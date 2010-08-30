@@ -42,5 +42,5 @@ vsub(const double x[3], const double y[3], double z[3]) {
 
 void
 unitize(const double x[3], double y[3]) {
-  scale(1.0/norm(x), x, y);
+  vscale(1.0/norm(x), x, y);
 }

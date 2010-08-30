@@ -33,7 +33,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = vector-check$(EXEEXT)
+check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -45,6 +45,9 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
+am_body_test_OBJECTS = body-test.$(OBJEXT) checks.$(OBJEXT)
+body_test_OBJECTS = $(am_body_test_OBJECTS)
+body_test_DEPENDENCIES = ../src/librings.la
 am_vector_check_OBJECTS = vector-check.$(OBJEXT) checks.$(OBJEXT)
 vector_check_OBJECTS = $(am_vector_check_OBJECTS)
 vector_check_DEPENDENCIES = ../src/librings.la
@@ -61,8 +64,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(vector_check_SOURCES)
-DIST_SOURCES = $(vector_check_SOURCES)
+SOURCES = $(body_test_SOURCES) $(vector_check_SOURCES)
+DIST_SOURCES = $(body_test_SOURCES) $(vector_check_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -182,6 +185,8 @@ check_HEADERS = checks.h
 TESTS = $(check_PROGRAMS)
 vector_check_SOURCES = vector-check.c checks.c
 vector_check_LDADD = ../src/librings.la
+body_test_SOURCES = body-test.c checks.c
+body_test_LDADD = ../src/librings.la
 all: all-am
 
 .SUFFIXES:
@@ -225,6 +230,9 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+body-test$(EXEEXT): $(body_test_OBJECTS) $(body_test_DEPENDENCIES) 
+	@rm -f body-test$(EXEEXT)
+	$(LINK) $(body_test_OBJECTS) $(body_test_LDADD) $(LIBS)
 vector-check$(EXEEXT): $(vector_check_OBJECTS) $(vector_check_DEPENDENCIES) 
 	@rm -f vector-check$(EXEEXT)
 	$(LINK) $(vector_check_OBJECTS) $(vector_check_LDADD) $(LIBS)
@@ -235,6 +243,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/body-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector-check.Po@am__quote@
 

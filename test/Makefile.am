@@ -1,7 +1,10 @@
-check_PROGRAMS = vector-check
+check_PROGRAMS = vector-check body-test
 check_HEADERS = checks.h
 
 TESTS = $(check_PROGRAMS)
 
 vector_check_SOURCES = vector-check.c checks.c
 vector_check_LDADD = ../src/librings.la
+
+body_test_SOURCES = body-test.c checks.c
+body_test_LDADD = ../src/librings.la

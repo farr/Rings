@@ -14,3 +14,4 @@ rings-*.tar.gz
 autom4te.cache
 
 test/vector-check
+test/body-test

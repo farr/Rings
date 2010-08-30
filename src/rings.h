@@ -27,9 +27,13 @@ unitize(const double x[3], double y[3]);
 
 typedef struct {
   double m; /* Mass, in units where G*Mcentral = 1 */
+  double a; /* Semi-major axis. */
   double L[3]; /* Of magnitude sqrt(1-e^2), in direction of Lhat */
   double A[3]; /* Of magnitude e, points to periapse. */
 } body;
+
+double
+meanMotian(const body *b);
 
 void
 EToRv(const body *b, const double E, double r[3], double v[3]);
