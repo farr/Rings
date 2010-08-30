@@ -1,0 +1,16 @@
+*~
+Makefile
+config.h
+config.log
+config.status
+stamp-h1
+libtool
+.deps
+.libs
+*.lo
+*.o
+*.la
+rings-*.tar.gz
+autom4te.cache
+
+test/vector-check
