@@ -10,6 +10,18 @@ eg(const double r[3], const double v[3]) {
 }
 
 static int
+mean_motion_test() {
+  body b;
+  double mm;
+
+  b.m = 1e-3;
+  b.a = 0.237; 
+  mm = meanMotion(&b);
+
+  return check_close(eps, eps, mm, 8.67151);
+}
+
+static int
 energy_test() {
   const int n = 7;
   const double Es[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
@@ -39,6 +51,8 @@ energy_test() {
 
 int
 main() {
+
+  if (!mean_motion_test()) return 2;
 
   if (!energy_test()) return 1;
   

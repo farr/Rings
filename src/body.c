@@ -1,11 +1,14 @@
 #include"rings.h"
 #include<assert.h>
 #include<math.h>
+#include<stdio.h>
 
 double
 meanMotion(const body *b) {
   double a = b->a;
-  return sqrt((1.0+b->m)/(a*a*a));
+  double m = b->m;
+  double mm = sqrt((1.0+m)/(a*a*a));
+  return mm;
 }
 
 void

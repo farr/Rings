@@ -33,7 +33,7 @@ typedef struct {
 } body;
 
 double
-meanMotian(const body *b);
+meanMotion(const body *b);
 
 void
 EToRv(const body *b, const double E, double r[3], double v[3]);
