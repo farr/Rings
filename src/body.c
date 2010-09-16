@@ -4,7 +4,7 @@
 #include<stdio.h>
 
 double
-meanMotion(const body *b) {
+mean_motion(const body *b) {
   double a = b->a;
   double m = b->m;
   double mm = sqrt((1.0+m)/(a*a*a));
@@ -12,10 +12,10 @@ meanMotion(const body *b) {
 }
 
 void
-EtoRv(const body *b, const double E, double x[3], double v[3]) {
+E_to_rv(const body *b, const double E, double x[3], double v[3]) {
   double xhat[3], yhat[3], zhat[3];
   double e = norm(b->A);
-  double n = meanMotion(b);
+  double n = mean_motion(b);
   double cosE = cos(E), sinE = sin(E);
   double eCosE = e*cosE;
   double sqrt1me2 = norm(b->L);

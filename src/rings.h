@@ -33,9 +33,9 @@ typedef struct {
 } body;
 
 double
-meanMotion(const body *b);
+mean_motion(const body *b);
 
 void
-EToRv(const body *b, const double E, double r[3], double v[3]);
+E_to_rv(const body *b, const double E, double r[3], double v[3]);
 
 #endif /* __RINGS_H__ */

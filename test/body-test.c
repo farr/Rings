@@ -16,7 +16,7 @@ mean_motion_test() {
 
   b.m = 1e-3;
   b.a = 0.237; 
-  mm = meanMotion(&b);
+  mm = mean_motion(&b);
 
   return check_close(eps, eps, mm, 8.67151);
 }
@@ -44,7 +44,7 @@ energy_test() {
   if (!magnitude_check(&b)) return 0;
 
   for(i = 0; i < n; i++) {
-    EtoRv(&b, Es[i], r, v);
+    E_to_rv(&b, Es[i], r, v);
     egs[i] = eg(r,v);
   }
 
