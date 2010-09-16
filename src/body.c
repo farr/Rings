@@ -32,6 +32,7 @@ E_to_rv(const body *b, const double E, double x[3], double v[3]) {
 
   assert(e > 0.0);
   assert(dot(b->A, b->L)/e/sqrt1me2 < 1e-8);
+  assert(fabs(sqrt1me2 - sqrt(1.0-e*e)) < 1e-8);
 
   unitize(b->L, zhat);
   unitize(b->A, xhat);
