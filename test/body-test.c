@@ -22,17 +22,26 @@ mean_motion_test() {
 }
 
 static int
+magnitude_check(const body *b) {
+  double e = norm(b->A);
+  double sqrt1me2 = norm(b->L);
+  
+  return check_close(eps,eps,sqrt(1.0-e*e), sqrt1me2);
+}
+
+static int
 energy_test() {
   const int n = 7;
   const double Es[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
   double egs[n];
   const body b = {1e-6, 0.237, 
-                  {0.683811, 0.68616, 0.301055},
-                  {-0.22306316859388583158, 0.19747183082696724358, 0.05658692577476481217}};
+                  {0.048121633812668, 0.346123635235211, 0.239632435658364},
+                  {0.807135311203869, 0.152173745618516, -0.381883193952636}};
   double r[3], v[3];
   int i;
 
   if (!check_close(eps,eps,dot(b.L,b.A), 0.0)) return 0;
+  if (!magnitude_check(&b)) return 0;
 
   for(i = 0; i < n; i++) {
     EtoRv(&b, Es[i], r, v);
@@ -40,11 +49,10 @@ energy_test() {
   }
 
   for(i = 1; i < n; i++) {
-    fprintf(stderr, "E = %g, energy = %g (last energy = %g)\n", Es[i], egs[i], egs[i-1]);
     if (!check_close(eps,eps,egs[i],egs[i-1])) return 0;
   }
 
-  if (!check_close(eps,eps,egs[0],1.0/2.0/b.a)) return 0;
+  if (!check_close(eps,eps,egs[0],-1.0/2.0/b.a)) return 0;
 
   return 1;
 }
