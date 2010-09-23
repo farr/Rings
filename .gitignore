@@ -15,3 +15,4 @@ autom4te.cache
 
 test/vector-check
 test/body-test
+test/projection-test

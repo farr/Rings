@@ -23,6 +23,13 @@ vsub(const double x[3], const double y[3], double z[3]);
 void
 unitize(const double x[3], double y[3]);
 
+/* Stores the projection of x onto y into z. */
+void
+project(const double x[3], const double y[3], double z[3]);
+
+/* Stores the component of x orthogonal to y in z. */
+void
+orthogonal_project(const double x[3], const double y[3], double z[3]);
 /* body.c */
 
 typedef struct {
@@ -37,5 +44,24 @@ mean_motion(const body *b);
 
 void
 E_to_rv(const body *b, const double E, double r[3], double v[3]);
+
+/* Constructs a body from the given mass and orbital elements (see
+ body structure for units):
+ 
+ * a: semi-major axis.
+ * e: eccentricity
+ * I: inclination of orbital plane in degrees (I > 90 means retrograde orbit)
+ * Omega: Longitude of ascending node in degrees.
+ * omega: Argument of periapse in degrees.
+
+*/
+body *
+alloc_body_from_elements(const double m, const double a, const double e, const double I, 
+                         const double Omega, const double omega);
+
+/* Sets the orbital elements given a body, b. */
+void
+elements_from_body(const body *b,
+                   double *e, double *I, double *Omega, double *omega);
 
 #endif /* __RINGS_H__ */

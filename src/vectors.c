@@ -44,3 +44,29 @@ void
 unitize(const double x[3], double y[3]) {
   vscale(1.0/norm(x), x, y);
 }
+
+void
+project(const double x[3], const double y[3], double z[3]) {
+  double xdyhat;
+  double yhat[3];
+  int i;
+
+  unitize(y, yhat);
+  xdyhat = dot(x, yhat);
+
+  for (i = 0; i < 3; i++) {
+    z[i] = xdyhat*yhat[i];
+  }
+}
+
+void
+orthogonal_project(const double x[3], const double y[3], double z[3]) {
+  double px[3];
+  int i;
+
+  project(x,y,px);
+
+  for(i = 0; i < 3; i++) {
+    z[i] = x[i] - px[i];
+  }
+}
