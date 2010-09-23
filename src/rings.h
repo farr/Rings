@@ -30,6 +30,14 @@ project(const double x[3], const double y[3], double z[3]);
 /* Stores the component of x orthogonal to y in z. */
 void
 orthogonal_project(const double x[3], const double y[3], double z[3]);
+
+/* Store in y the vector x rotated about the x-axis by an angle theta. */
+void
+rotate_x(const double x[3], const double theta, double y[3]);
+
+void
+rotate_z(const double x[3], const double theta, double y[3]);
+
 /* body.c */
 
 typedef struct {

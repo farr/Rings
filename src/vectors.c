@@ -70,3 +70,23 @@ orthogonal_project(const double x[3], const double y[3], double z[3]) {
     z[i] = x[i] - px[i];
   }
 }
+
+void
+rotate_x(const double x[3], const double theta, double y[3]) {
+  double ctheta = cos(theta);
+  double stheta = sin(theta);
+
+  y[0] = x[0];
+  y[1] = ctheta*x[1] - stheta*x[2];
+  y[2] = ctheta*x[2] + stheta*x[1];
+}
+
+void
+rotate_z(const double x[3], const double theta, double y[3]) {
+  double ctheta = cos(theta);
+  double stheta = sin(theta);
+
+  y[0] = ctheta*x[0] - stheta*x[1];
+  y[1] = ctheta*x[1] + stheta*x[0];
+  y[2] = x[2];
+}

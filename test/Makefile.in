@@ -34,7 +34,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
-	projection-test$(EXEEXT)
+	projection-test$(EXEEXT) rotate-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -53,6 +53,9 @@ am_projection_test_OBJECTS = checks.$(OBJEXT) \
 	projection-test.$(OBJEXT)
 projection_test_OBJECTS = $(am_projection_test_OBJECTS)
 projection_test_DEPENDENCIES = ../src/librings.la
+am_rotate_test_OBJECTS = checks.$(OBJEXT) rotate-test.$(OBJEXT)
+rotate_test_OBJECTS = $(am_rotate_test_OBJECTS)
+rotate_test_DEPENDENCIES = ../src/librings.la
 am_vector_check_OBJECTS = vector-check.$(OBJEXT) checks.$(OBJEXT)
 vector_check_OBJECTS = $(am_vector_check_OBJECTS)
 vector_check_DEPENDENCIES = ../src/librings.la
@@ -70,9 +73,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(body_test_SOURCES) $(projection_test_SOURCES) \
-	$(vector_check_SOURCES)
+	$(rotate_test_SOURCES) $(vector_check_SOURCES)
 DIST_SOURCES = $(body_test_SOURCES) $(projection_test_SOURCES) \
-	$(vector_check_SOURCES)
+	$(rotate_test_SOURCES) $(vector_check_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -196,6 +199,8 @@ body_test_SOURCES = body-test.c checks.c
 body_test_LDADD = ../src/librings.la
 projection_test_SOURCES = checks.c projection-test.c
 projection_test_LDADD = ../src/librings.la
+rotate_test_SOURCES = checks.c rotate-test.c
+rotate_test_LDADD = ../src/librings.la
 all: all-am
 
 .SUFFIXES:
@@ -245,6 +250,9 @@ body-test$(EXEEXT): $(body_test_OBJECTS) $(body_test_DEPENDENCIES)
 projection-test$(EXEEXT): $(projection_test_OBJECTS) $(projection_test_DEPENDENCIES) 
 	@rm -f projection-test$(EXEEXT)
 	$(LINK) $(projection_test_OBJECTS) $(projection_test_LDADD) $(LIBS)
+rotate-test$(EXEEXT): $(rotate_test_OBJECTS) $(rotate_test_DEPENDENCIES) 
+	@rm -f rotate-test$(EXEEXT)
+	$(LINK) $(rotate_test_OBJECTS) $(rotate_test_LDADD) $(LIBS)
 vector-check$(EXEEXT): $(vector_check_OBJECTS) $(vector_check_DEPENDENCIES) 
 	@rm -f vector-check$(EXEEXT)
 	$(LINK) $(vector_check_OBJECTS) $(vector_check_LDADD) $(LIBS)
@@ -258,6 +266,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/body-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/projection-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rotate-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector-check.Po@am__quote@
 
 .c.o:

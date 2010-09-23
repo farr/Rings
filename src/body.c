@@ -46,7 +46,7 @@ E_to_rv(const body *b, const double E, double x[3], double v[3]) {
 }
 
 /* body * */
-/* alloc_body_from_elements(const double m, const double a, const double e, const double I,  */
+/* alloc_body_from_elements(const double m, const double a, const double e, const double I, */
 /*                          const double Omega, const double omega) { */
 /*   double Lmag = sqrt(1.0-e*e); */
 /*   body *res = malloc(sizeof(body)); */
@@ -67,7 +67,7 @@ E_to_rv(const body *b, const double E, double x[3], double v[3]) {
 /* } */
 
 /* void */
-/* elements_from_body(const body *b,  */
+/* elements_from_body(const body *b, */
 /*                    double *e, double *I, double *Omega, double *omega) { */
   
 /*   double Lmag = norm(b->L); */
