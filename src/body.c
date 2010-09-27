@@ -58,28 +58,23 @@ rotate_to_orbit_frame(double v[3], const double I, const double Omega, const dou
   /* Correct vector stored in v. */
 }
 
-body *
-alloc_body_from_elements(const double m, const double a, const double e, const double I,
-                         const double Omega, const double omega) {
-  body *res = malloc(sizeof(body));
-
-  assert(res != 0);
-
-  res->m = m;
-  res->a = a;
+void
+init_body_from_elements(body *b, 
+                        const double m, const double a, const double e, const double I,
+                        const double Omega, const double omega) {
+  b->m = m;
+  b->a = a;
   
-  res->L[0] = 0.0;
-  res->L[1] = 0.0;
-  res->L[2] = sqrt(1.0 - e*e);
+  b->L[0] = 0.0;
+  b->L[1] = 0.0;
+  b->L[2] = sqrt(1.0 - e*e);
 
-  res->A[0] = e;
-  res->A[1] = 0.0;
-  res->A[2] = 0.0;
+  b->A[0] = e;
+  b->A[1] = 0.0;
+  b->A[2] = 0.0;
 
-  rotate_to_orbit_frame(res->L, I, Omega, omega);
-  rotate_to_orbit_frame(res->A, I, Omega, omega);
-
-  return res;
+  rotate_to_orbit_frame(b->L, I, Omega, omega);
+  rotate_to_orbit_frame(b->A, I, Omega, omega);
 }
 
 void

@@ -53,7 +53,7 @@ mean_motion(const body *b);
 void
 E_to_rv(const body *b, const double E, double r[3], double v[3]);
 
-/* Constructs a body from the given mass and orbital elements (see
+/* Fills in the given body from the mass and orbital elements (see
  body structure for units):
  
  * a: semi-major axis.
@@ -63,9 +63,10 @@ E_to_rv(const body *b, const double E, double r[3], double v[3]);
  * omega: Argument of periapse in degrees.
 
 */
-body *
-alloc_body_from_elements(const double m, const double a, const double e, const double I, 
-                         const double Omega, const double omega);
+void
+init_body_from_elements(body *b,
+                        const double m, const double a, const double e, const double I, 
+                        const double Omega, const double omega);
 
 /* Sets the orbital elements given a body, b. */
 void
