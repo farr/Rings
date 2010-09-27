@@ -17,3 +17,4 @@ test/vector-check
 test/body-test
 test/projection-test
 test/rotate-test
+test/alloc-body-from-elements-test

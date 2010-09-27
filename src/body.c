@@ -3,6 +3,7 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
 double
 mean_motion(const body *b) {
@@ -45,53 +46,74 @@ E_to_rv(const body *b, const double E, double x[3], double v[3]) {
   }
 }
 
-/* body * */
-/* alloc_body_from_elements(const double m, const double a, const double e, const double I, */
-/*                          const double Omega, const double omega) { */
-/*   double Lmag = sqrt(1.0-e*e); */
-/*   body *res = malloc(sizeof(body)); */
+static void
+rotate_to_orbit_frame(double v[3], const double I, const double Omega, const double omega) {
+  double temp[3];
 
-/*   assert(res != 0); */
+  memcpy(temp, v, 3*sizeof(double));
 
-/*   res->m = m; */
-/*   res->a = a; */
+  rotate_z(temp, omega*M_PI/180.0, v); /* Periapse to omega in x-y plane. */
+  rotate_x(v, I*M_PI/180.0, temp); /* Inclined orbit; line of nodes still x-axis. */
+  rotate_z(temp, Omega*M_PI/180.0, v); /* Rotate line of nodes to correct location. */
+  /* Correct vector stored in v. */
+}
 
-/*   res->L[2] = cos(I*M_PI/180.0); */
-/*   res->L[0] = cos(Omega*M_PI/180.0 - M_PI/2); */
-/*   res->L[1] = sin(Omega*M_PI/180.0 - M_PI/2); */
+body *
+alloc_body_from_elements(const double m, const double a, const double e, const double I,
+                         const double Omega, const double omega) {
+  body *res = malloc(sizeof(body));
 
-/*   unitize(res->L); */
-/*   vscale(Lmag, res->L, res->L); */
+  assert(res != 0);
 
+  res->m = m;
+  res->a = a;
   
-/* } */
+  res->L[0] = 0.0;
+  res->L[1] = 0.0;
+  res->L[2] = sqrt(1.0 - e*e);
 
-/* void */
-/* elements_from_body(const body *b, */
-/*                    double *e, double *I, double *Omega, double *omega) { */
+  res->A[0] = e;
+  res->A[1] = 0.0;
+  res->A[2] = 0.0;
+
+  rotate_to_orbit_frame(res->L, I, Omega, omega);
+  rotate_to_orbit_frame(res->A, I, Omega, omega);
+
+  return res;
+}
+
+void
+elements_from_body(const body *b,
+                   double *e, double *I, double *Omega, double *omega) {
   
-/*   double Lmag = norm(b->L); */
-/*   double lang = atan2(b->L[1], b->L[0]); */
-/*   double asc_node[3]; */
-/*   double my_omega; */
-/*   double asc_node_x_A[3]; */
+  double Lmag = norm(b->L);
+  double lang = atan2(b->L[1], b->L[0]); /* Between -Pi and Pi */
+  double asc_node[3];
+  double my_omega;
+  double asc_node_x_A[3];
 
-/*   *I = acos(b->L[2]/Lmag)*180.0/M_PI; */
-/*   *e = norm(b->A); */
-/*   *Omega = fmod(lang+M_PI/2.0, 2.0*M_PI)*180.0/M_PI; */
-  
-/*   my_omega = *omega; */
+  *I = acos(b->L[2]/Lmag)*180.0/M_PI;
+  *e = norm(b->A);
+  *Omega = lang + M_PI/2.0;
 
-/*   asc_node[0] = cos(my_omega); */
-/*   asc_node[1] = sin(my_omega); */
-/*   asc_node[2] = 0.0; */
+  if (*Omega < 0.0) {
+    *Omega = 2.0*M_PI - *Omega;
+  }
 
-/*   *omega = acos(dot(asc_node, b->A)/norm(b->A)); */
+  my_omega = *Omega;
 
-/*   cross(asc_node, b->A, asc_node_x_A); */
-/*   if (dot(b->L, asc_node_x_A) < 0) { /\* This means large argument of periapse. *\/ */
-/*     *omega = 2.0*M_PI - *omega; */
-/*   } */
+  *Omega *= 180.0/M_PI;
 
-/*   *omega = *omega*180.0/M_PI; */
-/* } */
+  asc_node[0] = cos(my_omega);
+  asc_node[1] = sin(my_omega);
+  asc_node[2] = 0.0;
+
+  *omega = acos(dot(asc_node, b->A)/norm(b->A));
+
+  cross(asc_node, b->A, asc_node_x_A);
+  if (dot(b->L, asc_node_x_A) < 0.0) { /* This means large argument of periapse. */
+    *omega = 2.0*M_PI - *omega;
+  }
+
+  *omega = *omega*180.0/M_PI;
+}

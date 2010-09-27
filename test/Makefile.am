@@ -1,4 +1,6 @@
-check_PROGRAMS = vector-check body-test projection-test rotate-test
+check_PROGRAMS = vector-check body-test projection-test rotate-test \
+alloc-body-from-elements-test
+
 check_HEADERS = checks.h
 
 TESTS = $(check_PROGRAMS)
@@ -14,3 +16,6 @@ projection_test_LDADD = ../src/librings.la
 
 rotate_test_SOURCES = checks.c rotate-test.c
 rotate_test_LDADD = ../src/librings.la
+
+alloc_body_from_elements_test_SOURCES = checks.c alloc-body-from-elements-test.c
+alloc_body_from_elements_test_LDADD = ../src/librings.la
