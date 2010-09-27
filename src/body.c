@@ -77,6 +77,19 @@ init_body_from_elements(body *b,
   rotate_to_orbit_frame(b->A, I, Omega, omega);
 }
 
+static double
+normalize_angle(const double ang, const double min, const double max) {
+  assert(fabs(max - min - 2.0*M_PI) < 1e-8);
+
+  if (ang < min) {
+    return max - fmod(max - ang, 2.0*M_PI);
+  } else if (ang > max) {
+    return min + fmod(ang - min, 2.0*M_PI);
+  } else {
+    return ang;
+  }    
+}
+
 void
 elements_from_body(const body *b,
                    double *e, double *I, double *Omega, double *omega) {
@@ -89,11 +102,7 @@ elements_from_body(const body *b,
 
   *I = acos(b->L[2]/Lmag)*180.0/M_PI;
   *e = norm(b->A);
-  *Omega = lang + M_PI/2.0;
-
-  if (*Omega < 0.0) {
-    *Omega = 2.0*M_PI - *Omega;
-  }
+  *Omega = normalize_angle(lang + M_PI/2.0, 0.0, 2.0*M_PI);
 
   my_omega = *Omega;
 
