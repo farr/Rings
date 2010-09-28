@@ -1,5 +1,6 @@
 #include"checks.h"
 #include<math.h>
+#include<assert.h>
 
 int
 check_close(const double epsabs, const double epsrel, const double x, const double y) {
@@ -17,4 +18,30 @@ check_vector_close(const double epsabs, const double epsrel, const double x[3], 
   }
 
   return 1;
+}
+
+void
+seed_random(gsl_rng *rng) {
+  unsigned long int seed;
+  FILE *devrandom;
+
+  devrandom = fopen("/dev/random", "r");
+  assert(devrandom != 0);
+
+  if (fread(&seed, sizeof(unsigned long int), 1, devrandom) != 1) {
+    fprintf(stderr, "%s at line %d: couldn't read seed from /dev/random", __FILE__, __LINE__);
+    exit(1);
+  }
+
+  if (fclose(devrandom) != 0) {
+    fprintf(stderr, "%s at line %d: could not close /dev/random", __FILE__, __LINE__);
+    exit(1);
+  }
+
+  gsl_rng_set(rng, seed);
+}
+
+double
+random_between(gsl_rng *rng, const double a, const double b) {
+  return a + (b-a)*(gsl_rng_uniform(rng));
 }
