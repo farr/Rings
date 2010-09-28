@@ -2,6 +2,8 @@
 #define __CHECKS_H__
 
 #include<gsl/gsl_rng.h>
+#include<assert.h> /* Not strictly needed for this header, but useful
+                      for files that include it. */
 
 int
 check_close(const double epsabs, const double epsrel, const double x, const double y);
