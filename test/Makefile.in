@@ -47,24 +47,27 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am_body_test_OBJECTS = body-test.$(OBJEXT) checks.$(OBJEXT)
+libcheck_la_LIBADD =
+am_libcheck_la_OBJECTS = checks.lo
+libcheck_la_OBJECTS = $(am_libcheck_la_OBJECTS)
+am_body_test_OBJECTS = body-test.$(OBJEXT)
 body_test_OBJECTS = $(am_body_test_OBJECTS)
-body_test_DEPENDENCIES = ../src/librings.la
-am_init_body_from_elements_test_OBJECTS = checks.$(OBJEXT) \
+body_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_init_body_from_elements_test_OBJECTS =  \
 	init-body-from-elements-test.$(OBJEXT)
 init_body_from_elements_test_OBJECTS =  \
 	$(am_init_body_from_elements_test_OBJECTS)
-init_body_from_elements_test_DEPENDENCIES = ../src/librings.la
-am_projection_test_OBJECTS = checks.$(OBJEXT) \
-	projection-test.$(OBJEXT)
+init_body_from_elements_test_DEPENDENCIES = ../src/librings.la \
+	libcheck.la
+am_projection_test_OBJECTS = projection-test.$(OBJEXT)
 projection_test_OBJECTS = $(am_projection_test_OBJECTS)
-projection_test_DEPENDENCIES = ../src/librings.la
-am_rotate_test_OBJECTS = checks.$(OBJEXT) rotate-test.$(OBJEXT)
+projection_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_rotate_test_OBJECTS = rotate-test.$(OBJEXT)
 rotate_test_OBJECTS = $(am_rotate_test_OBJECTS)
-rotate_test_DEPENDENCIES = ../src/librings.la
-am_vector_check_OBJECTS = vector-check.$(OBJEXT) checks.$(OBJEXT)
+rotate_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_vector_check_OBJECTS = vector-check.$(OBJEXT)
 vector_check_OBJECTS = $(am_vector_check_OBJECTS)
-vector_check_DEPENDENCIES = ../src/librings.la
+vector_check_DEPENDENCIES = ../src/librings.la libcheck.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -78,10 +81,11 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(body_test_SOURCES) $(init_body_from_elements_test_SOURCES) \
+SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
+	$(init_body_from_elements_test_SOURCES) \
 	$(projection_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
-DIST_SOURCES = $(body_test_SOURCES) \
+DIST_SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
 	$(projection_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
@@ -204,17 +208,19 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 check_HEADERS = checks.h
+check_LTLIBRARIES = libcheck.la
+libcheck_la_SOURCES = checks.c
 TESTS = $(check_PROGRAMS)
-vector_check_SOURCES = vector-check.c checks.c
-vector_check_LDADD = ../src/librings.la
-body_test_SOURCES = body-test.c checks.c
-body_test_LDADD = ../src/librings.la
-projection_test_SOURCES = checks.c projection-test.c
-projection_test_LDADD = ../src/librings.la
-rotate_test_SOURCES = checks.c rotate-test.c
-rotate_test_LDADD = ../src/librings.la
-init_body_from_elements_test_SOURCES = checks.c init-body-from-elements-test.c
-init_body_from_elements_test_LDADD = ../src/librings.la
+vector_check_SOURCES = vector-check.c
+vector_check_LDADD = ../src/librings.la libcheck.la
+body_test_SOURCES = body-test.c
+body_test_LDADD = ../src/librings.la libcheck.la
+projection_test_SOURCES = projection-test.c
+projection_test_LDADD = ../src/librings.la libcheck.la
+rotate_test_SOURCES = rotate-test.c
+rotate_test_LDADD = ../src/librings.la libcheck.la
+init_body_from_elements_test_SOURCES = init-body-from-elements-test.c
+init_body_from_elements_test_LDADD = ../src/librings.la libcheck.la
 all: all-am
 
 .SUFFIXES:
@@ -250,6 +256,17 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
+clean-checkLTLIBRARIES:
+	-test -z "$(check_LTLIBRARIES)" || rm -f $(check_LTLIBRARIES)
+	@list='$(check_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libcheck.la: $(libcheck_la_OBJECTS) $(libcheck_la_DEPENDENCIES) 
+	$(LINK)  $(libcheck_la_OBJECTS) $(libcheck_la_LIBADD) $(LIBS)
+
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
@@ -281,7 +298,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/body-test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init-body-from-elements-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/projection-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rotate-test.Po@am__quote@
@@ -489,7 +506,8 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_HEADERS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_LTLIBRARIES) $(check_PROGRAMS) \
+	  $(check_HEADERS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile
@@ -521,8 +539,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
-	mostlyclean-am
+clean-am: clean-checkLTLIBRARIES clean-checkPROGRAMS clean-generic \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -593,15 +611,15 @@ uninstall-am:
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-checkPROGRAMS clean-generic clean-libtool ctags \
-	distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean-checkLTLIBRARIES clean-checkPROGRAMS clean-generic \
+	clean-libtool ctags distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
