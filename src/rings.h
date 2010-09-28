@@ -1,6 +1,9 @@
 #ifndef __RINGS_H__
 #define __RINGS_H__
 
+#include<stdlib.h>
+#include<gsl/gsl_integration.h>
+
 /* Vector Utilities (vectors.c) */
 double
 dot(const double x[3], const double y[3]);
@@ -96,5 +99,14 @@ body_instantaneous_rhs(const double eps,
                        const body *b1, const double E1,
                        const body *b2, const double E2,
                        double dbdt[BODY_VECTOR_SIZE]);
+
+
+/* raw_average.c */
+
+void
+raw_average_rhs(const double eps, const body *b1, const body *b2,
+                gsl_integration_workspace *ws1, const size_t ws1_limit,
+                gsl_integration_workspace *ws2, const size_t ws2_limit,
+                double rhs[BODY_VECTOR_SIZE]);
 
 #endif /* __RINGS_H__ */
