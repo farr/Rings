@@ -1,6 +1,6 @@
 check_PROGRAMS = vector-check body-test projection-test rotate-test \
 init-body-from-elements-test \
-raw-average-zero-adot-test
+raw-average-zero-adot-test raw-average-orthogonal-test
 
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la
@@ -26,3 +26,6 @@ init_body_from_elements_test_LDADD = ../src/librings.la libcheck.la
 
 raw_average_zero_adot_test_SOURCES = raw-average-zero-adot-test.c
 raw_average_zero_adot_test_LDADD = ../src/librings.la libcheck.la
+
+raw_average_orthogonal_test_SOURCES = raw-average-orthogonal-test.c
+raw_average_orthogonal_test_LDADD = ../src/librings.la libcheck.la

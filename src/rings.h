@@ -66,6 +66,10 @@ typedef struct {
 } body;
 
 #define BODY_VECTOR_SIZE 8
+#define BODY_M_INDEX 0
+#define BODY_a_INDEX 1
+#define BODY_L_INDEX 2
+#define BODY_A_INDEX 5
 
 void
 body_to_vector(const body *b, double *v);
