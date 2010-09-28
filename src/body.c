@@ -121,3 +121,19 @@ elements_from_body(const body *b,
 
   *omega = *omega*180.0/M_PI;
 }
+
+void
+body_to_vector(const body *b, double *v) {
+  v[0] = b->m;
+  v[1] = b->a;
+  memcpy(v+2, b->L, 3*sizeof(double));
+  memcpy(v+5, b->A, 3*sizeof(double));
+}
+
+void
+vector_to_body(const double *v, body *b) {
+  b->m = v[0];
+  b->a = v[1];
+  memcpy(b->L, v+2, 3*sizeof(double));
+  memcpy(b->A, v+5, 3*sizeof(double));
+}

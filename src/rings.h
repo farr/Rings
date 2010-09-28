@@ -8,6 +8,9 @@ dot(const double x[3], const double y[3]);
 double
 norm(const double x[3]);
 
+double
+distance_squared(const double x[3], const double y[3]);
+
 void
 cross(const double x[3], const double y[3], double z[3]);
 
@@ -38,6 +41,13 @@ rotate_x(const double x[3], const double theta, double y[3]);
 void
 rotate_z(const double x[3], const double theta, double y[3]);
 
+/* Returns the acceleration on a body of m = 1 at r1 due to a body of
+   m = 1 at r2.  eps is the softening parameter. */
+void
+softened_specific_acceleration(const double eps, 
+                               const double r1[3], const double r2[3],
+                               double a[3]);
+
 /* body.c */
 
 typedef struct {
@@ -46,6 +56,14 @@ typedef struct {
   double L[3]; /* Of magnitude sqrt(1-e^2), in direction of Lhat */
   double A[3]; /* Of magnitude e, points to periapse. */
 } body;
+
+#define BODY_VECTOR_SIZE 8
+
+void
+body_to_vector(const body *b, double *v);
+
+void
+vector_to_body(const double *v, body *b);
 
 double
 mean_motion(const body *b);
@@ -72,5 +90,10 @@ init_body_from_elements(body *b,
 void
 elements_from_body(const body *b,
                    double *e, double *I, double *Omega, double *omega);
+
+double
+body_dadt(const double eps,
+          const body *b1, const double E1,
+          const body *b2, const double E2);
 
 #endif /* __RINGS_H__ */
