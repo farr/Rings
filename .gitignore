@@ -20,3 +20,5 @@ test/rotate-test
 test/init-body-from-elements-test
 test/raw-average-zero-adot-test
 test/raw-average-orthogonal-test
+test/raw-average-Ltot-test
+test/raw-average-rhs-earth-jupiter
