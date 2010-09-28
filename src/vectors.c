@@ -113,3 +113,12 @@ softened_specific_acceleration(const double eps,
   a[1] = (r2[1]-r1[1])/c;
   a[2] = (r2[2]-r1[2])/c;
 }
+
+double
+vdot_to_vmagdot(const double v[3], const double vdot[3]) {
+  double vhat[3];
+
+  unitize(v, vhat);
+
+  return dot(vhat, vdot);
+}

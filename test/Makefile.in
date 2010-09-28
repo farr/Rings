@@ -35,7 +35,8 @@ build_triplet = @build@
 host_triplet = @host@
 check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
 	projection-test$(EXEEXT) rotate-test$(EXEEXT) \
-	init-body-from-elements-test$(EXEEXT)
+	init-body-from-elements-test$(EXEEXT) \
+	raw-average-zero-adot-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -62,6 +63,12 @@ init_body_from_elements_test_DEPENDENCIES = ../src/librings.la \
 am_projection_test_OBJECTS = projection-test.$(OBJEXT)
 projection_test_OBJECTS = $(am_projection_test_OBJECTS)
 projection_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_raw_average_zero_adot_test_OBJECTS =  \
+	raw-average-zero-adot-test.$(OBJEXT)
+raw_average_zero_adot_test_OBJECTS =  \
+	$(am_raw_average_zero_adot_test_OBJECTS)
+raw_average_zero_adot_test_DEPENDENCIES = ../src/librings.la \
+	libcheck.la
 am_rotate_test_OBJECTS = rotate-test.$(OBJEXT)
 rotate_test_OBJECTS = $(am_rotate_test_OBJECTS)
 rotate_test_DEPENDENCIES = ../src/librings.la libcheck.la
@@ -83,11 +90,13 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) $(rotate_test_SOURCES) \
+	$(projection_test_SOURCES) \
+	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
 DIST_SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) $(rotate_test_SOURCES) \
+	$(projection_test_SOURCES) \
+	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -221,6 +230,8 @@ rotate_test_SOURCES = rotate-test.c
 rotate_test_LDADD = ../src/librings.la libcheck.la
 init_body_from_elements_test_SOURCES = init-body-from-elements-test.c
 init_body_from_elements_test_LDADD = ../src/librings.la libcheck.la
+raw_average_zero_adot_test_SOURCES = raw-average-zero-adot-test.c
+raw_average_zero_adot_test_LDADD = ../src/librings.la libcheck.la
 all: all-am
 
 .SUFFIXES:
@@ -284,6 +295,9 @@ init-body-from-elements-test$(EXEEXT): $(init_body_from_elements_test_OBJECTS) $
 projection-test$(EXEEXT): $(projection_test_OBJECTS) $(projection_test_DEPENDENCIES) 
 	@rm -f projection-test$(EXEEXT)
 	$(LINK) $(projection_test_OBJECTS) $(projection_test_LDADD) $(LIBS)
+raw-average-zero-adot-test$(EXEEXT): $(raw_average_zero_adot_test_OBJECTS) $(raw_average_zero_adot_test_DEPENDENCIES) 
+	@rm -f raw-average-zero-adot-test$(EXEEXT)
+	$(LINK) $(raw_average_zero_adot_test_OBJECTS) $(raw_average_zero_adot_test_LDADD) $(LIBS)
 rotate-test$(EXEEXT): $(rotate_test_OBJECTS) $(rotate_test_DEPENDENCIES) 
 	@rm -f rotate-test$(EXEEXT)
 	$(LINK) $(rotate_test_OBJECTS) $(rotate_test_LDADD) $(LIBS)
@@ -301,6 +315,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init-body-from-elements-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/projection-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-zero-adot-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rotate-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector-check.Po@am__quote@
 

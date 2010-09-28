@@ -45,3 +45,13 @@ double
 random_between(gsl_rng *rng, const double a, const double b) {
   return a + (b-a)*(gsl_rng_uniform(rng));
 }
+
+void
+init_random_body(gsl_rng *rng, body *b, const double m, const double a) {
+  b->m = m;
+  init_body_from_elements(b, m, a,
+                          random_between(rng, 0.0, 1.0),
+                          random_between(rng, 0.0, 180.0),
+                          random_between(rng, 0.0, 2.0*M_PI),
+                          random_between(rng, 0.0, 2.0*M_PI));                          
+}

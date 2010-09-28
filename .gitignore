@@ -18,3 +18,4 @@ test/body-test
 test/projection-test
 test/rotate-test
 test/init-body-from-elements-test
+test/raw-average-zero-adot-test

@@ -44,6 +44,11 @@ rotate_x(const double x[3], const double theta, double y[3]);
 void
 rotate_z(const double x[3], const double theta, double y[3]);
 
+/* Given a vector and its time derivative, returns the change in
+   magnitude of the vector. */
+double
+vdot_to_vmagdot(const double v[3], const double vdot[3]);
+
 /* Returns the acceleration on a body of m = 1 at r1 due to a body of
    m = 1 at r2.  eps is the softening parameter. */
 void
