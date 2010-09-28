@@ -137,3 +137,34 @@ vector_to_body(const double *v, body *b) {
   memcpy(b->L, v+2, 3*sizeof(double));
   memcpy(b->A, v+5, 3*sizeof(double));
 }
+
+void
+body_instantaneous_rhs(const double eps,
+                       const body *b1, const double E1,
+                       const body *b2, const double E2,
+                       double dbdt[BODY_VECTOR_SIZE]) {
+  double aspec[3], a[3];
+  double r1[3], v1[3], r2[3], v2[3];
+  double n1 = mean_motion(b1);
+  double rxa[3], adv, rda, rdv;
+  int i;
+
+  E_to_rv(b1, E1, r1, v1);
+  E_to_rv(b2, E2, r2, v2);
+
+  softened_specific_acceleration(eps, r1, r2, aspec);
+
+  vscale(b2->m, aspec, a);
+  
+  cross(r1, a, rxa);
+  adv = dot(a, v1);
+  rda = dot(a, r1);
+  rdv = dot(r1, v1);
+
+  dbdt[0] = 0.0; /* No change in m. */
+  dbdt[1] = 2.0 / (n1*n1*b1->a) * dot(v1, a);
+  for (i = 0; i < 3; i++) {
+    dbdt[2+i] = rxa[i]/(n1*n1*b1->a);
+    dbdt[5+i] = 1.0/(1.0+b1->m)*(2.0*adv*r1[i] - rda*v1[i] - rdv*a[i]);
+  }
+}

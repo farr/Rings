@@ -91,9 +91,10 @@ void
 elements_from_body(const body *b,
                    double *e, double *I, double *Omega, double *omega);
 
-double
-body_dadt(const double eps,
-          const body *b1, const double E1,
-          const body *b2, const double E2);
+void
+body_instantaneous_rhs(const double eps,
+                       const body *b1, const double E1,
+                       const body *b2, const double E2,
+                       double dbdt[BODY_VECTOR_SIZE]);
 
 #endif /* __RINGS_H__ */
