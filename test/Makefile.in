@@ -38,8 +38,7 @@ check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
 	init-body-from-elements-test$(EXEEXT) \
 	raw-average-zero-adot-test$(EXEEXT) \
 	raw-average-orthogonal-test$(EXEEXT) \
-	raw-average-Ltot-test$(EXEEXT) \
-	raw-average-rhs-earth-jupiter$(EXEEXT)
+	raw-average-Ltot-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -75,12 +74,6 @@ raw_average_orthogonal_test_OBJECTS =  \
 	$(am_raw_average_orthogonal_test_OBJECTS)
 raw_average_orthogonal_test_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
-am_raw_average_rhs_earth_jupiter_OBJECTS =  \
-	raw-average-rhs-earth-jupiter.$(OBJEXT)
-raw_average_rhs_earth_jupiter_OBJECTS =  \
-	$(am_raw_average_rhs_earth_jupiter_OBJECTS)
-raw_average_rhs_earth_jupiter_DEPENDENCIES = ../src/librings.la \
-	libcheck.la
 am_raw_average_zero_adot_test_OBJECTS =  \
 	raw-average-zero-adot-test.$(OBJEXT)
 raw_average_zero_adot_test_OBJECTS =  \
@@ -110,14 +103,12 @@ SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
 	$(projection_test_SOURCES) $(raw_average_Ltot_test_SOURCES) \
 	$(raw_average_orthogonal_test_SOURCES) \
-	$(raw_average_rhs_earth_jupiter_SOURCES) \
 	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
 DIST_SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
 	$(projection_test_SOURCES) $(raw_average_Ltot_test_SOURCES) \
 	$(raw_average_orthogonal_test_SOURCES) \
-	$(raw_average_rhs_earth_jupiter_SOURCES) \
 	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
 ETAGS = etags
@@ -258,8 +249,6 @@ raw_average_orthogonal_test_SOURCES = raw-average-orthogonal-test.c
 raw_average_orthogonal_test_LDADD = ../src/librings.la libcheck.la
 raw_average_Ltot_test_SOURCES = raw-average-Ltot-test.c
 raw_average_Ltot_test_LDADD = ../src/librings.la libcheck.la
-raw_average_rhs_earth_jupiter_SOURCES = raw-average-rhs-earth-jupiter.c
-raw_average_rhs_earth_jupiter_LDADD = ../src/librings.la libcheck.la
 all: all-am
 
 .SUFFIXES:
@@ -329,9 +318,6 @@ raw-average-Ltot-test$(EXEEXT): $(raw_average_Ltot_test_OBJECTS) $(raw_average_L
 raw-average-orthogonal-test$(EXEEXT): $(raw_average_orthogonal_test_OBJECTS) $(raw_average_orthogonal_test_DEPENDENCIES) 
 	@rm -f raw-average-orthogonal-test$(EXEEXT)
 	$(LINK) $(raw_average_orthogonal_test_OBJECTS) $(raw_average_orthogonal_test_LDADD) $(LIBS)
-raw-average-rhs-earth-jupiter$(EXEEXT): $(raw_average_rhs_earth_jupiter_OBJECTS) $(raw_average_rhs_earth_jupiter_DEPENDENCIES) 
-	@rm -f raw-average-rhs-earth-jupiter$(EXEEXT)
-	$(LINK) $(raw_average_rhs_earth_jupiter_OBJECTS) $(raw_average_rhs_earth_jupiter_LDADD) $(LIBS)
 raw-average-zero-adot-test$(EXEEXT): $(raw_average_zero_adot_test_OBJECTS) $(raw_average_zero_adot_test_DEPENDENCIES) 
 	@rm -f raw-average-zero-adot-test$(EXEEXT)
 	$(LINK) $(raw_average_zero_adot_test_OBJECTS) $(raw_average_zero_adot_test_LDADD) $(LIBS)
@@ -354,7 +340,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/projection-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-Ltot-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-orthogonal-test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-rhs-earth-jupiter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-zero-adot-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rotate-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector-check.Po@am__quote@
