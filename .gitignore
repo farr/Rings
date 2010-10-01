@@ -22,3 +22,6 @@ test/raw-average-zero-adot-test
 test/raw-average-orthogonal-test
 test/raw-average-Ltot-test
 test/raw-average-rhs-earth-jupiter
+test/raw-average-A-L-mags-test
+test/raw-average-jupiter-saturn
+test/raw-average-solar-system

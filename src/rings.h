@@ -80,6 +80,9 @@ vector_to_body(const double *v, body *b);
 double
 mean_motion(const body *b);
 
+double
+period(const body *b);
+
 void
 E_to_rv(const body *b, const double E, double r[3], double v[3]);
 
@@ -109,6 +112,17 @@ body_instantaneous_rhs(const double eps,
                        const body *b2, const double E2,
                        double dbdt[BODY_VECTOR_SIZE]);
 
+#define NELEMENTS 5
+#define A_INDEX 0
+#define E_INDEX 1
+#define I_INDEX 2
+#define OMEGA_INDEX 3
+#define oMEGA_INDEX 4
+
+/* Fills deldt with [adot, edot, Idot, OmegaDot, omegaDot] from the
+   given rates of change of the components of b in dbdt. */
+void
+body_derivs_to_orbital_elements(const body *b, const double dbdt[BODY_VECTOR_SIZE], double deldt[NELEMENTS]);
 
 /* raw_average.c */
 

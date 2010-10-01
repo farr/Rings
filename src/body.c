@@ -13,6 +13,11 @@ mean_motion(const body *b) {
   return mm;
 }
 
+double
+period(const body *b) {
+  return 2.0*M_PI / mean_motion(b);
+}
+
 void
 E_to_rv(const body *b, const double E, double x[3], double v[3]) {
   double xhat[3], yhat[3], zhat[3];
@@ -167,4 +172,23 @@ body_instantaneous_rhs(const double eps,
     dbdt[2+i] = rxa[i]/(n1*n1*b1->a);
     dbdt[5+i] = 1.0/(1.0+b1->m)*(2.0*adv*r1[i] - rda*v1[i] - rdv*a[i]);
   }
+}
+
+void
+body_derivs_to_orbital_elements(const body *b, const double dbdt[BODY_VECTOR_SIZE], double deldt[NELEMENTS]) {
+  double Lmag = norm(b->L);
+  double Lx = b->L[0], Ly = b->L[1], Lz = b->L[2];
+  double cosI = Lz/Lmag;
+  double sinI = sqrt(1.0 - cosI*cosI);
+  double Lmag_dot = vdot_to_vmagdot(b->L, dbdt + BODY_L_INDEX);
+
+  deldt[A_INDEX] = dbdt[BODY_a_INDEX];
+
+  deldt[E_INDEX] = vdot_to_vmagdot(b->A, dbdt + BODY_A_INDEX);
+
+  deldt[I_INDEX] = 1.0/sinI*(Lz/Lmag * Lmag_dot/Lmag - dbdt[BODY_L_INDEX+2]/Lmag)*180.0/M_PI;
+
+  deldt[OMEGA_INDEX] = 1.0/(1.0+Lx*Lx/(Ly*Ly))*(dbdt[BODY_L_INDEX+1]/Lx - Ly/(Lx*Lx)*dbdt[BODY_L_INDEX])*180.0/M_PI;
+
+  deldt[oMEGA_INDEX] = 0.0/0.0;  /* Not implemented yet. */
 }

@@ -1,6 +1,8 @@
 #include"rings.h"
 
 #include<math.h>
+#include<stdlib.h>
+#include<stdio.h>
 
 #include<gsl/gsl_integration.h>
 
@@ -18,39 +20,43 @@ typedef struct {
 
 static
 double inner_fn(double E2, inner_data *data) {
-  if (data->comp == 0) { /* No change in the mass. */
-    return 0;
+  if (data->comp == BODY_M_INDEX) { /* No change in the mass. */
+    return 0.0;
   } else {
     double r2[3], v2[3];
     double aspec[3], a[3];
     double e2 = norm(data->b2->A);
     double fac = (1.0 - e2*cos(E2))/(2.0*M_PI);
+    double n1 = data->n1;
+    double a1 = data->b1->a;
 
     E_to_rv(data->b2, E2, r2, v2);
 
     softened_specific_acceleration(data->eps, data->r1, r2, aspec);
     vscale(data->b2->m, aspec, a);
 
-    if (data->comp == 1) { 
+    if (data->comp == BODY_a_INDEX) { 
       /* da1/dt */
-      return fac * 2.0 * dot(data->v1, a) / (data->n1*data->n1*data->b1->a);
-    } else if (2 <= data->comp && data->comp < 5) {
+      return fac * 2.0 * dot(data->v1, a) / (n1*n1*a1);
+    } else if (BODY_L_INDEX <= data->comp && data->comp < BODY_L_INDEX+3) {
       /* dL/dt */
-      int i = data->comp - 2;
-      double a2 = data->b1->a*data->b1->a;
+      int i = data->comp - BODY_L_INDEX;
       double rxa[3];
 
       cross(data->r1, a, rxa);
 
-      return fac * rxa[i]/(data->n1*a2);
-    } else if (5 <= data->comp && data->comp < 8) {
+      return fac * rxa[i]/(n1*a1*a1);
+    } else if (BODY_A_INDEX <= data->comp && data->comp < BODY_A_INDEX+3) {
       /* dA/dt */
       double adv = dot(a, data->v1);
       double rda = dot(data->r1, a);
       double rdv = dot(data->r1, data->v1);
-      int i = data->comp - 5;
+      int i = data->comp - BODY_A_INDEX;
 
       return fac / (1.0 + data->b1->m) * (2.0*data->r1[i]*adv - data->v1[i]*rda - a[i]*rdv);
+    } else {
+      fprintf(stderr, "in inner_fn of raw_average_rhs with unknown component of derivative: %d", data->comp);
+      abort();
     }
   }
 }

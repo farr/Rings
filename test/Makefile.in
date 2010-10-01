@@ -38,7 +38,10 @@ check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
 	init-body-from-elements-test$(EXEEXT) \
 	raw-average-zero-adot-test$(EXEEXT) \
 	raw-average-orthogonal-test$(EXEEXT) \
-	raw-average-Ltot-test$(EXEEXT)
+	raw-average-Ltot-test$(EXEEXT) \
+	raw-average-solar-system$(EXEEXT) \
+	raw-average-A-L-mags-test$(EXEEXT) \
+	raw-average-jupiter-saturn$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -65,15 +68,32 @@ init_body_from_elements_test_DEPENDENCIES = ../src/librings.la \
 am_projection_test_OBJECTS = projection-test.$(OBJEXT)
 projection_test_OBJECTS = $(am_projection_test_OBJECTS)
 projection_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_raw_average_A_L_mags_test_OBJECTS =  \
+	raw-average-A-L-mags-test.$(OBJEXT)
+raw_average_A_L_mags_test_OBJECTS =  \
+	$(am_raw_average_A_L_mags_test_OBJECTS)
+raw_average_A_L_mags_test_DEPENDENCIES = ../src/librings.la \
+	libcheck.la
 am_raw_average_Ltot_test_OBJECTS = raw-average-Ltot-test.$(OBJEXT)
 raw_average_Ltot_test_OBJECTS = $(am_raw_average_Ltot_test_OBJECTS)
 raw_average_Ltot_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_raw_average_jupiter_saturn_OBJECTS =  \
+	raw-average-jupiter-saturn.$(OBJEXT)
+raw_average_jupiter_saturn_OBJECTS =  \
+	$(am_raw_average_jupiter_saturn_OBJECTS)
+raw_average_jupiter_saturn_DEPENDENCIES = ../src/librings.la \
+	libcheck.la
 am_raw_average_orthogonal_test_OBJECTS =  \
 	raw-average-orthogonal-test.$(OBJEXT)
 raw_average_orthogonal_test_OBJECTS =  \
 	$(am_raw_average_orthogonal_test_OBJECTS)
 raw_average_orthogonal_test_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
+am_raw_average_solar_system_OBJECTS =  \
+	raw-average-solar-system.$(OBJEXT)
+raw_average_solar_system_OBJECTS =  \
+	$(am_raw_average_solar_system_OBJECTS)
+raw_average_solar_system_DEPENDENCIES = ../src/librings.la libcheck.la
 am_raw_average_zero_adot_test_OBJECTS =  \
 	raw-average-zero-adot-test.$(OBJEXT)
 raw_average_zero_adot_test_OBJECTS =  \
@@ -101,14 +121,22 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) $(raw_average_Ltot_test_SOURCES) \
+	$(projection_test_SOURCES) \
+	$(raw_average_A_L_mags_test_SOURCES) \
+	$(raw_average_Ltot_test_SOURCES) \
+	$(raw_average_jupiter_saturn_SOURCES) \
 	$(raw_average_orthogonal_test_SOURCES) \
+	$(raw_average_solar_system_SOURCES) \
 	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
 DIST_SOURCES = $(libcheck_la_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) $(raw_average_Ltot_test_SOURCES) \
+	$(projection_test_SOURCES) \
+	$(raw_average_A_L_mags_test_SOURCES) \
+	$(raw_average_Ltot_test_SOURCES) \
+	$(raw_average_jupiter_saturn_SOURCES) \
 	$(raw_average_orthogonal_test_SOURCES) \
+	$(raw_average_solar_system_SOURCES) \
 	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
 ETAGS = etags
@@ -249,6 +277,12 @@ raw_average_orthogonal_test_SOURCES = raw-average-orthogonal-test.c
 raw_average_orthogonal_test_LDADD = ../src/librings.la libcheck.la
 raw_average_Ltot_test_SOURCES = raw-average-Ltot-test.c
 raw_average_Ltot_test_LDADD = ../src/librings.la libcheck.la
+raw_average_solar_system_SOURCES = raw-average-solar-system.c
+raw_average_solar_system_LDADD = ../src/librings.la libcheck.la
+raw_average_A_L_mags_test_SOURCES = raw-average-A-L-mags-test.c
+raw_average_A_L_mags_test_LDADD = ../src/librings.la libcheck.la
+raw_average_jupiter_saturn_SOURCES = raw-average-jupiter-saturn.c
+raw_average_jupiter_saturn_LDADD = ../src/librings.la libcheck.la
 all: all-am
 
 .SUFFIXES:
@@ -312,12 +346,21 @@ init-body-from-elements-test$(EXEEXT): $(init_body_from_elements_test_OBJECTS) $
 projection-test$(EXEEXT): $(projection_test_OBJECTS) $(projection_test_DEPENDENCIES) 
 	@rm -f projection-test$(EXEEXT)
 	$(LINK) $(projection_test_OBJECTS) $(projection_test_LDADD) $(LIBS)
+raw-average-A-L-mags-test$(EXEEXT): $(raw_average_A_L_mags_test_OBJECTS) $(raw_average_A_L_mags_test_DEPENDENCIES) 
+	@rm -f raw-average-A-L-mags-test$(EXEEXT)
+	$(LINK) $(raw_average_A_L_mags_test_OBJECTS) $(raw_average_A_L_mags_test_LDADD) $(LIBS)
 raw-average-Ltot-test$(EXEEXT): $(raw_average_Ltot_test_OBJECTS) $(raw_average_Ltot_test_DEPENDENCIES) 
 	@rm -f raw-average-Ltot-test$(EXEEXT)
 	$(LINK) $(raw_average_Ltot_test_OBJECTS) $(raw_average_Ltot_test_LDADD) $(LIBS)
+raw-average-jupiter-saturn$(EXEEXT): $(raw_average_jupiter_saturn_OBJECTS) $(raw_average_jupiter_saturn_DEPENDENCIES) 
+	@rm -f raw-average-jupiter-saturn$(EXEEXT)
+	$(LINK) $(raw_average_jupiter_saturn_OBJECTS) $(raw_average_jupiter_saturn_LDADD) $(LIBS)
 raw-average-orthogonal-test$(EXEEXT): $(raw_average_orthogonal_test_OBJECTS) $(raw_average_orthogonal_test_DEPENDENCIES) 
 	@rm -f raw-average-orthogonal-test$(EXEEXT)
 	$(LINK) $(raw_average_orthogonal_test_OBJECTS) $(raw_average_orthogonal_test_LDADD) $(LIBS)
+raw-average-solar-system$(EXEEXT): $(raw_average_solar_system_OBJECTS) $(raw_average_solar_system_DEPENDENCIES) 
+	@rm -f raw-average-solar-system$(EXEEXT)
+	$(LINK) $(raw_average_solar_system_OBJECTS) $(raw_average_solar_system_LDADD) $(LIBS)
 raw-average-zero-adot-test$(EXEEXT): $(raw_average_zero_adot_test_OBJECTS) $(raw_average_zero_adot_test_DEPENDENCIES) 
 	@rm -f raw-average-zero-adot-test$(EXEEXT)
 	$(LINK) $(raw_average_zero_adot_test_OBJECTS) $(raw_average_zero_adot_test_LDADD) $(LIBS)
@@ -338,8 +381,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init-body-from-elements-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/projection-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-A-L-mags-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-Ltot-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-jupiter-saturn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-orthogonal-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-solar-system.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-zero-adot-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rotate-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector-check.Po@am__quote@
