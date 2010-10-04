@@ -70,7 +70,8 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 librings_la_LIBADD =
-am_librings_la_OBJECTS = vectors.lo body.lo raw_average.lo advancer.lo
+am_librings_la_OBJECTS = vectors.lo body.lo raw_average.lo advancer.lo \
+	analytic_average.lo
 librings_la_OBJECTS = $(am_librings_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -206,7 +207,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 include_HEADERS = rings.h
 lib_LTLIBRARIES = librings.la
-librings_la_SOURCES = vectors.c body.c raw_average.c advancer.c
+librings_la_SOURCES = vectors.c body.c raw_average.c advancer.c analytic_average.c
 all: all-am
 
 .SUFFIXES:
@@ -282,6 +283,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/advancer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/analytic_average.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/body.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw_average.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vectors.Plo@am__quote@

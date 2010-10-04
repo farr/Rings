@@ -84,6 +84,9 @@ double
 period(const body *b);
 
 void
+body_coordinate_system(const body *b, double xhat[3], double yhat[3], double zhat[3]);
+
+void
 E_to_rv(const body *b, const double E, double r[3], double v[3]);
 
 /* Fills in the given body from the mass and orbital elements (see
@@ -131,5 +134,13 @@ raw_average_rhs(const double eps, const body *b1, const body *b2,
                 gsl_integration_workspace *ws1, const size_t ws1_limit,
                 gsl_integration_workspace *ws2, const size_t ws2_limit,
                 double rhs[BODY_VECTOR_SIZE]);
+
+/* analytic_average.c */
+
+/* Fills f with the acceleration on a body at position rp from body b
+   averaged over the orbit of body b.  The softening parameter is
+   eps. */
+void
+force_averaged_unprimed(const double eps, const double rp[3], const body *b, double f[3]);
 
 #endif /* __RINGS_H__ */

@@ -2,7 +2,9 @@ check_PROGRAMS = vector-check body-test projection-test rotate-test \
 init-body-from-elements-test \
 raw-average-zero-adot-test raw-average-orthogonal-test raw-average-Ltot-test \
 raw-average-solar-system raw-average-A-L-mags-test \
-raw-average-jupiter-saturn
+raw-average-jupiter-saturn \
+raw-average-yoram-elements \
+analytic-average-test
 
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la
@@ -43,3 +45,9 @@ raw_average_A_L_mags_test_LDADD = ../src/librings.la libcheck.la
 
 raw_average_jupiter_saturn_SOURCES = raw-average-jupiter-saturn.c
 raw_average_jupiter_saturn_LDADD = ../src/librings.la libcheck.la
+
+raw_average_yoram_elements_SOURCES = raw-average-yoram-elements.c
+raw_average_yoram_elements_LDADD = ../src/librings.la libcheck.la
+
+analytic_average_test_SOURCES = analytic-average-test.c
+analytic_average_test_LDADD = ../src/librings.la libcheck.la

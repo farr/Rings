@@ -192,3 +192,10 @@ body_derivs_to_orbital_elements(const body *b, const double dbdt[BODY_VECTOR_SIZ
 
   deldt[oMEGA_INDEX] = 0.0/0.0;  /* Not implemented yet. */
 }
+
+void
+body_coordinate_system(const body *b, double xhat[3], double yhat[3], double zhat[3]) {
+  unitize(b->L, zhat);
+  unitize(b->A, xhat);
+  cross(zhat, xhat, yhat);
+}

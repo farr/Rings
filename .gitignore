@@ -25,3 +25,5 @@ test/raw-average-rhs-earth-jupiter
 test/raw-average-A-L-mags-test
 test/raw-average-jupiter-saturn
 test/raw-average-solar-system
+test/analytic-average-test
+test/raw-average-yoram-elements
