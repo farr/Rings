@@ -11,7 +11,7 @@ int
 check_close(const double epsabs, const double epsrel, const double x, const double y);
 
 int
-check_vector_close(const double epsabs, const double epsrel, const double x[3], const double y[3]);
+check_vector_close(const double epsabs, const double epsrel, const size_t len, const double x[], const double y[]);
 
 /* Random utilities. */
 void

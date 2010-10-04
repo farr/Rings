@@ -43,7 +43,7 @@ check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
 	raw-average-A-L-mags-test$(EXEEXT) \
 	raw-average-jupiter-saturn$(EXEEXT) \
 	raw-average-yoram-elements$(EXEEXT) \
-	analytic-average-test$(EXEEXT)
+	analytic-average-test$(EXEEXT) average-rhs-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -61,6 +61,9 @@ libcheck_la_OBJECTS = $(am_libcheck_la_OBJECTS)
 am_analytic_average_test_OBJECTS = analytic-average-test.$(OBJEXT)
 analytic_average_test_OBJECTS = $(am_analytic_average_test_OBJECTS)
 analytic_average_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_average_rhs_test_OBJECTS = average-rhs-test.$(OBJEXT)
+average_rhs_test_OBJECTS = $(am_average_rhs_test_OBJECTS)
+average_rhs_test_DEPENDENCIES = ../src/librings.la libcheck.la
 am_body_test_OBJECTS = body-test.$(OBJEXT)
 body_test_OBJECTS = $(am_body_test_OBJECTS)
 body_test_DEPENDENCIES = ../src/librings.la libcheck.la
@@ -131,7 +134,8 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
-	$(body_test_SOURCES) $(init_body_from_elements_test_SOURCES) \
+	$(average_rhs_test_SOURCES) $(body_test_SOURCES) \
+	$(init_body_from_elements_test_SOURCES) \
 	$(projection_test_SOURCES) \
 	$(raw_average_A_L_mags_test_SOURCES) \
 	$(raw_average_Ltot_test_SOURCES) \
@@ -142,7 +146,8 @@ SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
 	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
 	$(vector_check_SOURCES)
 DIST_SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
-	$(body_test_SOURCES) $(init_body_from_elements_test_SOURCES) \
+	$(average_rhs_test_SOURCES) $(body_test_SOURCES) \
+	$(init_body_from_elements_test_SOURCES) \
 	$(projection_test_SOURCES) \
 	$(raw_average_A_L_mags_test_SOURCES) \
 	$(raw_average_Ltot_test_SOURCES) \
@@ -300,6 +305,8 @@ raw_average_yoram_elements_SOURCES = raw-average-yoram-elements.c
 raw_average_yoram_elements_LDADD = ../src/librings.la libcheck.la
 analytic_average_test_SOURCES = analytic-average-test.c
 analytic_average_test_LDADD = ../src/librings.la libcheck.la
+average_rhs_test_SOURCES = average-rhs-test.c
+average_rhs_test_LDADD = ../src/librings.la libcheck.la
 all: all-am
 
 .SUFFIXES:
@@ -357,6 +364,9 @@ clean-checkPROGRAMS:
 analytic-average-test$(EXEEXT): $(analytic_average_test_OBJECTS) $(analytic_average_test_DEPENDENCIES) 
 	@rm -f analytic-average-test$(EXEEXT)
 	$(LINK) $(analytic_average_test_OBJECTS) $(analytic_average_test_LDADD) $(LIBS)
+average-rhs-test$(EXEEXT): $(average_rhs_test_OBJECTS) $(average_rhs_test_DEPENDENCIES) 
+	@rm -f average-rhs-test$(EXEEXT)
+	$(LINK) $(average_rhs_test_OBJECTS) $(average_rhs_test_LDADD) $(LIBS)
 body-test$(EXEEXT): $(body_test_OBJECTS) $(body_test_DEPENDENCIES) 
 	@rm -f body-test$(EXEEXT)
 	$(LINK) $(body_test_OBJECTS) $(body_test_LDADD) $(LIBS)
@@ -401,6 +411,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/analytic-average-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/average-rhs-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/body-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init-body-from-elements-test.Po@am__quote@

@@ -4,7 +4,8 @@ raw-average-zero-adot-test raw-average-orthogonal-test raw-average-Ltot-test \
 raw-average-solar-system raw-average-A-L-mags-test \
 raw-average-jupiter-saturn \
 raw-average-yoram-elements \
-analytic-average-test
+analytic-average-test \
+average-rhs-test
 
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la
@@ -51,3 +52,6 @@ raw_average_yoram_elements_LDADD = ../src/librings.la libcheck.la
 
 analytic_average_test_SOURCES = analytic-average-test.c
 analytic_average_test_LDADD = ../src/librings.la libcheck.la
+
+average_rhs_test_SOURCES = average-rhs-test.c
+average_rhs_test_LDADD = ../src/librings.la libcheck.la

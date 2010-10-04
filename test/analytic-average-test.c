@@ -76,7 +76,8 @@ main() {
       fnumerical[i] = result;
     }
 
-    if (!check_vector_close(EPS, EPS, fanalytic, fnumerical)) {
+    if (!check_vector_close(EPS, EPS, 3, fanalytic, fnumerical)) {
+      fprintf(stderr, "analytic-average-test: analytic and numerical average forces disagree.\n");
       status = 1;
     }
   }

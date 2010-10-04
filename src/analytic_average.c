@@ -138,3 +138,79 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
     f[i] = 2.0*b->m/M_PI*sqrt(l0-l2)/((l0-l1)*(l1-l2))*((k2*FU[i] + FV[i])*Ek - (1.0 - k2)*FV[i]*Kk);
   }
 }
+
+typedef struct {
+  double eps;
+  body *bp;
+  body *b;
+  int comp;
+} avg_data;
+
+static double
+average_integrand(const double Ep, void *vdata) {
+  avg_data *data = (avg_data *)vdata;
+
+  if (data->comp == BODY_M_INDEX) {
+    return 0.0;
+  } else {
+    double rp[3], vp[3];
+    double f[3];
+    double ep = norm(data->bp->A);
+    double fac = (1.0 - ep*cos(Ep))/(2.0*M_PI);
+    
+    E_to_rv(data->bp, Ep, rp, vp);
+    force_averaged_unprimed(data->eps, rp, data->b, f);
+    
+    if (data->comp == BODY_a_INDEX) {
+      double np = mean_motion(data->bp);
+      double ap = data->bp->a;
+
+      return fac*2.0*dot(vp, f)/(np*np*ap);
+    } else if (BODY_A_INDEX <= data->comp && data->comp < BODY_A_INDEX+3) {
+      double fdv = dot(f, vp);
+      double rdf = dot(rp, f);
+      double rdv = dot(rp, vp);
+      int i = data->comp - BODY_A_INDEX;
+
+      return fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
+    } else if (BODY_L_INDEX <= data->comp && data->comp < BODY_L_INDEX+3) {
+      double np = mean_motion(data->bp);
+      double ap = data->bp->a;
+      double rxf[3];
+      int i = data->comp - BODY_L_INDEX;
+
+      cross(rp, f, rxf);
+
+      return fac*rxf[i]/(np*ap*ap);
+    } else {
+      fprintf(stderr, "Unknown index for RHS component in average_integrand.\n");
+      abort();
+    }
+  }  
+}
+
+void
+average_rhs(const double eps, const body *b1, const body *b2, 
+            gsl_integration_workspace *ws, size_t ws_size,
+            const double epsabs, const double epsrel, double rhs[BODY_VECTOR_SIZE]) {
+  avg_data data;
+  int i;  
+
+  data.b = b2;
+  data.bp = b1;
+  data.eps = eps;
+
+  for (i = 0; i < BODY_VECTOR_SIZE; i++) {
+    gsl_function f;
+    double result, err;
+
+    data.comp = i;
+
+    f.function = (double (*)(const double, void *))average_integrand;
+    f.params = &data;
+
+    gsl_integration_qag(&f, 0.0, 2.0*M_PI, epsabs, epsrel, ws_size, GSL_INTEG_GAUSS61, ws, &result, &err);
+
+    rhs[i] = result;
+  }
+}

@@ -144,4 +144,12 @@ raw_average_rhs(const double eps, const body *b1, const body *b2,
 void
 force_averaged_unprimed(const double eps, const double rp[3], const body *b, double f[3]);
 
+/* Returns the time derivative of b1's components (including the mass
+   and semi-major axis, which are always constant in the secular
+   approximation) in rhs. */
+void
+average_rhs(const double eps, const body *b1, const body *b2, 
+            gsl_integration_workspace *ws, size_t ws_size,
+            const double epsabs, const double epsrel, double rhs[BODY_VECTOR_SIZE]);
+
 #endif /* __RINGS_H__ */

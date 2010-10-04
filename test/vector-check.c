@@ -28,7 +28,7 @@ check_cross() {
 
   cross(x,y,z);
   
-  return check_vector_close(eps,eps,z,zexact);
+  return check_vector_close(eps,eps,3,z,zexact);
 }
 
 static int
@@ -42,7 +42,7 @@ check_add_sub_scale() {
   vscale(-1.0,y,xmmy);
   vsub(x,xmmy,xmmy);
 
-  return check_vector_close(eps,eps,xpy,xmmy);
+  return check_vector_close(eps,eps,3,xpy,xmmy);
 }
 
 int main() {
