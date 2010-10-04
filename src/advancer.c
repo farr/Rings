@@ -11,6 +11,8 @@ typedef struct {
   gsl_integration_workspace *ws2;
   size_t ws2_size;
   double eps;
+  double epsabs;
+  double epsrel;
 } system_params;
 
 static int
@@ -39,6 +41,7 @@ rhs(double t, const double y[], double dydt[], void *vparams) {
         raw_average_rhs(params->eps, &b1, &b2, 
                         params->ws1, params->ws1_size,
                         params->ws2, params->ws2_size,
+                        params->epsabs, params->epsrel,
                         rhs);
 
         for (k = 0; k < BODY_VECTOR_SIZE; k++) {

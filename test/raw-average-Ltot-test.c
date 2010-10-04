@@ -3,6 +3,8 @@
 
 #include<gsl/gsl_rng.h>
 
+#define EPS 1e-10
+
 int
 main() {
   body b1, b2;
@@ -30,8 +32,8 @@ main() {
   init_random_body(rng, &b1, m1, a1);
   init_random_body(rng, &b2, m2, a2);
 
-  raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, rhs1);
-  raw_average_rhs(0.0, &b2, &b1, ws1, ws_size, ws2, ws_size, rhs2);
+  raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs1);
+  raw_average_rhs(0.0, &b2, &b1, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs2);
 
   vscale(b1.m*mean_motion(&b1)*a1*a1, rhs1+BODY_L_INDEX, rhs1+BODY_L_INDEX);
   vscale(b2.m*mean_motion(&b2)*a2*a2, rhs2+BODY_L_INDEX, rhs2+BODY_L_INDEX);

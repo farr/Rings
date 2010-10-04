@@ -3,6 +3,8 @@
 
 #include<stdlib.h>
 
+#define EPS 1e-10
+
 int
 main() {
   body b1, b2;
@@ -31,7 +33,7 @@ main() {
   init_random_body(rng, &b2, m2, a2);
   eps = random_between(rng, 1e-4, 1e-3);
 
-  raw_average_rhs(eps, &b1, &b2, ws1, ws_size, ws2, ws_size, rhs);
+  raw_average_rhs(eps, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs);
 
   if (rhs[0] != 0.0) {
     fprintf(stderr, "raw-average-zero-adot-test: rhs[0] != 0.0\n");

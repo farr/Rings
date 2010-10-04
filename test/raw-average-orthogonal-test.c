@@ -3,6 +3,8 @@
 
 #include<gsl/gsl_rng.h>
 
+#define EPS 1e-10
+
 int
 main() {
   body b1, b2;
@@ -29,7 +31,7 @@ main() {
   init_random_body(rng, &b1, m1, a1);
   init_random_body(rng, &b2, m2, a2);
 
-  raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, rhs);
+  raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs);
 
   if (norm(rhs+BODY_A_INDEX) < 1e-8) {
     fprintf(stderr, "raw-average-orthogonal-test: zero-norm Adot");

@@ -4,6 +4,8 @@
 #include<gsl/gsl_rng.h>
 #include<gsl/gsl_integration.h>
 
+#define EPS 1e-10
+
 static double
 rtod(const double r) { return r*180.0/M_PI; }
 
@@ -51,7 +53,7 @@ main() {
         double rhs_temp[BODY_VECTOR_SIZE];
         int k;
 
-        raw_average_rhs(0.0, planets+i, planets+j, ws1, ws_size, ws2, ws_size, rhs_temp);
+        raw_average_rhs(0.0, planets+i, planets+j, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs_temp);
 
         for(k = 0; k < BODY_VECTOR_SIZE; k++) {
           rhs[i][k] += rhs_temp[k]; 

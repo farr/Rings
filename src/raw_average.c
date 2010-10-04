@@ -67,6 +67,8 @@ typedef struct {
   gsl_integration_workspace *ws;
   size_t ws_limit;
   double eps;
+  double epsabs;
+  double epsrel;
   int comp;
 } outer_data;
 
@@ -88,7 +90,8 @@ double outer_fn(double E1, outer_data *data) {
   finner.function = (double (*)(double, void *))inner_fn;
   finner.params = &idata;
 
-  gsl_integration_qag(&finner, 0.0, 2.0*M_PI, EPS, EPS, data->ws_limit, GSL_INTEG_GAUSS61, data->ws, &result, &error);
+  gsl_integration_qag(&finner, 0.0, 2.0*M_PI, data->epsabs, data->epsrel, 
+                      data->ws_limit, GSL_INTEG_GAUSS61, data->ws, &result, &error);
 
   return result*fac;
 }
@@ -97,6 +100,7 @@ void
 raw_average_rhs(const double eps, const body *b1, const body *b2, 
                 gsl_integration_workspace *ws1, const size_t ws1_limit,
                 gsl_integration_workspace *ws2, const size_t ws2_limit,
+                const double epsabs, const double epsrel,
                 double rhs[BODY_VECTOR_SIZE]) {
   outer_data odata;
   int i;
@@ -107,6 +111,8 @@ raw_average_rhs(const double eps, const body *b1, const body *b2,
   odata.ws = ws2;
   odata.ws_limit = ws2_limit;
   odata.eps = eps;
+  odata.epsabs = epsabs;
+  odata.epsrel = epsrel;
 
   fouter.function = (double (*)(double, void *))outer_fn;
   fouter.params = &odata;
@@ -116,7 +122,7 @@ raw_average_rhs(const double eps, const body *b1, const body *b2,
     
     odata.comp = i;
 
-    gsl_integration_qag(&fouter, 0.0, 2.0*M_PI, EPS, EPS, ws1_limit, GSL_INTEG_GAUSS61, ws1, &result, &error);
+    gsl_integration_qag(&fouter, 0.0, 2.0*M_PI, epsabs, epsrel, ws1_limit, GSL_INTEG_GAUSS61, ws1, &result, &error);
 
     rhs[i] = result;
   }  

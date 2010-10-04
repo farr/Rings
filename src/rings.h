@@ -133,6 +133,7 @@ void
 raw_average_rhs(const double eps, const body *b1, const body *b2,
                 gsl_integration_workspace *ws1, const size_t ws1_limit,
                 gsl_integration_workspace *ws2, const size_t ws2_limit,
+                const double epsabs, const double epsrel,
                 double rhs[BODY_VECTOR_SIZE]);
 
 /* analytic_average.c */

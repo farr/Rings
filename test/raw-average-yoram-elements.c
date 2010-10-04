@@ -3,6 +3,8 @@
 
 #include<gsl/gsl_integration.h>
 
+#define EPS 1e-10
+
 int main() {
   body b1 = {1e-6, 0.1, {0.0, 0.0, sqrt(1.0-0.04)}, {0.2, 0.0, 0.0}};
   body b2 = {1e-6, 2.0, {0.0, 0.0, sqrt(1.0-0.09)}, {0.3, 0.0, 0.0}};
@@ -16,8 +18,8 @@ int main() {
   assert(ws1 != 0);
   assert(ws2 != 0);
 
-  raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, rhs1);
-  raw_average_rhs(0.0, &b2, &b1, ws1, ws_size, ws2, ws_size, rhs2);
+  raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs1);
+  raw_average_rhs(0.0, &b2, &b1, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs2);
   
   /* fprintf(stderr, "%g %g %g %g %g %g %g %g\n",  */
   /*         rhs1[BODY_M_INDEX], rhs1[BODY_A_INDEX], */
