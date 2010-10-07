@@ -11195,6 +11195,14 @@ if test "${with_gsl+set}" = set; then :
 fi
 
 
+ac_fn_c_check_func "$LINENO" "getopt_long" "ac_cv_func_getopt_long"
+if test "x$ac_cv_func_getopt_long" = xyes; then :
+
+else
+  as_fn_error $? "could not call getopt_long" "$LINENO" 5
+fi
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for cblas_ddot in -lgslcblas" >&5
 $as_echo_n "checking for cblas_ddot in -lgslcblas... " >&6; }
 if ${ac_cv_lib_gslcblas_cblas_ddot+:} false; then :
@@ -11289,6 +11297,14 @@ if test "x$ac_cv_header_gsl_gsl_sf_h" = xyes; then :
 
 else
   as_fn_error $? "could not find GSL headers; consider using --with-gsl argument" "$LINENO" 5
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "getopt.h" "ac_cv_header_getopt_h" "$ac_includes_default"
+if test "x$ac_cv_header_getopt_h" = xyes; then :
+
+else
+  as_fn_error $? "could not find getopt.h" "$LINENO" 5
 fi
 
 

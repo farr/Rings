@@ -3,6 +3,8 @@
 
 #include<stdlib.h>
 #include<gsl/gsl_integration.h>
+#include<gsl/gsl_odeiv.h>
+#include<stdio.h>
 
 /* Vector Utilities (vectors.c) */
 double
@@ -151,5 +153,65 @@ void
 average_rhs(const double eps, const body *b1, const body *b2, 
             gsl_integration_workspace *ws, size_t ws_size,
             const double epsabs, const double epsrel, double rhs[BODY_VECTOR_SIZE]);
+
+/* advancer.c */
+
+/* Given the number of bodies in the sysetm, returns the number of
+   elements in the system vector.  This is useful when allocating GSL
+   odeiv objects, since these require a vector size. */
+size_t
+body_size_to_vector_size(const size_t nbodies);
+
+/* Convert between arrays of bodies and arrays of doubles. */
+void
+bodies_to_vector(const body bs[], const size_t nbodies, double y[]);
+
+void
+vector_to_bodies(const double y[], const size_t nbodies, body bs[]);
+
+/* Advance routine.  Behaves similarly to gsl_odeiv_evolve_apply, but
+   specialized to systems of bodies.  The e, con, and step arguments
+   are as for gsl_odeiv_evolve_apply.  The evolve_system procedure
+   uses the provided GSL objects to advance the system toward a time
+   t1 (the actual time of the system after a step is returned in t,
+   which is guaranteed to never pass t1).  The parameter h is the
+   initial guess at a stepsize (the routine will give the actual
+   stepsize chosen to maintain the accuracy requirements in the
+   control object con).  bs is the initial state of the system, which
+   will be overwritten as the routine progresses.  It should be of
+   size nbodies.  y is a vector capable of storing the system state
+   (see body_size_to_vector_size above).  y need not be initialized,
+   but on output it will contain the vectorized state of bs.  The ws
+   parameter is a workspace for the integration over rings; its size
+   should be given in ws_size. The parameters epsabs and epsrel are
+   integration tolerances for the averaging over rings.  They should
+   be set smaller than the desired accuracy in the control object con.
+
+   Typically, evolve_system is called in a loop that terminates when
+   the output time is exactly t1.  In this use case, subsequent steps
+   should use the parameters from the previous step (t, h, bs, y).
+   When the next step is *not* a continuation of the previous step,
+   remember to call the appropriate gsl_odeiv_evolve_reset procedure
+   on e and gsl_odeiv_step_reset on step.  
+
+  */
+int
+evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
+              double *t, const double t1, double *h, body bs[], double y[], const size_t nbodies, 
+              gsl_integration_workspace *ws, const size_t ws_size, 
+              const double epsabs, const double epsrel);
+
+/* read_write.c */
+int
+read_body(FILE *stream, body *b);
+
+int
+read_body_bin(FILE *stream, body *b);
+
+int
+write_body(FILE *stream, const body *b);
+
+int
+write_body_bin(FILE *stream, const body *b);
 
 #endif /* __RINGS_H__ */
