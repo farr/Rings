@@ -2,6 +2,7 @@
 
 #include<gsl/gsl_integration.h>
 #include<gsl/gsl_odeiv.h>
+#include<gsl/gsl_errno.h>
 
 size_t
 body_size_to_vector_size(const size_t nbodies) { return nbodies*BODY_VECTOR_SIZE; }

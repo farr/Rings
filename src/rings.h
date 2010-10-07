@@ -199,7 +199,8 @@ int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], const size_t nbodies, 
               gsl_integration_workspace *ws, const size_t ws_size, 
-              const double epsabs, const double epsrel);
+              const double epsabs, const double epsrel,
+              const double eps);
 
 /* read_write.c */
 int
