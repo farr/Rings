@@ -36,7 +36,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = rings$(EXEEXT) rings_elements_to_bodies$(EXEEXT)
+bin_PROGRAMS = rings$(EXEEXT) rings_elements_to_bodies$(EXEEXT) \
+	rings_output_to_elements$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -85,6 +86,11 @@ am_rings_elements_to_bodies_OBJECTS =  \
 rings_elements_to_bodies_OBJECTS =  \
 	$(am_rings_elements_to_bodies_OBJECTS)
 rings_elements_to_bodies_DEPENDENCIES = librings.la
+am_rings_output_to_elements_OBJECTS =  \
+	rings_output_to_elements.$(OBJEXT)
+rings_output_to_elements_OBJECTS =  \
+	$(am_rings_output_to_elements_OBJECTS)
+rings_output_to_elements_DEPENDENCIES = librings.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -99,9 +105,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(librings_la_SOURCES) $(rings_SOURCES) \
-	$(rings_elements_to_bodies_SOURCES)
+	$(rings_elements_to_bodies_SOURCES) \
+	$(rings_output_to_elements_SOURCES)
 DIST_SOURCES = $(librings_la_SOURCES) $(rings_SOURCES) \
-	$(rings_elements_to_bodies_SOURCES)
+	$(rings_elements_to_bodies_SOURCES) \
+	$(rings_output_to_elements_SOURCES)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -226,6 +234,8 @@ rings_SOURCES = rings.c
 rings_LDADD = librings.la
 rings_elements_to_bodies_SOURCES = rings_elements_to_bodies.c
 rings_elements_to_bodies_LDADD = librings.la
+rings_output_to_elements_SOURCES = rings_output_to_elements.c
+rings_output_to_elements_LDADD = librings.la
 all: all-am
 
 .SUFFIXES:
@@ -342,6 +352,9 @@ rings$(EXEEXT): $(rings_OBJECTS) $(rings_DEPENDENCIES)
 rings_elements_to_bodies$(EXEEXT): $(rings_elements_to_bodies_OBJECTS) $(rings_elements_to_bodies_DEPENDENCIES) 
 	@rm -f rings_elements_to_bodies$(EXEEXT)
 	$(LINK) $(rings_elements_to_bodies_OBJECTS) $(rings_elements_to_bodies_LDADD) $(LIBS)
+rings_output_to_elements$(EXEEXT): $(rings_output_to_elements_OBJECTS) $(rings_output_to_elements_DEPENDENCIES) 
+	@rm -f rings_output_to_elements$(EXEEXT)
+	$(LINK) $(rings_output_to_elements_OBJECTS) $(rings_output_to_elements_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -356,6 +369,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/read_write.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rings_elements_to_bodies.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rings_output_to_elements.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vectors.Plo@am__quote@
 
 .c.o:
