@@ -79,7 +79,7 @@ int main (int argc, char *argv[]) {
   e = gsl_odeiv_evolve_alloc(bs_size*BODY_VECTOR_SIZE);
   step = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, bs_size*BODY_VECTOR_SIZE);
 
-  y = malloc(bs_size*BODY_VECTOR_SIZE);
+  y = malloc(bs_size*BODY_VECTOR_SIZE*sizeof(double));
 
   while (t != T) {
     int i;

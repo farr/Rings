@@ -31,7 +31,7 @@ int
 write_body(FILE *stream, const body *b) {
   int nchar;
   
-  nchar = fprintf(stream, "%g %g %g %g %g %g %g %g\n",
+  nchar = fprintf(stream, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n",
                   b->m, b->a, b->L[0], b->L[1], b->L[2],
                   b->A[0], b->A[1], b->A[2]);
 

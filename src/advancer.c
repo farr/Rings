@@ -79,6 +79,7 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
   fparams p;
   gsl_odeiv_system sys;
   int status;
+  int i;
 
   p.eps = eps;
   p.epsabs = epsabs;

@@ -19,7 +19,7 @@ main() {
 
     elements_from_body(&b, &e, &I, &O, &o);
 
-    fprintf(stdout, "%g %g %g %g %g %g %g\n",
+    fprintf(stdout, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n",
             t, b.m, b.a, e, I, O, o);
   }
 
