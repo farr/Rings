@@ -6,7 +6,7 @@ int
 read_body(FILE *stream, body *b) {
   int nscan;
 
-  nscan = fscanf(stream, " %g %g %g %g %g %g %g %g ",
+  nscan = fscanf(stream, " %lg %lg %lg %lg %lg %lg %lg %lg ",
                  &(b->m), &(b->a),
                  b->L, b->L+1, b->L+2,
                  b->A, b->A+1, b->A+2);

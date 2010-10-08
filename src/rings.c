@@ -90,9 +90,8 @@ int main (int argc, char *argv[]) {
                   acc, acc,
                   eps);
 
-    fprintf(stdout, "%8g ", t);
     for (i = 0; i < bs_size; i++) {
-      fprintf(stdout, "         ");
+      fprintf(stdout, "%8g ", t);
       write_body(stdout, bs+i);
     }
   }
