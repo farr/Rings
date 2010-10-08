@@ -87,7 +87,7 @@ int main (int argc, char *argv[]) {
     evolve_system(e, con, step, 
                   &t, T, &h, bs, y, bs_size,
                   ws, ws_size,
-                  acc, acc,
+                  acc/10.0, acc/10.0,
                   eps);
 
     for (i = 0; i < bs_size; i++) {
