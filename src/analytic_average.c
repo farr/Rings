@@ -150,7 +150,7 @@ static double
 average_integrand(const double Ep, void *vdata) {
   avg_data *data = (avg_data *)vdata;
 
-  if (data->comp == BODY_M_INDEX) {
+  if (data->comp == BODY_M_INDEX || data->comp == BODY_a_INDEX) {
     return 0.0;
   } else {
     double rp[3], vp[3];
@@ -161,12 +161,7 @@ average_integrand(const double Ep, void *vdata) {
     E_to_rv(data->bp, Ep, rp, vp);
     force_averaged_unprimed(data->eps, rp, data->b, f);
     
-    if (data->comp == BODY_a_INDEX) {
-      double np = mean_motion(data->bp);
-      double ap = data->bp->a;
-
-      return fac*2.0*dot(vp, f)/(np*np*ap);
-    } else if (BODY_A_INDEX <= data->comp && data->comp < BODY_A_INDEX+3) {
+    if (BODY_A_INDEX <= data->comp && data->comp < BODY_A_INDEX+3) {
       double fdv = dot(f, vp);
       double rdf = dot(rp, f);
       double rdv = dot(rp, vp);
