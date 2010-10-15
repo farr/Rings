@@ -43,7 +43,8 @@ check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
 	raw-average-A-L-mags-test$(EXEEXT) \
 	raw-average-jupiter-saturn$(EXEEXT) \
 	raw-average-yoram-elements$(EXEEXT) \
-	analytic-average-test$(EXEEXT) average-rhs-test$(EXEEXT)
+	analytic-average-test$(EXEEXT) average-rhs-test$(EXEEXT) \
+	quad-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -76,6 +77,9 @@ init_body_from_elements_test_DEPENDENCIES = ../src/librings.la \
 am_projection_test_OBJECTS = projection-test.$(OBJEXT)
 projection_test_OBJECTS = $(am_projection_test_OBJECTS)
 projection_test_DEPENDENCIES = ../src/librings.la libcheck.la
+am_quad_test_OBJECTS = quad-test.$(OBJEXT)
+quad_test_OBJECTS = $(am_quad_test_OBJECTS)
+quad_test_DEPENDENCIES = ../src/librings.la libcheck.la
 am_raw_average_A_L_mags_test_OBJECTS =  \
 	raw-average-A-L-mags-test.$(OBJEXT)
 raw_average_A_L_mags_test_OBJECTS =  \
@@ -136,7 +140,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
 	$(average_rhs_test_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) \
+	$(projection_test_SOURCES) $(quad_test_SOURCES) \
 	$(raw_average_A_L_mags_test_SOURCES) \
 	$(raw_average_Ltot_test_SOURCES) \
 	$(raw_average_jupiter_saturn_SOURCES) \
@@ -148,7 +152,7 @@ SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
 DIST_SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
 	$(average_rhs_test_SOURCES) $(body_test_SOURCES) \
 	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) \
+	$(projection_test_SOURCES) $(quad_test_SOURCES) \
 	$(raw_average_A_L_mags_test_SOURCES) \
 	$(raw_average_Ltot_test_SOURCES) \
 	$(raw_average_jupiter_saturn_SOURCES) \
@@ -307,6 +311,8 @@ analytic_average_test_SOURCES = analytic-average-test.c
 analytic_average_test_LDADD = ../src/librings.la libcheck.la
 average_rhs_test_SOURCES = average-rhs-test.c
 average_rhs_test_LDADD = ../src/librings.la libcheck.la
+quad_test_SOURCES = quad-test.c
+quad_test_LDADD = ../src/librings.la libcheck.la
 all: all-am
 
 .SUFFIXES:
@@ -376,6 +382,9 @@ init-body-from-elements-test$(EXEEXT): $(init_body_from_elements_test_OBJECTS) $
 projection-test$(EXEEXT): $(projection_test_OBJECTS) $(projection_test_DEPENDENCIES) 
 	@rm -f projection-test$(EXEEXT)
 	$(LINK) $(projection_test_OBJECTS) $(projection_test_LDADD) $(LIBS)
+quad-test$(EXEEXT): $(quad_test_OBJECTS) $(quad_test_DEPENDENCIES) 
+	@rm -f quad-test$(EXEEXT)
+	$(LINK) $(quad_test_OBJECTS) $(quad_test_LDADD) $(LIBS)
 raw-average-A-L-mags-test$(EXEEXT): $(raw_average_A_L_mags_test_OBJECTS) $(raw_average_A_L_mags_test_DEPENDENCIES) 
 	@rm -f raw-average-A-L-mags-test$(EXEEXT)
 	$(LINK) $(raw_average_A_L_mags_test_OBJECTS) $(raw_average_A_L_mags_test_LDADD) $(LIBS)
@@ -416,6 +425,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init-body-from-elements-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/projection-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-A-L-mags-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-Ltot-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raw-average-jupiter-saturn.Po@am__quote@

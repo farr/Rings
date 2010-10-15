@@ -4,7 +4,7 @@
 
 #include<string.h>
 
-#define MAXSUBDIV 10000
+#define MAXSUBDIV 100000000
 
 static int
 cleanup(const int status, double result[BODY_VECTOR_SIZE]) {
@@ -14,7 +14,7 @@ cleanup(const int status, double result[BODY_VECTOR_SIZE]) {
 
 static int
 should_continue(const double integral[BODY_VECTOR_SIZE], const double eps) {
-  return integral[BODY_a_INDEX] > eps;
+  return fabs(integral[BODY_a_INDEX]) > fabs(eps);
 }
 
 int
@@ -50,7 +50,7 @@ quad(const integrand f, void *fdata, const double a, const double b, const doubl
 
     nsubdiv *= 2;
     if (nsubdiv > MAXSUBDIV) {
-      cleanup(GSL_EMAXITER, result);
+      return cleanup(GSL_EMAXITER, result);
     }
 
     h = (b-a)/nsubdiv;
@@ -59,10 +59,13 @@ quad(const integrand f, void *fdata, const double a, const double b, const doubl
       result[i] *= 0.5;
     }
 
-    for (i = 1; i < MAXSUBDIV; i += 2) {
+    for (i = 1; i < nsubdiv; i += 2) {
       int j;
 
-      f(a + h*i, fdata, temp);
+      status = f(a + h*i, fdata, temp);
+      if (status != GSL_SUCCESS) {
+        return cleanup(status, result);
+      }
 
       for (j = 0; j < BODY_VECTOR_SIZE; j++) {
         result[j] += h*temp[j];

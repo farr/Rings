@@ -5,7 +5,8 @@ raw-average-solar-system raw-average-A-L-mags-test \
 raw-average-jupiter-saturn \
 raw-average-yoram-elements \
 analytic-average-test \
-average-rhs-test
+average-rhs-test \
+quad-test
 
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la
@@ -55,3 +56,6 @@ analytic_average_test_LDADD = ../src/librings.la libcheck.la
 
 average_rhs_test_SOURCES = average-rhs-test.c
 average_rhs_test_LDADD = ../src/librings.la libcheck.la
+
+quad_test_SOURCES = quad-test.c
+quad_test_LDADD = ../src/librings.la libcheck.la
