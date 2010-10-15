@@ -164,7 +164,13 @@ elements_from_body(const body *b,
 
   *I = acos(b->L[2]/Lmag)*180.0/M_PI;
   *e = norm(b->A);
-  *Omega = normalize_angle(lang + M_PI/2.0, 0.0, 2.0*M_PI);
+
+  if (b->L[1]*b->L[1] + b->L[0]*b->L[0] < 1e4*DBL_EPSILON*DBL_EPSILON) {
+    /* If we are basically in the x-y plane, then Omega is undefined; use x-axis. */
+    *Omega = 0.0;
+  } else {
+    *Omega = normalize_angle(lang + M_PI/2.0, 0.0, 2.0*M_PI);
+  }
 
   my_omega = *Omega;
 
@@ -174,14 +180,19 @@ elements_from_body(const body *b,
   asc_node[1] = sin(my_omega);
   asc_node[2] = 0.0;
 
-  *omega = acos(dot(asc_node, b->A)/norm(b->A));
-
-  cross(asc_node, b->A, asc_node_x_A);
-  if (dot(b->L, asc_node_x_A) < 0.0) { /* This means large argument of periapse. */
-    *omega = 2.0*M_PI - *omega;
+  if (*e < 100.0*DBL_EPSILON) {
+    /* Then e is so small we don't really have omega. */
+    *omega = 0.0;
+  } else {
+    *omega = acos(dot(asc_node, b->A)/norm(b->A));
+    
+    cross(asc_node, b->A, asc_node_x_A);
+    if (dot(b->L, asc_node_x_A) < 0.0) { /* This means large argument of periapse. */
+      *omega = 2.0*M_PI - *omega;
+    }
+    
+    *omega = *omega*180.0/M_PI;
   }
-
-  *omega = *omega*180.0/M_PI;
 }
 
 void
