@@ -215,4 +215,11 @@ write_body(FILE *stream, const body *b);
 int
 write_body_bin(FILE *stream, const body *b);
 
+/* quad.c */
+typedef int (*integrand)(const double E, void *data, double result[BODY_VECTOR_SIZE]);
+
+int
+quad(const integrand f, void *fdata, const double a, const double b, const double eps, 
+     double result[BODY_VECTOR_SIZE]);
+
 #endif /* __RINGS_H__ */
