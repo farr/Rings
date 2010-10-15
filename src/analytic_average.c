@@ -36,6 +36,11 @@ lambda_roots(const double A, const double Bcose, const double Bsine, const doubl
   *l0 = -2.0*sqrtQ*cos((theta + 2.0*M_PI)/3.0) - 1.0/3.0*CmA;
   *l1 = -2.0*sqrtQ*cos((theta - 2.0*M_PI)/3.0) - 1.0/3.0*CmA;
   *l2 = -2.0*sqrtQ*cos(theta/3.0) - 1.0/3.0*CmA;
+
+  if (fabs(C/A) < 100.0*DBL_EPSILON) {
+    /* Small eccentricity limit. */
+    *l2 = -0.0; /* Use -0.0 to get the sign right. */
+  }
 }
 
 static double
@@ -63,6 +68,12 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
   Q[2][0] = Bcose*sqrt(l0/((l0+C)*(l0-l1)*(l0-l2)));
   Q[2][1] = Bcose*sqrt(l1/((l1+C)*(l0-l1)*(l1-l2)));
   Q[2][2] = Bcose*sqrt(fabs(l2)/((l2+C)*(l0-l2)*(l1-l2)));
+
+  if (l2 == -0.0) {
+    /* Then we have taken the small e path through lambda_roots, and we need to fix up the infinities . */
+    Q[1][2] = -Bsine*sqrt(1.0/((l0-l2)*(l1-l2)));
+    Q[2][2] = Bcose*sqrt(1.0/((l0-l2)*(l1-l2)));
+  }
 }
 
 static void
