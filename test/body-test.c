@@ -57,12 +57,42 @@ energy_test() {
   return 1;
 }
 
+static int
+zero_ecc_energy_test() {
+  const int n = 7;
+  const double Es[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+  double egs[n];
+  const body b = {1e-6, 0.237, 
+                  {0.113569, 0.816863, 0.565541},
+                  {0.0, 0.0, 0.0}};
+  double r[3], v[3];
+  int i;
+
+  if (!check_close(eps,eps,dot(b.L,b.A), 0.0)) return 0;
+  if (!magnitude_check(&b)) return 0;
+
+  for(i = 0; i < n; i++) {
+    E_to_rv(&b, Es[i], r, v);
+    egs[i] = eg(r,v);
+  }
+
+  for(i = 1; i < n; i++) {
+    if (!check_close(eps,eps,egs[i],egs[i-1])) return 0;
+  }
+
+  if (!check_close(eps,eps,egs[0],-1.0/2.0/b.a)) return 0;
+
+  return 1;
+}
+
 int
 main() {
 
   if (!mean_motion_test()) return 2;
 
   if (!energy_test()) return 1;
+
+  if (!zero_ecc_energy_test()) return 3;
   
   return 0;
 }

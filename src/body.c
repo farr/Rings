@@ -4,6 +4,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<float.h>
+
+static const double SQRT_DBL_EPSILON = sqrt(DBL_EPSILON);
 
 double
 mean_motion(const body *b) {
@@ -37,13 +40,67 @@ E_to_rv(const body *b, const double E, double x[3], double v[3]) {
 
   int i;
 
-  assert(e > 0.0);
-  assert(dot(b->A, b->L)/e/sqrt1me2 < 1e-8);
-  assert(fabs(sqrt1me2 - sqrt(1.0-e*e)) < 1e-8);
+  /* The reason for this if statement is to handle constructing a
+     consistent coordinate system when e ~= 0 or e ~= 1. 
 
-  unitize(b->L, zhat);
-  unitize(b->A, xhat);
-  cross(zhat, xhat, yhat);
+     In the former case, we have no real handle on xhat (because b->A
+     ~= 0).  So, we get zhat from b->L.  Then we cross {1,0,0} or
+     {0,1,0} with zhat (whichever is more orthogonal to zhat to begin
+     with) to produce xhat in the orbital plane.  yhat then follows
+     from yhat = zhat x xhat.
+
+     In the latter case, we have no real handle on zhat (because b->L
+     ~= 0).  So, we get xhat from b->A.  Then we cross either {0,1,0}
+     or {0,0,1} with xhat (whichever is more orthogonal to begin with)
+     to produce a yhat orthogonal to xhat.  zhat then follows from
+     zhat = xhat x yhat. */
+  if (e < 100.0*DBL_EPSILON) {
+    double Ldx, Ldy;
+    const double x[] = {1.0, 0.0, 0.0}, y[] = {0.0, 1.0, 0.0};
+    double xhat_temp[3];
+
+    unitize(b->L, zhat);
+
+    Ldx = dot(zhat, x);
+    Ldy = dot(zhat, y);
+
+    if (Ldx > Ldy) {
+      /* If L is more along x than y, then use y to cross with z to get xhat. */
+      cross(y, zhat, xhat_temp);
+      unitize(xhat_temp, xhat);
+    } else {
+      /* L is more along y than x, so we can use x to cross with z to get xhat. */
+      cross(x, zhat, xhat_temp);
+      unitize(xhat_temp, xhat);
+    }
+
+    cross(zhat, xhat, yhat);
+  } else if (sqrt1me2 < 100.0*DBL_EPSILON) {
+    double Ady, Adz;
+    const double y[] = {0.0, 1.0, 0.0}, z[] = {0.0, 0.0, 1.0};
+    double yhat_temp[3];
+
+    unitize(b->A, xhat);
+
+    Ady = dot(xhat, y);
+    Adz = dot(xhat, z);
+
+    if (Ady > Adz) {
+      /* A is more along y, so use z to cross with xhat to get yhat. */
+      cross(z, xhat, yhat_temp);
+      unitize(yhat_temp, yhat);
+    } else {
+      /* A is more along x, so use y for yhat. */
+      cross(y, xhat, yhat_temp);
+      unitize(yhat_temp, yhat);
+    }
+
+    cross(xhat, yhat, zhat);
+  } else {
+    unitize(b->L, zhat);
+    unitize(b->A, xhat);
+    cross(zhat, xhat, yhat);
+  }
 
   for (i = 0; i < 3; i++) {
     x[i] = xc*xhat[i] + yc*yhat[i];
