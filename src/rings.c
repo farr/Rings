@@ -10,14 +10,21 @@
 static double eps = 0.0;
 static double T = 1.0;
 static double acc = 1e-10;
+static double acc_int = 1e-11;
 static double h = 0.01;
 
 static const char *short_opts = "e:T:a:h:";
+
+/* Avoid 65--122 (A-Z, a-z, some others) */
+enum LONG_ARGS {
+  ACC_INT = 0
+};
 
 static struct option long_opts[] = {
   { "epsilon", required_argument, NULL, 'e' },
   { "evolve-time", required_argument, NULL, 'T' },
   { "accuracy", required_argument, NULL, 'a' },
+  { "accuracy-integral", required_argument, NULL, ACC_INT },
   { "timestep", required_argument, NULL, 'h' },
   { NULL, 0, NULL, 0 }
 };
@@ -27,7 +34,7 @@ int main (int argc, char *argv[]) {
   gsl_odeiv_control *con;
   gsl_odeiv_step *step;
   gsl_odeiv_evolve *e;
-  const size_t ws_size = 10000;
+  const size_t ws_size = 100000;
   gsl_integration_workspace *ws;
   body *bs;
   double *y;
@@ -49,15 +56,16 @@ int main (int argc, char *argv[]) {
     case 'h':
       h = atof(optarg);
       break;
+    case ACC_INT: 
+      acc_int = atof(optarg);
+      break;
     default:
       exit(1);
       break;
     }
   }
 
-  h = T/100.0;
-
-  con = gsl_odeiv_control_y_new(acc, acc);
+  con = gsl_odeiv_control_y_new(acc, 0.0); /* We don't really care about anything but absolute error. */
   ws = gsl_integration_workspace_alloc(ws_size);
 
   bs = malloc(sizeof(body));
@@ -87,7 +95,7 @@ int main (int argc, char *argv[]) {
     evolve_system(e, con, step, 
                   &t, T, &h, bs, y, bs_size,
                   ws, ws_size,
-                  acc/10.0, acc/10.0,
+                  acc_int, acc_int,
                   eps);
 
     for (i = 0; i < bs_size; i++) {
