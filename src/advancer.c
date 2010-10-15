@@ -39,15 +39,13 @@ f(double t, const double y[], double dydt[], void *vparams) {
   fparams *p = (fparams *)vparams;
   size_t i;
 
+  memset(dydt, 0, p->nbodies*BODY_VECTOR_SIZE);
+  
   for (i = 0; i < p->nbodies; i++) {
     size_t j;
     body bi;
 
     vector_to_body(y+i*BODY_VECTOR_SIZE, &bi);
-
-    for (j = 0; j < BODY_VECTOR_SIZE; j++) {
-      dydt[i*BODY_VECTOR_SIZE+j] = 0.0;
-    }
 
     for (j = 0; j < p->nbodies; j++) {
       if (j != i) {
