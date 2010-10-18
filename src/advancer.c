@@ -37,6 +37,7 @@ static int
 f(double t, const double y[], double dydt[], void *vparams) {
   fparams *p = (fparams *)vparams;
   size_t i;
+  int status;
 
   memset(dydt, 0, p->nbodies*BODY_VECTOR_SIZE);
   
@@ -54,7 +55,14 @@ f(double t, const double y[], double dydt[], void *vparams) {
 
         vector_to_body(y+j*BODY_VECTOR_SIZE, &bj);
         
-        average_rhs(p->eps, &bi, &bj, p->epsabs, rhs);
+        status = average_rhs(p->eps, &bi, &bj, p->epsabs, rhs);
+
+        if (status != GSL_SUCCESS) {
+          for (k = 0; k < BODY_VECTOR_SIZE; k++) {
+            dydt[i*BODY_VECTOR_SIZE + k] = 0.0;
+          }
+          return status;
+        }
 
         for (k = 0; k < BODY_VECTOR_SIZE; k++) {
           dydt[i*BODY_VECTOR_SIZE+k] += rhs[k];

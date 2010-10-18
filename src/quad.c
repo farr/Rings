@@ -4,7 +4,7 @@
 
 #include<string.h>
 
-size_t quad_maxsubdiv = 10000000;
+size_t quad_maxsubdiv = 65536;
 
 static int
 cleanup(const int status, double result[BODY_VECTOR_SIZE]) {

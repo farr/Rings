@@ -33,7 +33,7 @@ main() {
     return 1;
   }
 
-  status = quad(&quad_test_rhs, NULL, 0.0, 2.0*M_PI, 1e-10, result);
+  status = quad(&quad_test_rhs, NULL, 0.0, 2.0*M_PI, 1e-6, result);
   if (status != GSL_SUCCESS) {
     fprintf(stderr, "quad-test: quad failed with status %d\n", status);
   }

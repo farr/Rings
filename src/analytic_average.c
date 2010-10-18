@@ -174,6 +174,7 @@ average_integrand(const double Ep, void *vdata, double result[BODY_VECTOR_SIZE])
   result[BODY_M_INDEX] = 0.0;
 
   E_to_rv(data->bp, Ep, rp, vp);
+
   force_averaged_unprimed(data->eps, rp, data->b, f);
   
   fdv = dot(f, vp);
