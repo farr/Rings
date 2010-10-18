@@ -218,6 +218,9 @@ write_body_bin(FILE *stream, const body *b);
 /* quad.c */
 typedef int (*integrand)(const double E, void *data, double result[BODY_VECTOR_SIZE]);
 
+extern size_t
+quad_maxsubdiv;
+
 int
 quad(const integrand f, void *fdata, const double a, const double b, const double eps, 
      double result[BODY_VECTOR_SIZE]);

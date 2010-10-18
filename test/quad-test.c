@@ -9,7 +9,7 @@ quad_test_rhs(const double x, void *data, double result[BODY_VECTOR_SIZE]) {
   memset(result, 0, BODY_VECTOR_SIZE*sizeof(double));
 
   result[0] = exp(x);
-  result[1] = x*x*x + x*x + x + 1 - 79.31361854897525;
+  result[1] = x*x*x + x*x + x + 1 - 79.31361854897525; /* Integrates to zero over 2Pi, as with f*v. */
   result[2] = sin(x);
   result[3] = log(x);
   result[4] = sqrt(x);

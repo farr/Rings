@@ -4,7 +4,7 @@
 
 #include<string.h>
 
-#define MAXSUBDIV 100000000
+size_t quad_maxsubdiv = 10000000;
 
 static int
 cleanup(const int status, double result[BODY_VECTOR_SIZE]) {
@@ -23,7 +23,7 @@ quad(const integrand f, void *fdata, const double a, const double b, const doubl
   double temp[BODY_VECTOR_SIZE];
   int status;
   int i;
-  int nsubdiv = 1;
+  size_t nsubdiv = 1;
 
   memset(result, 0, BODY_VECTOR_SIZE*sizeof(double));
 
@@ -49,7 +49,7 @@ quad(const integrand f, void *fdata, const double a, const double b, const doubl
     double h;
 
     nsubdiv *= 2;
-    if (nsubdiv > MAXSUBDIV) {
+    if (nsubdiv > quad_maxsubdiv) {
       return cleanup(GSL_EMAXITER, result);
     }
 
