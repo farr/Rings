@@ -34,8 +34,6 @@ int main (int argc, char *argv[]) {
   gsl_odeiv_control *con;
   gsl_odeiv_step *step;
   gsl_odeiv_evolve *e;
-  const size_t ws_size = 100000;
-  gsl_integration_workspace *ws;
   body *bs;
   double *y;
   int bs_size;
@@ -66,7 +64,6 @@ int main (int argc, char *argv[]) {
   }
 
   con = gsl_odeiv_control_y_new(acc, 0.0); /* We don't really care about anything but absolute error. */
-  ws = gsl_integration_workspace_alloc(ws_size);
 
   bs = malloc(sizeof(body));
   bs_size = 1;
@@ -94,8 +91,7 @@ int main (int argc, char *argv[]) {
 
     evolve_system(e, con, step, 
                   &t, T, &h, bs, y, bs_size,
-                  ws, ws_size,
-                  acc_int, acc_int,
+                  acc_int,
                   eps);
 
     for (i = 0; i < bs_size; i++) {
@@ -106,7 +102,6 @@ int main (int argc, char *argv[]) {
 
   free(bs);
   free(y);
-  gsl_integration_workspace_free(ws);
   gsl_odeiv_evolve_free(e);
   gsl_odeiv_step_free(step);
   gsl_odeiv_control_free(con);

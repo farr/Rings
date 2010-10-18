@@ -154,69 +154,54 @@ typedef struct {
   double eps;
   body *bp;
   body *b;
-  int comp;
 } avg_data;
 
-static double
-average_integrand(const double Ep, void *vdata) {
+static int
+average_integrand(const double Ep, void *vdata, double result[BODY_VECTOR_SIZE]) {
   avg_data *data = (avg_data *)vdata;
+  double rp[3], vp[3];
+  double f[3];
+  double ep = norm(data->bp->A);
+  double fac = (1.0 - ep*cos(Ep))/(2.0*M_PI);
+  double fdv;
+  double rdf;
+  double rdv;
+  double rxf[3];
+  double ap = data->bp->a;
+  double np = mean_motion(data->bp);
+  int i;
 
-  if (data->comp == BODY_M_INDEX || data->comp == BODY_a_INDEX) {
-    return 0.0;
-  } else {
-    double rp[3], vp[3];
-    double f[3];
-    double ep = norm(data->bp->A);
-    double fac = (1.0 - ep*cos(Ep))/(2.0*M_PI);
-    
-    E_to_rv(data->bp, Ep, rp, vp);
-    force_averaged_unprimed(data->eps, rp, data->b, f);
-    
-    if (BODY_A_INDEX <= data->comp && data->comp < BODY_A_INDEX+3) {
-      double fdv = dot(f, vp);
-      double rdf = dot(rp, f);
-      double rdv = dot(rp, vp);
-      int i = data->comp - BODY_A_INDEX;
+  result[BODY_M_INDEX] = 0.0;
 
-      return fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
-    } else if (BODY_L_INDEX <= data->comp && data->comp < BODY_L_INDEX+3) {
-      double np = mean_motion(data->bp);
-      double ap = data->bp->a;
-      double rxf[3];
-      int i = data->comp - BODY_L_INDEX;
+  E_to_rv(data->bp, Ep, rp, vp);
+  force_averaged_unprimed(data->eps, rp, data->b, f);
+  
+  fdv = dot(f, vp);
+  rdf = dot(rp, f);
+  rdv = dot(rp, vp);
+  cross(rp, f, rxf);
 
-      cross(rp, f, rxf);
+  result[BODY_a_INDEX] = 2.0*fac/(np*np*ap)*fdv;
+  
+  for (i = 0; i < 3; i++) {
+    result[BODY_A_INDEX+i] = fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
+  }
 
-      return fac*rxf[i]/(np*ap*ap);
-    } else {
-      fprintf(stderr, "Unknown index for RHS component in average_integrand.\n");
-      abort();
-    }
-  }  
+  for (i = 0; i < 3; i++) {
+    result[BODY_L_INDEX+i] = fac*rxf[i]/(np*ap*ap);
+  }
+
+  return GSL_SUCCESS;
 }
 
-void
+int
 average_rhs(const double eps, const body *b1, const body *b2, 
-            gsl_integration_workspace *ws, size_t ws_size,
-            const double epsabs, const double epsrel, double rhs[BODY_VECTOR_SIZE]) {
+            const double epsabs, double rhs[BODY_VECTOR_SIZE]) {
   avg_data data;
-  int i;  
 
   data.b = b2;
   data.bp = b1;
   data.eps = eps;
 
-  for (i = 0; i < BODY_VECTOR_SIZE; i++) {
-    gsl_function f;
-    double result, err;
-
-    data.comp = i;
-
-    f.function = (double (*)(const double, void *))average_integrand;
-    f.params = &data;
-
-    gsl_integration_qag(&f, 0.0, 2.0*M_PI, epsabs, epsrel, ws_size, GSL_INTEG_GAUSS61, ws, &result, &err);
-
-    rhs[i] = result;
-  }
+  return quad(average_integrand, &data, 0.0, 2.0*M_PI, epsabs, rhs);
 }

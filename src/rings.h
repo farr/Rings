@@ -149,10 +149,9 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 /* Returns the time derivative of b1's components (including the mass
    and semi-major axis, which are always constant in the secular
    approximation) in rhs. */
-void
+int
 average_rhs(const double eps, const body *b1, const body *b2, 
-            gsl_integration_workspace *ws, size_t ws_size,
-            const double epsabs, const double epsrel, double rhs[BODY_VECTOR_SIZE]);
+            const double epsabs, double rhs[BODY_VECTOR_SIZE]);
 
 /* advancer.c */
 
@@ -198,8 +197,7 @@ vector_to_bodies(const double y[], const size_t nbodies, body bs[]);
 int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], const size_t nbodies, 
-              gsl_integration_workspace *ws, const size_t ws_size, 
-              const double epsabs, const double epsrel,
+              const double epsabs,
               const double eps);
 
 /* read_write.c */

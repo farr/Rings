@@ -5,7 +5,7 @@
 #include<gsl/gsl_integration.h>
 #include<gsl/gsl_rng.h>
 
-#define EPS 1e-10
+#define EPS 1e-8
 
 int
 main() {
@@ -21,6 +21,7 @@ main() {
   const double eps = 0.001;
   double rhs[BODY_VECTOR_SIZE];
   double numerical_rhs[BODY_VECTOR_SIZE];
+  int avg_status;
 
   rng = gsl_rng_alloc(gsl_rng_ranlxd2);
   assert(rng != 0);
@@ -35,7 +36,12 @@ main() {
   init_random_body(rng, &b2, m2, a2);
 
   raw_average_rhs(eps, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, numerical_rhs);
-  average_rhs(eps, &b1, &b2, ws1, ws_size, EPS, EPS, rhs);
+  avg_status = average_rhs(eps, &b1, &b2, EPS, rhs);
+
+  if (avg_status != GSL_SUCCESS) {
+    fprintf(stderr, "average-rhs-test: quad reported error %d.\n", avg_status);
+    status = 2;
+  }
 
   if (!check_vector_close(10.0*EPS, 10.0*EPS, BODY_VECTOR_SIZE, rhs, numerical_rhs)) {
     fprintf(stderr, "average-rhs-test: numerical average doesn't agree with analytical average\n");

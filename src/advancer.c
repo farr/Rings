@@ -4,6 +4,8 @@
 #include<gsl/gsl_odeiv.h>
 #include<gsl/gsl_errno.h>
 
+#include<string.h>
+
 size_t
 body_size_to_vector_size(const size_t nbodies) { return nbodies*BODY_VECTOR_SIZE; }
 
@@ -28,10 +30,7 @@ vector_to_bodies(const double y[], const size_t nbodies, body bs[]) {
 typedef struct {
   size_t nbodies;
   double eps;
-  gsl_integration_workspace *ws;
-  size_t ws_size;
   double epsabs;
-  double epsrel;
 } fparams;
 
 static int
@@ -55,7 +54,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
 
         vector_to_body(y+j*BODY_VECTOR_SIZE, &bj);
         
-        average_rhs(p->eps, &bi, &bj, p->ws, p->ws_size, p->epsabs, p->epsrel, rhs);
+        average_rhs(p->eps, &bi, &bj, p->epsabs, rhs);
 
         for (k = 0; k < BODY_VECTOR_SIZE; k++) {
           dydt[i*BODY_VECTOR_SIZE+k] += rhs[k];
@@ -71,8 +70,7 @@ int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], 
               size_t nbodies, 
-              gsl_integration_workspace *ws, const size_t ws_size,
-              const double epsabs, const double epsrel,
+              const double epsabs,
               const double eps) {
   fparams p;
   gsl_odeiv_system sys;
@@ -81,9 +79,6 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
 
   p.eps = eps;
   p.epsabs = epsabs;
-  p.epsrel = epsrel;
-  p.ws = ws;
-  p.ws_size = ws_size;
   p.nbodies = nbodies;
 
   sys.function = (int (*)(double, const double [], double [], void *))f;
