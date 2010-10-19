@@ -24,7 +24,8 @@ period(const body *b) {
 void
 E_to_rv(const body *b, const double E, double x[3], double v[3]) {
   double xhat[3], yhat[3], zhat[3];
-  double e = norm(b->A);
+  double etmp = norm(b->A);
+  double e = (etmp > 1.0 ? 1.0 : etmp);
   double n = mean_motion(b);
   double cosE = cos(E), sinE = sin(E);
   double eCosE = e*cosE;

@@ -19,7 +19,7 @@ get_ABC(const double eps, const double rp[3], const body *b,
   *A = rpmag*rpmag + a*a + eps*eps + 2.0*a*e*dot(rp, xhat);
 
   *Bcose = a*dot(rp, xhat) + a*a*e;
-  *Bsine = a*sqrt(1.0 - e*e)*dot(rp, yhat);
+  *Bsine = a*sqrt(fabs(1.0 - e*e))*dot(rp, yhat);
 
   *C = a*a*e*e;
 }
@@ -52,19 +52,51 @@ lambda_equation(const double A, const double Bcose, const double Bsine, const do
 
 static void
 Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
-        const double l0, const double l1, const double l2, 
+        const double l0, const double l1_in, const double l2, 
         double Q[3][3]) {
   int i,j,k;
+  double l1 = fabs(l1_in);  /* l1 should always be nonnegative, but
+                               roundoff.... */
+
+  /* We have several issues to worry about here, hence the careful
+     finessing with fabs(...) and re-writing of some terms relative to
+     T&T. 
+
+     As e --> 0, C --> 0, and -C < l2 < 0 means that l2 becomes
+     "squeezed" between -C and 0.  In this case l2/(l2+C) --> 0/0.
+     So, we want to avoid this ratio.
+       
+     As e --> 1, 0 < l1 < a^2(1-e^2) gets squeezed toward zero.  In
+     this circumstance, the l1 in the denominator Q[1][1] is
+     problematic.  In fact, as e --> 1, Bsine --> 0 as well, so we
+     again have a 0/0 situation.
+
+     When rp*yhat --> 0, Bsine --> 0 (this happens at least once an
+     orbit); because l0*l1*l2 = -B^2 C Sin^2 epsilon, at least one of
+     l2 or l1 is driven to zero.  
+
+     We can fix these problems by using the relations
+
+     l0*l1*l2 = -Bsine^2 C
+     (l0+C)*(l1+C)*(l2+C) = Bcose^2 C
+
+     to remove l2, l1, and (l2+C) terms from the denominator of the Q
+     components.  The result appears below.  We also added fabs(...)
+     to l1 and (l2+C) because they should be positive, but may be
+     negative due to roundoff.  (fabs(l2) already appears because l2
+     *should* be negative.)
+
+  */
 
   Q[0][0] = sqrt(l0*(l0+C)/((l0-l1)*(l0-l2)));
   Q[0][1] = sqrt(l1*(l1+C)/((l0-l1)*(l1-l2)));
-  Q[0][2] = sqrt(fabs(l2)*(l2+C)/((l0-l2)*(l1-l2)));
+  Q[0][2] = sqrt(fabs(l2)*fabs(l2+C)/((l0-l2)*(l1-l2)));
   Q[1][0] = Bsine*sqrt((l0+C)/(l0*(l0-l1)*(l0-l2)));
   Q[1][1] = Bsine*sqrt((l1+C)/(l1*(l0-l1)*(l1-l2)));
-  Q[1][2] = -Bsine*sqrt((l2+C)/(fabs(l2)*(l0-l2)*(l1-l2)));
+  Q[1][2] = -Bsine*sqrt(fabs(l2+C)/(fabs(l2)*(l0-l2)*(l1-l2)));
   Q[2][0] = Bcose*sqrt(l0/((l0+C)*(l0-l1)*(l0-l2)));
   Q[2][1] = Bcose*sqrt(l1/((l1+C)*(l0-l1)*(l1-l2)));
-  Q[2][2] = Bcose*sqrt(fabs(l2)/((l2+C)*(l0-l2)*(l1-l2)));
+  Q[2][2] = Bcose*sqrt(fabs(l2)/(fabs(l2+C)*(l0-l2)*(l1-l2)));
 }
 
 static void
