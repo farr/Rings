@@ -32,6 +32,11 @@ lambda_roots(const double A, const double Bcose, const double Bsine, const doubl
 
   nroots = gsl_poly_solve_cubic(C-A, B2-A*C, Bsine*Bsine*C, l2, l1, l0);
 
+  if (nroots != 3) {
+    fprintf(stderr, "nroots = %d; A = %g, Bcose = %g, Bsine = %g, C = %g\n",
+            nroots, A, Bcose, Bsine, C);
+  }
+
   assert(nroots == 3);
 }
 
@@ -60,12 +65,6 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
   Q[2][0] = Bcose*sqrt(l0/((l0+C)*(l0-l1)*(l0-l2)));
   Q[2][1] = Bcose*sqrt(l1/((l1+C)*(l0-l1)*(l1-l2)));
   Q[2][2] = Bcose*sqrt(fabs(l2)/((l2+C)*(l0-l2)*(l1-l2)));
-
-  if (l2 == -0.0) {
-    /* Then we have taken the small e path through lambda_roots, and we need to fix up the infinities . */
-    Q[1][2] = -Bsine*sqrt(1.0/((l0-l2)*(l1-l2)));
-    Q[2][2] = Bcose*sqrt(1.0/((l0-l2)*(l1-l2)));
-  }
 }
 
 static void
