@@ -1,6 +1,7 @@
 #include"rings.h"
 
 #include<gsl/gsl_sf.h>
+#include<gsl/gsl_poly.h>
 
 #include<math.h>
 #include<assert.h>
@@ -26,23 +27,12 @@ get_ABC(const double eps, const double rp[3], const body *b,
 static void
 lambda_roots(const double A, const double Bcose, const double Bsine, const double C,
              double *l0, double *l1, double *l2) {
-  double CmA = C - A;
-  double CmA2 = CmA*CmA;
-  double CmA3 = CmA*CmA2;
-  double B2 = Bsine*Bsine + Bcose*Bcose;
-  double Q = 1.0/9.0*CmA2 - 1.0/3.0*(B2 - A*C);
-  double R = 1.0/27.0*CmA3 - 1.0/6.0*CmA*(B2 - A*C) + 0.5*C*Bsine*Bsine;
-  double sqrtQ = sqrt(Q);
-  double theta = acos(R/(sqrtQ*sqrtQ*sqrtQ));
+  int nroots;
+  double B2 = Bcose*Bcose + Bsine*Bsine;
 
-  *l0 = -2.0*sqrtQ*cos((theta + 2.0*M_PI)/3.0) - 1.0/3.0*CmA;
-  *l1 = -2.0*sqrtQ*cos((theta - 2.0*M_PI)/3.0) - 1.0/3.0*CmA;
-  *l2 = -2.0*sqrtQ*cos(theta/3.0) - 1.0/3.0*CmA;
+  nroots = gsl_poly_solve_cubic(C-A, B2-A*C, Bsine*Bsine*C, l2, l1, l0);
 
-  if (fabs(C/A) < 100.0*DBL_EPSILON) {
-    /* Small eccentricity limit. */
-    *l2 = -0.0; /* Use -0.0 to get the sign right. */
-  }
+  assert(nroots == 3);
 }
 
 static double
