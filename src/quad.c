@@ -71,7 +71,11 @@ quad(const integrand f, void *fdata, const double a, const double b, const doubl
         result[j] += h*temp[j];
       }
     }
-  } while(should_continue(result, eps));
+  } while(nsubdiv < 8 || should_continue(result, eps)); /* Prevent
+                                                           early
+                                                           convergence
+                                                           with 8
+                                                           subdiv's. */
 
   return GSL_SUCCESS;
 }
