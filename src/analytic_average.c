@@ -1,7 +1,9 @@
 #include"rings.h"
 
 #include<gsl/gsl_sf.h>
+
 #include<math.h>
+#include<assert.h>
 
 static void
 get_ABC(const double eps, const double rp[3], const body *b, 
@@ -141,6 +143,8 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 
   k2 = (l1-l2)/(l0-l2);
   k = sqrt(fabs(k2));
+
+  assert(!(isnan(k))); /* Workaround for infinite loop bug in GSL ellint. */
 
   Ek = gsl_sf_ellint_Ecomp(k, GSL_PREC_DOUBLE);
   Kk = gsl_sf_ellint_Kcomp(k, GSL_PREC_DOUBLE);
