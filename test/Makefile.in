@@ -44,7 +44,7 @@ check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
 	raw-average-jupiter-saturn$(EXEEXT) \
 	raw-average-yoram-elements$(EXEEXT) \
 	analytic-average-test$(EXEEXT) average-rhs-test$(EXEEXT) \
-	quad-test$(EXEEXT)
+	quad-test$(EXEEXT) extreme-eccentricity-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -59,70 +59,83 @@ CONFIG_CLEAN_VPATH_FILES =
 libcheck_la_LIBADD =
 am_libcheck_la_OBJECTS = checks.lo
 libcheck_la_OBJECTS = $(am_libcheck_la_OBJECTS)
-am_analytic_average_test_OBJECTS = analytic-average-test.$(OBJEXT)
-analytic_average_test_OBJECTS = $(am_analytic_average_test_OBJECTS)
+analytic_average_test_SOURCES = analytic-average-test.c
+analytic_average_test_OBJECTS = analytic-average-test.$(OBJEXT)
+analytic_average_test_LDADD = $(LDADD)
 analytic_average_test_DEPENDENCIES = ../src/librings.la libcheck.la
-am_average_rhs_test_OBJECTS = average-rhs-test.$(OBJEXT)
-average_rhs_test_OBJECTS = $(am_average_rhs_test_OBJECTS)
+average_rhs_test_SOURCES = average-rhs-test.c
+average_rhs_test_OBJECTS = average-rhs-test.$(OBJEXT)
+average_rhs_test_LDADD = $(LDADD)
 average_rhs_test_DEPENDENCIES = ../src/librings.la libcheck.la
-am_body_test_OBJECTS = body-test.$(OBJEXT)
-body_test_OBJECTS = $(am_body_test_OBJECTS)
+body_test_SOURCES = body-test.c
+body_test_OBJECTS = body-test.$(OBJEXT)
+body_test_LDADD = $(LDADD)
 body_test_DEPENDENCIES = ../src/librings.la libcheck.la
-am_init_body_from_elements_test_OBJECTS =  \
-	init-body-from-elements-test.$(OBJEXT)
+extreme_eccentricity_test_SOURCES = extreme-eccentricity-test.c
+extreme_eccentricity_test_OBJECTS =  \
+	extreme-eccentricity-test.$(OBJEXT)
+extreme_eccentricity_test_LDADD = $(LDADD)
+extreme_eccentricity_test_DEPENDENCIES = ../src/librings.la \
+	libcheck.la
+init_body_from_elements_test_SOURCES = init-body-from-elements-test.c
 init_body_from_elements_test_OBJECTS =  \
-	$(am_init_body_from_elements_test_OBJECTS)
+	init-body-from-elements-test.$(OBJEXT)
+init_body_from_elements_test_LDADD = $(LDADD)
 init_body_from_elements_test_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
-am_projection_test_OBJECTS = projection-test.$(OBJEXT)
-projection_test_OBJECTS = $(am_projection_test_OBJECTS)
+projection_test_SOURCES = projection-test.c
+projection_test_OBJECTS = projection-test.$(OBJEXT)
+projection_test_LDADD = $(LDADD)
 projection_test_DEPENDENCIES = ../src/librings.la libcheck.la
-am_quad_test_OBJECTS = quad-test.$(OBJEXT)
-quad_test_OBJECTS = $(am_quad_test_OBJECTS)
+quad_test_SOURCES = quad-test.c
+quad_test_OBJECTS = quad-test.$(OBJEXT)
+quad_test_LDADD = $(LDADD)
 quad_test_DEPENDENCIES = ../src/librings.la libcheck.la
-am_raw_average_A_L_mags_test_OBJECTS =  \
-	raw-average-A-L-mags-test.$(OBJEXT)
+raw_average_A_L_mags_test_SOURCES = raw-average-A-L-mags-test.c
 raw_average_A_L_mags_test_OBJECTS =  \
-	$(am_raw_average_A_L_mags_test_OBJECTS)
+	raw-average-A-L-mags-test.$(OBJEXT)
+raw_average_A_L_mags_test_LDADD = $(LDADD)
 raw_average_A_L_mags_test_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
-am_raw_average_Ltot_test_OBJECTS = raw-average-Ltot-test.$(OBJEXT)
-raw_average_Ltot_test_OBJECTS = $(am_raw_average_Ltot_test_OBJECTS)
+raw_average_Ltot_test_SOURCES = raw-average-Ltot-test.c
+raw_average_Ltot_test_OBJECTS = raw-average-Ltot-test.$(OBJEXT)
+raw_average_Ltot_test_LDADD = $(LDADD)
 raw_average_Ltot_test_DEPENDENCIES = ../src/librings.la libcheck.la
-am_raw_average_jupiter_saturn_OBJECTS =  \
-	raw-average-jupiter-saturn.$(OBJEXT)
+raw_average_jupiter_saturn_SOURCES = raw-average-jupiter-saturn.c
 raw_average_jupiter_saturn_OBJECTS =  \
-	$(am_raw_average_jupiter_saturn_OBJECTS)
+	raw-average-jupiter-saturn.$(OBJEXT)
+raw_average_jupiter_saturn_LDADD = $(LDADD)
 raw_average_jupiter_saturn_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
-am_raw_average_orthogonal_test_OBJECTS =  \
-	raw-average-orthogonal-test.$(OBJEXT)
+raw_average_orthogonal_test_SOURCES = raw-average-orthogonal-test.c
 raw_average_orthogonal_test_OBJECTS =  \
-	$(am_raw_average_orthogonal_test_OBJECTS)
+	raw-average-orthogonal-test.$(OBJEXT)
+raw_average_orthogonal_test_LDADD = $(LDADD)
 raw_average_orthogonal_test_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
-am_raw_average_solar_system_OBJECTS =  \
-	raw-average-solar-system.$(OBJEXT)
-raw_average_solar_system_OBJECTS =  \
-	$(am_raw_average_solar_system_OBJECTS)
+raw_average_solar_system_SOURCES = raw-average-solar-system.c
+raw_average_solar_system_OBJECTS = raw-average-solar-system.$(OBJEXT)
+raw_average_solar_system_LDADD = $(LDADD)
 raw_average_solar_system_DEPENDENCIES = ../src/librings.la libcheck.la
-am_raw_average_yoram_elements_OBJECTS =  \
-	raw-average-yoram-elements.$(OBJEXT)
+raw_average_yoram_elements_SOURCES = raw-average-yoram-elements.c
 raw_average_yoram_elements_OBJECTS =  \
-	$(am_raw_average_yoram_elements_OBJECTS)
+	raw-average-yoram-elements.$(OBJEXT)
+raw_average_yoram_elements_LDADD = $(LDADD)
 raw_average_yoram_elements_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
-am_raw_average_zero_adot_test_OBJECTS =  \
-	raw-average-zero-adot-test.$(OBJEXT)
+raw_average_zero_adot_test_SOURCES = raw-average-zero-adot-test.c
 raw_average_zero_adot_test_OBJECTS =  \
-	$(am_raw_average_zero_adot_test_OBJECTS)
+	raw-average-zero-adot-test.$(OBJEXT)
+raw_average_zero_adot_test_LDADD = $(LDADD)
 raw_average_zero_adot_test_DEPENDENCIES = ../src/librings.la \
 	libcheck.la
-am_rotate_test_OBJECTS = rotate-test.$(OBJEXT)
-rotate_test_OBJECTS = $(am_rotate_test_OBJECTS)
+rotate_test_SOURCES = rotate-test.c
+rotate_test_OBJECTS = rotate-test.$(OBJEXT)
+rotate_test_LDADD = $(LDADD)
 rotate_test_DEPENDENCIES = ../src/librings.la libcheck.la
-am_vector_check_OBJECTS = vector-check.$(OBJEXT)
-vector_check_OBJECTS = $(am_vector_check_OBJECTS)
+vector_check_SOURCES = vector-check.c
+vector_check_OBJECTS = vector-check.$(OBJEXT)
+vector_check_LDADD = $(LDADD)
 vector_check_DEPENDENCIES = ../src/librings.la libcheck.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -137,30 +150,20 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
-	$(average_rhs_test_SOURCES) $(body_test_SOURCES) \
-	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) $(quad_test_SOURCES) \
-	$(raw_average_A_L_mags_test_SOURCES) \
-	$(raw_average_Ltot_test_SOURCES) \
-	$(raw_average_jupiter_saturn_SOURCES) \
-	$(raw_average_orthogonal_test_SOURCES) \
-	$(raw_average_solar_system_SOURCES) \
-	$(raw_average_yoram_elements_SOURCES) \
-	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
-	$(vector_check_SOURCES)
-DIST_SOURCES = $(libcheck_la_SOURCES) $(analytic_average_test_SOURCES) \
-	$(average_rhs_test_SOURCES) $(body_test_SOURCES) \
-	$(init_body_from_elements_test_SOURCES) \
-	$(projection_test_SOURCES) $(quad_test_SOURCES) \
-	$(raw_average_A_L_mags_test_SOURCES) \
-	$(raw_average_Ltot_test_SOURCES) \
-	$(raw_average_jupiter_saturn_SOURCES) \
-	$(raw_average_orthogonal_test_SOURCES) \
-	$(raw_average_solar_system_SOURCES) \
-	$(raw_average_yoram_elements_SOURCES) \
-	$(raw_average_zero_adot_test_SOURCES) $(rotate_test_SOURCES) \
-	$(vector_check_SOURCES)
+SOURCES = $(libcheck_la_SOURCES) analytic-average-test.c \
+	average-rhs-test.c body-test.c extreme-eccentricity-test.c \
+	init-body-from-elements-test.c projection-test.c quad-test.c \
+	raw-average-A-L-mags-test.c raw-average-Ltot-test.c \
+	raw-average-jupiter-saturn.c raw-average-orthogonal-test.c \
+	raw-average-solar-system.c raw-average-yoram-elements.c \
+	raw-average-zero-adot-test.c rotate-test.c vector-check.c
+DIST_SOURCES = $(libcheck_la_SOURCES) analytic-average-test.c \
+	average-rhs-test.c body-test.c extreme-eccentricity-test.c \
+	init-body-from-elements-test.c projection-test.c quad-test.c \
+	raw-average-A-L-mags-test.c raw-average-Ltot-test.c \
+	raw-average-jupiter-saturn.c raw-average-orthogonal-test.c \
+	raw-average-solar-system.c raw-average-yoram-elements.c \
+	raw-average-zero-adot-test.c rotate-test.c vector-check.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -283,36 +286,7 @@ check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la
 libcheck_la_SOURCES = checks.c
 TESTS = $(check_PROGRAMS)
-vector_check_SOURCES = vector-check.c
-vector_check_LDADD = ../src/librings.la libcheck.la
-body_test_SOURCES = body-test.c
-body_test_LDADD = ../src/librings.la libcheck.la
-projection_test_SOURCES = projection-test.c
-projection_test_LDADD = ../src/librings.la libcheck.la
-rotate_test_SOURCES = rotate-test.c
-rotate_test_LDADD = ../src/librings.la libcheck.la
-init_body_from_elements_test_SOURCES = init-body-from-elements-test.c
-init_body_from_elements_test_LDADD = ../src/librings.la libcheck.la
-raw_average_zero_adot_test_SOURCES = raw-average-zero-adot-test.c
-raw_average_zero_adot_test_LDADD = ../src/librings.la libcheck.la
-raw_average_orthogonal_test_SOURCES = raw-average-orthogonal-test.c
-raw_average_orthogonal_test_LDADD = ../src/librings.la libcheck.la
-raw_average_Ltot_test_SOURCES = raw-average-Ltot-test.c
-raw_average_Ltot_test_LDADD = ../src/librings.la libcheck.la
-raw_average_solar_system_SOURCES = raw-average-solar-system.c
-raw_average_solar_system_LDADD = ../src/librings.la libcheck.la
-raw_average_A_L_mags_test_SOURCES = raw-average-A-L-mags-test.c
-raw_average_A_L_mags_test_LDADD = ../src/librings.la libcheck.la
-raw_average_jupiter_saturn_SOURCES = raw-average-jupiter-saturn.c
-raw_average_jupiter_saturn_LDADD = ../src/librings.la libcheck.la
-raw_average_yoram_elements_SOURCES = raw-average-yoram-elements.c
-raw_average_yoram_elements_LDADD = ../src/librings.la libcheck.la
-analytic_average_test_SOURCES = analytic-average-test.c
-analytic_average_test_LDADD = ../src/librings.la libcheck.la
-average_rhs_test_SOURCES = average-rhs-test.c
-average_rhs_test_LDADD = ../src/librings.la libcheck.la
-quad_test_SOURCES = quad-test.c
-quad_test_LDADD = ../src/librings.la libcheck.la
+LDADD = ../src/librings.la libcheck.la
 all: all-am
 
 .SUFFIXES:
@@ -376,6 +350,9 @@ average-rhs-test$(EXEEXT): $(average_rhs_test_OBJECTS) $(average_rhs_test_DEPEND
 body-test$(EXEEXT): $(body_test_OBJECTS) $(body_test_DEPENDENCIES) 
 	@rm -f body-test$(EXEEXT)
 	$(LINK) $(body_test_OBJECTS) $(body_test_LDADD) $(LIBS)
+extreme-eccentricity-test$(EXEEXT): $(extreme_eccentricity_test_OBJECTS) $(extreme_eccentricity_test_DEPENDENCIES) 
+	@rm -f extreme-eccentricity-test$(EXEEXT)
+	$(LINK) $(extreme_eccentricity_test_OBJECTS) $(extreme_eccentricity_test_LDADD) $(LIBS)
 init-body-from-elements-test$(EXEEXT): $(init_body_from_elements_test_OBJECTS) $(init_body_from_elements_test_DEPENDENCIES) 
 	@rm -f init-body-from-elements-test$(EXEEXT)
 	$(LINK) $(init_body_from_elements_test_OBJECTS) $(init_body_from_elements_test_LDADD) $(LIBS)
@@ -423,6 +400,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/average-rhs-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/body-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extreme-eccentricity-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init-body-from-elements-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/projection-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-test.Po@am__quote@
