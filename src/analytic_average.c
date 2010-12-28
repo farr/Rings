@@ -50,13 +50,21 @@ lambda_equation(const double A, const double Bcose, const double Bsine, const do
   return lam3 + (C - A)*lam2 + (B2 - A*C)*lam + C*Bsine*Bsine;
 }
 
+static double
+sign(const double x) { if (x < 0.0) { return -1.0; } else { return 1.0; } }
+
 static void
 Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
-        const double l0, const double l1_in, const double l2, 
+        const double l0, const double l1_in, const double l2_in, 
         double Q[3][3]) {
   int i,j,k;
   double l1 = fabs(l1_in);  /* l1 should always be nonnegative, but
                                roundoff.... */
+  double l2 = -fabs(l2_in);  /* l2 should always be nonpositive, but
+                                roundoff.... */
+
+  double root_sum = l0+l1+fabs(l2);
+  double small = sqrt(DBL_EPSILON)*root_sum;
 
   /* We have several issues to worry about here, hence the careful
      finessing with fabs(...) and re-writing of some terms relative to
@@ -80,6 +88,10 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
      l0*l1*l2 = -Bsine^2 C
      (l0+C)*(l1+C)*(l2+C) = Bcose^2 C
 
+     which imply that 
+
+     (l2+C)/l2 = cose^2/sine^2 l0*l1/((l0+C)*(l1+C))
+
      to remove l2, l1, and (l2+C) terms from the denominator of the Q
      components.  The result appears below.  We also added fabs(...)
      to l1 and (l2+C) because they should be positive, but may be
@@ -88,6 +100,9 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
 
   */
 
+  /* Though l2 + C should always be positive, sometimes it gets small
+     enough that roundoff matters; in this case, we need the
+     fabs(l2+C) calls. */
   Q[0][0] = sqrt(l0*(l0+C)/((l0-l1)*(l0-l2)));
   Q[0][1] = sqrt(l1*(l1+C)/((l0-l1)*(l1-l2)));
   Q[0][2] = sqrt(fabs(l2)*fabs(l2+C)/((l0-l2)*(l1-l2)));
