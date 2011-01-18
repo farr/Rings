@@ -200,6 +200,12 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
               const double epsabs,
               const double eps);
 
+/* A new type of control object, does the usual checks of the standard
+   GSL control on the absolute error of y(t), but also checks the
+   orthogonality of A and L for each body, and the constraint A^2 +
+   L^2 = 1. */
+gsl_odeiv_control *gsl_odeiv_control_secular_new(double epsabs);
+
 /* read_write.c */
 int
 read_body(FILE *stream, body *b);

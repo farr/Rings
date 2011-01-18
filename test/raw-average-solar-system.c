@@ -66,9 +66,9 @@ main() {
     for (j = 0; j < NELEMENTS; j++) {
       deldt[j] = deldt[j] * (period(planets+2)*100.0); /* Convert from our time units to 100*years. */
     }
-    fprintf(stderr, "Planet %10s derivatives: %9.3g %9.3g %9.3g %9.3g %9.3g\n",
-            names[i], deldt[A_INDEX], deldt[E_INDEX], 
-            deldt[I_INDEX]*3600.0, deldt[OMEGA_INDEX]*3600.0, deldt[oMEGA_INDEX]*3600.0);
+    /* fprintf(stderr, "Planet %10s derivatives: %9.3g %9.3g %9.3g %9.3g %9.3g\n", */
+    /*         names[i], deldt[A_INDEX], deldt[E_INDEX],  */
+    /*         deldt[I_INDEX]*3600.0, deldt[OMEGA_INDEX]*3600.0, deldt[oMEGA_INDEX]*3600.0); */
   }
 
   gsl_integration_workspace_free(ws1);

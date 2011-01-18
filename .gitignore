@@ -12,6 +12,7 @@ libtool
 *.la
 rings-*.tar.gz
 autom4te.cache
+TAGS
 
 # A test file I don't care about
 smadar_test.sh

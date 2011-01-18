@@ -198,18 +198,18 @@ elements_from_body(const body *b,
 
 void
 body_to_vector(const body *b, double *v) {
-  v[0] = b->m;
-  v[1] = b->a;
-  memcpy(v+2, b->L, 3*sizeof(double));
-  memcpy(v+5, b->A, 3*sizeof(double));
+  v[BODY_M_INDEX] = b->m;
+  v[BODY_a_INDEX] = b->a;
+  memcpy(v+BODY_L_INDEX, b->L, 3*sizeof(double));
+  memcpy(v+BODY_A_INDEX, b->A, 3*sizeof(double));
 }
 
 void
 vector_to_body(const double *v, body *b) {
-  b->m = v[0];
-  b->a = v[1];
-  memcpy(b->L, v+2, 3*sizeof(double));
-  memcpy(b->A, v+5, 3*sizeof(double));
+  b->m = v[BODY_M_INDEX];
+  b->a = v[BODY_a_INDEX];
+  memcpy(b->L, v+BODY_L_INDEX, 3*sizeof(double));
+  memcpy(b->A, v+BODY_A_INDEX, 3*sizeof(double));
 }
 
 void

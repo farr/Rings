@@ -11,7 +11,10 @@ raw-average-A-L-mags-test
 raw-average-jupiter-saturn
 raw-average-solar-system
 analytic-average-test
+analytic-average-angular-momentum
+analytic-average-A-L
 raw-average-yoram-elements
 average-rhs-test
 quad-test
 extreme-eccentricity-test
+advancer-test

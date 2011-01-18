@@ -5,9 +5,12 @@ raw-average-solar-system raw-average-A-L-mags-test \
 raw-average-jupiter-saturn \
 raw-average-yoram-elements \
 analytic-average-test \
+analytic-average-angular-momentum \
 average-rhs-test \
 quad-test \
-extreme-eccentricity-test
+extreme-eccentricity-test \
+analytic-average-A-L \
+advancer-test
 
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la

@@ -43,8 +43,11 @@ check_PROGRAMS = vector-check$(EXEEXT) body-test$(EXEEXT) \
 	raw-average-A-L-mags-test$(EXEEXT) \
 	raw-average-jupiter-saturn$(EXEEXT) \
 	raw-average-yoram-elements$(EXEEXT) \
-	analytic-average-test$(EXEEXT) average-rhs-test$(EXEEXT) \
-	quad-test$(EXEEXT) extreme-eccentricity-test$(EXEEXT)
+	analytic-average-test$(EXEEXT) \
+	analytic-average-angular-momentum$(EXEEXT) \
+	average-rhs-test$(EXEEXT) quad-test$(EXEEXT) \
+	extreme-eccentricity-test$(EXEEXT) \
+	analytic-average-A-L$(EXEEXT) advancer-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(check_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -59,6 +62,21 @@ CONFIG_CLEAN_VPATH_FILES =
 libcheck_la_LIBADD =
 am_libcheck_la_OBJECTS = checks.lo
 libcheck_la_OBJECTS = $(am_libcheck_la_OBJECTS)
+advancer_test_SOURCES = advancer-test.c
+advancer_test_OBJECTS = advancer-test.$(OBJEXT)
+advancer_test_LDADD = $(LDADD)
+advancer_test_DEPENDENCIES = ../src/librings.la libcheck.la
+analytic_average_A_L_SOURCES = analytic-average-A-L.c
+analytic_average_A_L_OBJECTS = analytic-average-A-L.$(OBJEXT)
+analytic_average_A_L_LDADD = $(LDADD)
+analytic_average_A_L_DEPENDENCIES = ../src/librings.la libcheck.la
+analytic_average_angular_momentum_SOURCES =  \
+	analytic-average-angular-momentum.c
+analytic_average_angular_momentum_OBJECTS =  \
+	analytic-average-angular-momentum.$(OBJEXT)
+analytic_average_angular_momentum_LDADD = $(LDADD)
+analytic_average_angular_momentum_DEPENDENCIES = ../src/librings.la \
+	libcheck.la
 analytic_average_test_SOURCES = analytic-average-test.c
 analytic_average_test_OBJECTS = analytic-average-test.$(OBJEXT)
 analytic_average_test_LDADD = $(LDADD)
@@ -150,20 +168,24 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libcheck_la_SOURCES) analytic-average-test.c \
-	average-rhs-test.c body-test.c extreme-eccentricity-test.c \
-	init-body-from-elements-test.c projection-test.c quad-test.c \
-	raw-average-A-L-mags-test.c raw-average-Ltot-test.c \
-	raw-average-jupiter-saturn.c raw-average-orthogonal-test.c \
-	raw-average-solar-system.c raw-average-yoram-elements.c \
-	raw-average-zero-adot-test.c rotate-test.c vector-check.c
-DIST_SOURCES = $(libcheck_la_SOURCES) analytic-average-test.c \
-	average-rhs-test.c body-test.c extreme-eccentricity-test.c \
-	init-body-from-elements-test.c projection-test.c quad-test.c \
-	raw-average-A-L-mags-test.c raw-average-Ltot-test.c \
-	raw-average-jupiter-saturn.c raw-average-orthogonal-test.c \
-	raw-average-solar-system.c raw-average-yoram-elements.c \
-	raw-average-zero-adot-test.c rotate-test.c vector-check.c
+SOURCES = $(libcheck_la_SOURCES) advancer-test.c \
+	analytic-average-A-L.c analytic-average-angular-momentum.c \
+	analytic-average-test.c average-rhs-test.c body-test.c \
+	extreme-eccentricity-test.c init-body-from-elements-test.c \
+	projection-test.c quad-test.c raw-average-A-L-mags-test.c \
+	raw-average-Ltot-test.c raw-average-jupiter-saturn.c \
+	raw-average-orthogonal-test.c raw-average-solar-system.c \
+	raw-average-yoram-elements.c raw-average-zero-adot-test.c \
+	rotate-test.c vector-check.c
+DIST_SOURCES = $(libcheck_la_SOURCES) advancer-test.c \
+	analytic-average-A-L.c analytic-average-angular-momentum.c \
+	analytic-average-test.c average-rhs-test.c body-test.c \
+	extreme-eccentricity-test.c init-body-from-elements-test.c \
+	projection-test.c quad-test.c raw-average-A-L-mags-test.c \
+	raw-average-Ltot-test.c raw-average-jupiter-saturn.c \
+	raw-average-orthogonal-test.c raw-average-solar-system.c \
+	raw-average-yoram-elements.c raw-average-zero-adot-test.c \
+	rotate-test.c vector-check.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -341,6 +363,15 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+advancer-test$(EXEEXT): $(advancer_test_OBJECTS) $(advancer_test_DEPENDENCIES) 
+	@rm -f advancer-test$(EXEEXT)
+	$(LINK) $(advancer_test_OBJECTS) $(advancer_test_LDADD) $(LIBS)
+analytic-average-A-L$(EXEEXT): $(analytic_average_A_L_OBJECTS) $(analytic_average_A_L_DEPENDENCIES) 
+	@rm -f analytic-average-A-L$(EXEEXT)
+	$(LINK) $(analytic_average_A_L_OBJECTS) $(analytic_average_A_L_LDADD) $(LIBS)
+analytic-average-angular-momentum$(EXEEXT): $(analytic_average_angular_momentum_OBJECTS) $(analytic_average_angular_momentum_DEPENDENCIES) 
+	@rm -f analytic-average-angular-momentum$(EXEEXT)
+	$(LINK) $(analytic_average_angular_momentum_OBJECTS) $(analytic_average_angular_momentum_LDADD) $(LIBS)
 analytic-average-test$(EXEEXT): $(analytic_average_test_OBJECTS) $(analytic_average_test_DEPENDENCIES) 
 	@rm -f analytic-average-test$(EXEEXT)
 	$(LINK) $(analytic_average_test_OBJECTS) $(analytic_average_test_LDADD) $(LIBS)
@@ -396,6 +427,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/advancer-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/analytic-average-A-L.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/analytic-average-angular-momentum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/analytic-average-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/average-rhs-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/body-test.Po@am__quote@
