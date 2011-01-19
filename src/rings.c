@@ -2,108 +2,186 @@
 
 #include<getopt.h>
 #include<stdio.h>
-#include<stdlib.h>
+#include<assert.h>
+#include<gsl/gsl_errno.h>
 
-#include<gsl/gsl_odeiv.h>
-#include<gsl/gsl_integration.h>
+typedef enum {
+  OPT_HELP,
+  OPT_T,
+  OPT_HINI,
+  OPT_EPS,
+  OPT_ACC,
+  OPT_INP,
+  OPT_OUT
+} opt_flag;
 
-static double eps = 0.0;
-static double T = 1.0;
-static double acc = 1e-10;
-static double acc_int = 1e-11;
-static double h = 0.01;
+typedef struct {
+  double T;
+  double hini;
+  double eps;
+  double epsabs;
+  FILE *inp;
+  FILE *out;
+} configuration;
 
-static const char *short_opts = "e:T:a:h:";
-
-/* Avoid 65--122 (A-Z, a-z, some others) */
-enum LONG_ARGS {
-  ACC_INT = 0
+static struct option opts[] = {
+  {"help", no_argument, 0, OPT_HELP},
+  {"time", required_argument, 0, OPT_T},
+  {"h", required_argument, 0, OPT_HINI},
+  {"epsilon", required_argument, 0, OPT_EPS},
+  {"accuracy", required_argument, 0, OPT_ACC},
+  {"input", required_argument, 0, OPT_INP},
+  {"output", required_argument, 0, OPT_OUT},
+  {0}
 };
 
-static struct option long_opts[] = {
-  { "epsilon", required_argument, NULL, 'e' },
-  { "evolve-time", required_argument, NULL, 'T' },
-  { "accuracy", required_argument, NULL, 'a' },
-  { "accuracy-integral", required_argument, NULL, ACC_INT },
-  { "timestep", required_argument, NULL, 'h' },
-  { NULL, 0, NULL, 0 }
-};
+static char usage[] = "rings OPTION ...\n"
+"\n"
+"OPTION is one of:\n"
+"\n"
+"--help          Display this help message\n"
+"--time T        Total evolution time\n"
+"--h H           Initial step size\n"
+"--epsilon EPS   Softening scale\n"
+"--accuracy ACC  Absolute accuracy of evolution\n"
+"--input FILE    Input file\n"
+"--output FILE   Output file\n";
 
-int main (int argc, char *argv[]) {
-  char ch;
-  gsl_odeiv_control *con;
-  gsl_odeiv_step *step;
-  gsl_odeiv_evolve *e;
-  body *bs;
-  double *y;
-  int bs_size;
-  int bs_insert_index;
-  double t = 0.0;
-  
-  while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
-    switch(ch) {
-    case 'e':
-      eps = atof(optarg);
+static int parse_args(int argc, char **argv, struct option *opts, configuration *conf) {
+  int flag, index;
+  while ((flag = getopt_long(argc, argv, "", opts, &index))  != -1) {
+    switch (flag) {
+    case OPT_HELP:
+      fprintf(stderr, "%s", usage);
+      exit(0);
       break;
-    case 'T':
-      T = atof(optarg);
+    case OPT_T:
+      conf->T = atof(optarg);
       break;
-    case 'a':
-      acc = atof(optarg);
+    case OPT_HINI:
+      conf->hini = atof(optarg);
       break;
-    case 'h':
-      h = atof(optarg);
+    case OPT_EPS:
+      conf->eps = atof(optarg);
       break;
-    case ACC_INT: 
-      acc_int = atof(optarg);
+    case OPT_ACC:
+      conf->epsabs = atof(optarg);
+      break;
+    case OPT_INP:
+      conf->inp = fopen(optarg, "r");
+      if (conf->inp == 0) {
+        fprintf(stderr, "Input file not found: %s\n", optarg);
+        exit(1);
+      }
+      break;
+    case OPT_OUT:
+      conf->out = fopen(optarg, "w");
+      if (conf->out == 0) {
+        fprintf(stderr, "Could not open output file: %s\n", optarg);
+        exit(1);
+      }
       break;
     default:
+      fprintf(stderr, "Unrecognized option!\n");
       exit(1);
       break;
     }
   }
 
-  con = gsl_odeiv_control_y_new(acc, 0.0); /* We don't really care about anything but absolute error. */
-
-  bs = malloc(sizeof(body));
-  bs_size = 1;
-  bs_insert_index = 0;
-
-  while (!feof(stdin)) {
-    if (bs_insert_index == bs_size) {
-      bs_size *= 2;
-      bs = realloc(bs, bs_size*sizeof(body));
-    }
-
-    read_body(stdin, bs+bs_insert_index);
-    bs_insert_index++;
-  }
-  bs = realloc(bs, bs_insert_index*sizeof(body)); /* Cut down to size. */
-  bs_size = bs_insert_index;
-
-  e = gsl_odeiv_evolve_alloc(bs_size*BODY_VECTOR_SIZE);
-  step = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, bs_size*BODY_VECTOR_SIZE);
-
-  y = malloc(bs_size*BODY_VECTOR_SIZE*sizeof(double));
-
-  while (t != T) {
-    int i;
-
-    evolve_system(e, con, step, 
-                  &t, T, &h, bs, y, bs_size,
-                  acc_int,
-                  eps);
-
-    for (i = 0; i < bs_size; i++) {
-      fprintf(stdout, "%8g ", t);
-      write_body(stdout, bs+i);
-    }
+  if (optind < argc) {
+    fprintf(stderr, "WARNING: unknown options encountered on command line.\n");
   }
 
+  return 0;
+}
+
+static body *read_input(FILE *inp, body *bs, int *bsize) {
+  int i = 0;
+  
+  while (!feof(inp)) {
+    if (i == *bsize) {
+      bs = realloc(bs, 2*i*sizeof(body));
+      *bsize = 2*i;
+    }
+
+    if (read_body_from_elements(inp, bs+i)) {
+      fprintf(stderr, "Error reading body from input (%d bodies read)\n", i);
+      exit(1);
+    }
+
+    i++;
+  }
+
+  if (i==0) {
+    fprintf(stderr, "No bodies read from input.\n");
+    exit(1);
+  }
+
+  bs=realloc(bs, i*sizeof(body));
+  *bsize=i;
+
+  return bs;
+}
+
+int main(int argc, char **argv) {
+  int status;
+  configuration conf = {1e9, 1.0, 0.0, 1e-8, stdin, stdout};
+  body *bs = malloc(sizeof(body));
+  int bsize = 1;
+  double t = 0.0;
+  gsl_odeiv_evolve *e;
+  gsl_odeiv_control *con;
+  gsl_odeiv_step *step;
+  double *ys;
+  int odesize;
+  int i;
+  double h;
+
+  status = parse_args(argc, argv, opts, &conf);
+  if (status != 0) {
+    fprintf(stderr, "Error in option parsing.\n");
+    exit(1);
+  }
+
+  h = conf.hini;
+
+  bs = read_input(conf.inp, bs, &bsize);
+
+  odesize = bsize*BODY_VECTOR_SIZE;
+  ys = malloc(odesize*sizeof(double));
+  e = gsl_odeiv_evolve_alloc(odesize);
+  step = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, odesize);
+  con = gsl_odeiv_control_secular_new(conf.epsabs);
+
+  do {
+    int status;
+
+    for (i = 0; i < bsize; i++) {
+      fprintf(conf.out, "%g ", t);
+      write_body_elements(conf.out, bs+i);
+    }
+
+    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsabs, conf.eps);
+
+    if (status != GSL_SUCCESS) {
+      fprintf(stderr, "Error in evolution: %d (%s)\n", status, gsl_strerror(status));
+      exit(1);
+    }
+
+  } while (t != conf.T);
+
+  for (i = 0; i < bsize; i++) {
+    fprintf(conf.out, "%g ", t);
+    write_body_elements(conf.out, bs+i);
+  }
+
+  if (conf.inp != stdin) fclose(conf.inp);
+  if (conf.out != stdout) fclose(conf.out);
   free(bs);
-  free(y);
-  gsl_odeiv_evolve_free(e);
+  free(ys);
   gsl_odeiv_step_free(step);
+  gsl_odeiv_evolve_free(e);
   gsl_odeiv_control_free(con);
+
   return 0;
 }

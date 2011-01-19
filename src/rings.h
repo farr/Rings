@@ -207,15 +207,46 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
 gsl_odeiv_control *gsl_odeiv_control_secular_new(double epsabs);
 
 /* read_write.c */
+
+/* Exects body in Runge-Lenz/L coordinates as 
+
+   m a L0 L1 L2 A0 A1 A2
+
+   Whitespace is ignored.  Note that these coordinates should satisfy
+   the constraints A*L = 0 and A^2 + L^2 = 1, but read_body does not
+   check this!  */
 int
 read_body(FILE *stream, body *b);
 
+/* Expects elements in the following format: 
+
+   m a e I Omega omega
+
+   whitespace is ignored. 
+*/
+int
+read_body_from_elements(FILE *stream, body *b);
+
+/* Binary version of read_body. */
 int
 read_body_bin(FILE *stream, body *b);
 
+/* Writes b to stream, in the format of read_body above:
+
+   m a L0 L1 L2 A0 A1 A2 */
 int
 write_body(FILE *stream, const body *b);
 
+/* Writes the state of b to stream as 
+
+   m a e I Omega omega\n
+
+   See read_body_from_elements.
+*/
+int
+write_body_elements(FILE *stream, const body *b);
+
+/* Writes b to stream in a binary format. */
 int
 write_body_bin(FILE *stream, const body *b);
 
