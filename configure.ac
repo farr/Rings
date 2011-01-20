@@ -21,7 +21,7 @@ AC_CHECK_HEADER([gsl/gsl_sf.h], [], [AC_MSG_ERROR([could not find GSL headers; c
 AC_CHECK_HEADER([getopt.h], [], [AC_MSG_ERROR([could not find getopt.h])])
 
 AC_CONFIG_HEADERS([config.h])
-
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([
         Makefile
         src/Makefile
