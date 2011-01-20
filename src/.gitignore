@@ -1,3 +1,4 @@
+Makefile.in
 rings
 rings_elements_to_bodies
 rings_output_to_elements
