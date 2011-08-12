@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (rings) 1.0
-# Libtool was configured on host dhcp-129-105-65-163.astro.northwestern.edu:
+# Libtool was configured on host eamu.home:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -63,13 +63,13 @@ ECHO="printf %s\\n"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin10.7.0
-host_os=darwin10.7.0
+host=x86_64-apple-darwin10.8.0
+host_os=darwin10.8.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin10.7.0
-build_os=darwin10.7.0
+build=x86_64-apple-darwin10.8.0
+build_os=darwin10.8.0
 
 # A sed program that does not truncate output.
 SED="/opt/local/bin/gsed"
@@ -158,10 +158,10 @@ old_postuninstall_cmds=""
 lock_old_archive_extraction=yes
 
 # A C compiler.
-LTCC="gcc"
+LTCC="clang"
 
 # LTCC compiler flags.
-LTCFLAGS="-I/opt/local/include -g -O2"
+LTCFLAGS="-I/opt/local/include -march=core2 -O4"
 
 # Take the output of nm and produce a listing of raw symbols and C names.
 global_symbol_pipe="sed -n -e 's/^.*[	 ]\\([BCDEGRST][BCDEGRST]*\\)[	 ][	 ]*_\\([_A-Za-z][_A-Za-z0-9]*\\)\$/\\1 _\\2 \\2/p' | sed '/ __gnu_lto/d'"
@@ -269,7 +269,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/i686-apple-darwin10/4.2.1/x86_64 /usr/lib/i686-apple-darwin10/4.2.1 /usr/lib  /usr/local/lib"
+sys_lib_search_path_spec="  /usr/local/lib"
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"
@@ -289,7 +289,7 @@ striplib="strip -x"
 
 
 # The linker used to build libraries.
-LD="/usr/libexec/gcc/i686-apple-darwin10/4.2.1/ld"
+LD="/usr/bin/ld"
 
 # How to create reloadable object files.
 reload_flag=" -r"
@@ -299,13 +299,13 @@ reload_cmds="\$LTCC \$LTCFLAGS -nostdlib \${wl}-r -o \$output\$reload_objs"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
 
 # A language specific compiler.
-CC="gcc"
+CC="clang"
 
 # Is the compiler the GNU compiler?
 with_gcc=yes
 
 # Compiler flag to turn off builtin functions.
-no_builtin_flag=" -fno-builtin"
+no_builtin_flag=" -fno-builtin -fno-rtti -fno-exceptions"
 
 # Additional compiler flags for building library objects.
 pic_flag=" -fno-common -DPIC"

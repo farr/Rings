@@ -29,15 +29,25 @@ lambda_roots(const double A, const double Bcose, const double Bsine, const doubl
              double *l0, double *l1, double *l2) {
   int nroots;
   double B2 = Bcose*Bcose + Bsine*Bsine;
+  double CmA = C - A;
+  double CmA2 = CmA*CmA;
+  double CmA3 = CmA2*CmA;
+  double disc = B2 - A*C;
+  double Q = 1.0/9.0*CmA2 - 1.0/3.0*disc;
+  double R = 1.0/27.0*CmA3 - 1.0/6.0*CmA*disc + 0.5*Bsine*Bsine*C;
+  double sqrtQ = sqrt(Q);
+  double CmAO3 = CmA/3.0;
 
-  nroots = gsl_poly_solve_cubic(C-A, B2-A*C, Bsine*Bsine*C, l2, l1, l0);
+  double cosTheta = R / (sqrtQ*sqrtQ*sqrtQ);
 
-  if (nroots != 3) {
-    fprintf(stderr, "nroots = %d; A = %g, Bcose = %g, Bsine = %g, C = %g\n",
-            nroots, A, Bcose, Bsine, C);
-  }
+  if (cosTheta > 1.0) cosTheta = 1.0;
+  if (cosTheta < -1.0) cosTheta = -1.0;
 
-  assert(nroots == 3);
+  double theta = acos(cosTheta);
+  
+  *l0 = -2.0*sqrtQ*cos(theta/3.0 + 2.0*M_PI/3.0) - CmAO3;
+  *l1 = -2.0*sqrtQ*cos(theta/3.0 - 2.0*M_PI/3.0) - CmAO3;
+  *l2 = -2.0*sqrtQ*cos(theta/3.0) - CmAO3;
 }
 
 static double

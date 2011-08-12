@@ -6,8 +6,6 @@
 #include<string.h>
 #include<float.h>
 
-static const double SQRT_DBL_EPSILON = sqrt(DBL_EPSILON);
-
 double
 mean_motion(const body *b) {
   double a = b->a;
