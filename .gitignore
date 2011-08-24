@@ -6,3 +6,11 @@
 *.la
 rings-*.tar.gz
 TAGS
+Makefile
+config.h
+config.log
+config.status
+libtool
+src/Makefile
+stamp-h1
+test/Makefile
