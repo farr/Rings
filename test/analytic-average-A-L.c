@@ -1,5 +1,6 @@
 #include "../src/rings.h"
 #include <gsl/gsl_rng.h>
+#include"checks.h"
 
 int main() {
   body b1, b2;

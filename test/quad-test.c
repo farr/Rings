@@ -1,6 +1,8 @@
 #include"../src/rings.h"
+#include"checks.h"
 
 #include<math.h>
+#include<string.h>
 
 #include<gsl/gsl_errno.h>
 

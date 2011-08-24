@@ -125,7 +125,7 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
 }
 
 static void
-UV_from_Q(const double Q[3][3], const double e, double U[3], double V[3]) {
+UV_from_Q(double Q[3][3], const double e, double U[3], double V[3]) {
   U[0] = Q[0][0]*Q[0][0] - e*Q[0][0]*Q[2][0] + Q[0][2]*Q[0][2] - e*Q[0][2]*Q[2][2];
   U[1] = Q[0][0]*Q[1][0] - e*Q[1][0]*Q[2][0] + Q[0][2]*Q[1][2] - e*Q[1][2]*Q[2][2];
   U[2] = Q[0][0]*Q[2][0] - e*Q[2][0]*Q[2][0] + Q[0][2]*Q[2][2] - e*Q[2][2]*Q[2][2];
@@ -202,8 +202,8 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 
 typedef struct {
   double eps;
-  body *bp;
-  body *b;
+  const body *bp;
+  const body *b;
 } avg_data;
 
 static int

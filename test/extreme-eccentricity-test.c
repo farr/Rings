@@ -2,6 +2,7 @@
 #include<assert.h>
 #include<math.h>
 #include<gsl/gsl_integration.h>
+#include"checks.h"
 
 int main() {
   body b1, b2;
