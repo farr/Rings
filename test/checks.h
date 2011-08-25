@@ -21,6 +21,9 @@ double
 random_between(gsl_rng *rng, const double a, const double b);
 
 void
-init_random_body(gsl_rng *rng, body *b, const double m, const double a);
+random_vector(gsl_rng *rng, double v[3], const double scale);
+
+void
+init_random_body(gsl_rng *rng, body *b, const double m, const double a, const double Qp, const double I);
 
 #endif /* __CHECKS_H__ */

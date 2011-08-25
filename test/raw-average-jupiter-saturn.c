@@ -19,14 +19,15 @@ main() {
   int status = 0;
   double sat_rhs[BODY_VECTOR_SIZE], jup_rhs[BODY_VECTOR_SIZE];
   double sat_deltdt[NELEMENTS], jup_deltdt[NELEMENTS];
+  double spin[3] = {0.0, 0.0, 0.0};
 
   ws1 = gsl_integration_workspace_alloc(ws_size);
   ws2 = gsl_integration_workspace_alloc(ws_size);
   assert(ws1 != 0);
   assert(ws2 != 0);
   
-  init_body_from_elements(&jupiter, 9.54786e-4, 5.202545, 0.0474622, 1.30667, 100.0381, 13.983865);
-  init_body_from_elements(&saturn, 2.85837e-4, 9.554841, 0.0575481, 2.48795, 113.1334, 88.719425);
+  init_body_from_elements(&jupiter, 9.54786e-4, 5.202545, 0.0474622, 1.30667, 100.0381, 13.983865, spin, 0.0, 0.0);
+  init_body_from_elements(&saturn, 2.85837e-4, 9.554841, 0.0575481, 2.48795, 113.1334, 88.719425, spin, 0.0, 0.0);
 
   raw_average_rhs(0.0, &jupiter, &saturn, ws1, ws_size, ws2, ws_size, EPS, EPS, jup_rhs);
   raw_average_rhs(0.0, &saturn, &jupiter, ws1, ws_size, ws2, ws_size, EPS, EPS, sat_rhs);

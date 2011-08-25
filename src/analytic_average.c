@@ -5,6 +5,7 @@
 
 #include<math.h>
 #include<assert.h>
+#include<string.h>
 
 static void
 get_ABC(const double eps, const double rp[3], const body *b, 
@@ -222,6 +223,8 @@ average_integrand(const double Ep, void *vdata, double result[BODY_VECTOR_SIZE])
   int i;
 
   result[BODY_M_INDEX] = 0.0;
+  result[BODY_Qp_INDEX] = 0.0;
+  result[BODY_I_INDEX] = 0.0;
 
   E_to_rv(data->bp, Ep, rp, vp);
 
@@ -241,6 +244,8 @@ average_integrand(const double Ep, void *vdata, double result[BODY_VECTOR_SIZE])
   for (i = 0; i < 3; i++) {
     result[BODY_L_INDEX+i] = fac*rxf[i]/(np*ap*ap);
   }
+
+  memset(result+BODY_SPIN_INDEX, 0, 3*sizeof(double));
 
   return GSL_SUCCESS;
 }

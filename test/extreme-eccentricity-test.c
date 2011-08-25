@@ -18,6 +18,7 @@ int main() {
   const double omega1 = M_PI/3.0, omega2 = sqrt(2.0)*M_PI;
   const double I2 = 1.0*M_PI/180.0; /* Outer inclination 1 degree. */
   const double I1 = 55.0*M_PI/180.0;  /* Inner inclination 55 degrees. */
+  double spin[3] = {0.0, 0.0, 0.0};
 
   ws1 = gsl_integration_workspace_alloc(ws_size);
   ws2 = gsl_integration_workspace_alloc(ws_size);
@@ -25,8 +26,8 @@ int main() {
   assert(ws2 != NULL);  
 
   /* Low eccentricity */
-  init_body_from_elements(&b1, m1, a1, elow, I1, Omega1, omega1);
-  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2);
+  init_body_from_elements(&b1, m1, a1, elow, I1, Omega1, omega1, spin, 0.0, 0.0);
+  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0);
 
   /* RHS on b1. */
   average_rhs(eps, &b1, &b2, epsabs, analytic_rhs);
@@ -47,8 +48,8 @@ int main() {
   }
 
   /* High eccentricity */
-  init_body_from_elements(&b1, m1, a1, ehigh, I1, Omega1, omega1);
-  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2);
+  init_body_from_elements(&b1, m1, a1, ehigh, I1, Omega1, omega1, spin, 0.0, 0.0);
+  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0);
 
   /* RHS on b1. */
   average_rhs(eps, &b1, &b2, epsabs, analytic_rhs);

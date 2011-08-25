@@ -20,6 +20,9 @@ main() {
   gsl_integration_workspace *ws1, *ws2;
   const size_t ws_size = 10000;
   double rhs[nplanet][BODY_VECTOR_SIZE];
+  const double Qp = 0.0;
+  const double inertia = 0.0;
+  double spin[3] = {0.0, 0.0, 0.0};
   int status = 0;
   double edot_earth;
   int i;
@@ -30,15 +33,15 @@ main() {
   assert(ws1 != 0);
   assert(ws2 != 0);
 
-  init_body_from_elements(planets+0, 1.66e-7, 0.387, 0.206, 7.005, 48.332, 77.456);
-  init_body_from_elements(planets+1, 2.448e-6, 0.723, 0.007, 3.395, 76.68,  131.532);
-  init_body_from_elements(planets+2, 3e-6, 1.000, 0.017, 5e-5, 348.739, 102.947);
-  init_body_from_elements(planets+3, 3.227e-7, 1.524, 0.093, 1.85, 49.58,   336.04);
-  init_body_from_elements(planets+4, 0.000955, 5.203, 0.0484, 1.31, 100.56, 14.75);
-  init_body_from_elements(planets+5, 0.000286, 9.537, 0.0542, 2.484, 113.715, 92.432);
-  init_body_from_elements(planets+6, 4.37e-5, 19.19, 0.047, 0.769, 74.23, 170.964);
-  init_body_from_elements(planets+7, 5.15e-5, 30.069, 0.0086, 1.769, 131.721, 44.971);
-  init_body_from_elements(planets+8, 6.39e-9, 39.482, 0.2488, 17.142, 110.303, 224.07);
+  init_body_from_elements(planets+0, 1.66e-7, 0.387, 0.206, 7.005, 48.332, 77.456, spin, Qp, inertia);
+  init_body_from_elements(planets+1, 2.448e-6, 0.723, 0.007, 3.395, 76.68,  131.532, spin, Qp, inertia);
+  init_body_from_elements(planets+2, 3e-6, 1.000, 0.017, 5e-5, 348.739, 102.947, spin, Qp, inertia);
+  init_body_from_elements(planets+3, 3.227e-7, 1.524, 0.093, 1.85, 49.58,   336.04, spin, Qp, inertia);
+  init_body_from_elements(planets+4, 0.000955, 5.203, 0.0484, 1.31, 100.56, 14.75, spin, Qp, inertia);
+  init_body_from_elements(planets+5, 0.000286, 9.537, 0.0542, 2.484, 113.715, 92.432, spin, Qp, inertia);
+  init_body_from_elements(planets+6, 4.37e-5, 19.19, 0.047, 0.769, 74.23, 170.964, spin, Qp, inertia);
+  init_body_from_elements(planets+7, 5.15e-5, 30.069, 0.0086, 1.769, 131.721, 44.971, spin, Qp, inertia);
+  init_body_from_elements(planets+8, 6.39e-9, 39.482, 0.2488, 17.142, 110.303, 224.07, spin, Qp, inertia);
 
   for(i = 0; i < nplanet; i++) {
     int j;

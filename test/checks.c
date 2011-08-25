@@ -47,11 +47,30 @@ random_between(gsl_rng *rng, const double a, const double b) {
 }
 
 void
-init_random_body(gsl_rng *rng, body *b, const double m, const double a) {
+random_vector(gsl_rng *rng, double v[3], const double scale) {
+  double vol = random_between(rng, 0.0, 4.0/3.0*M_PI);
+  double phi = random_between(rng, 0.0, 2.0*M_PI);
+  double cos_theta = random_between(rng, -1.0, 1.0);
+  double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+  double r = pow(vol*3.0/(4.0*M_PI), 1.0/3.0);
+
+  v[0] = scale*r*cos(phi)*sin_theta;
+  v[1] = scale*r*sin(phi)*sin_theta;
+  v[2] = scale*r*cos_theta;
+}
+
+void
+init_random_body(gsl_rng *rng, body *b, const double m, const double a, const double Qp, const double inertia) {
+  double n = sqrt((1.0+m)/(a*a*a));
+  double spin[3];
+
+  random_vector(rng, spin, n);
+  
   b->m = m;
   init_body_from_elements(b, m, a,
                           random_between(rng, 0.0, 1.0),
                           random_between(rng, 0.0, 180.0),
-                          random_between(rng, 0.0, 2.0*M_PI),
-                          random_between(rng, 0.0, 2.0*M_PI));                          
+                          random_between(rng, 0.0, 360.0),
+                          random_between(rng, 0.0, 360.0),
+                          spin, Qp, inertia);                          
 }

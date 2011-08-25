@@ -15,8 +15,8 @@ int main() {
 
   eps = gsl_rng_uniform(rng);
 
-  init_random_body(rng, &b1, 1e-1*gsl_rng_uniform(rng), 1.0+gsl_rng_uniform(rng));
-  init_random_body(rng, &b2, 2e-2*gsl_rng_uniform(rng), 2.0+gsl_rng_uniform(rng));
+  init_random_body(rng, &b1, 1e-1*gsl_rng_uniform(rng), 1.0+gsl_rng_uniform(rng), 0.0, 0.0);
+  init_random_body(rng, &b2, 2e-2*gsl_rng_uniform(rng), 2.0+gsl_rng_uniform(rng), 0.0, 0.0);
 
   average_rhs(eps, &b1, &b2, epsabs, rhs1);
   average_rhs(eps, &b2, &b1, epsabs, rhs2);

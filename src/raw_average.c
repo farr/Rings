@@ -12,15 +12,17 @@ typedef struct {
   double r1[3];
   double v1[3];
   double n1;
-  body *b1;
-  body *b2;
+  const body *b1;
+  const body *b2;
   double eps;
   int comp;
 } inner_data;
 
 static
 double inner_fn(double E2, inner_data *data) {
-  if (data->comp == BODY_M_INDEX) { /* No change in the mass. */
+  if (data->comp == BODY_M_INDEX || data->comp == BODY_Qp_INDEX || data->comp == BODY_I_INDEX || 
+      (data->comp >= BODY_SPIN_INDEX && data->comp < BODY_SPIN_INDEX + 3)) { 
+    /* No change in these components. */
     return 0.0;
   } else {
     double r2[3], v2[3];
@@ -62,8 +64,8 @@ double inner_fn(double E2, inner_data *data) {
 }
 
 typedef struct {
-  body *b1;
-  body *b2;
+  const body *b1;
+  const body *b2;
   gsl_integration_workspace *ws;
   size_t ws_limit;
   double eps;

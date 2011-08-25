@@ -122,9 +122,12 @@ rotate_to_orbit_frame(double v[3], const double I, const double Omega, const dou
 void
 init_body_from_elements(body *b, 
                         const double m, const double a, const double e, const double I,
-                        const double Omega, const double omega) {
+                        const double Omega, const double omega, const double spin[3], 
+                        const double Qp, const double inertia) {
   b->m = m;
   b->a = a;
+  b->Qp = Qp;
+  b->I = inertia;
   
   b->L[0] = 0.0;
   b->L[1] = 0.0;
@@ -134,8 +137,11 @@ init_body_from_elements(body *b,
   b->A[1] = 0.0;
   b->A[2] = 0.0;
 
+  memcpy(b->spin, spin, 3*sizeof(double));  
+
   rotate_to_orbit_frame(b->L, I, Omega, omega);
   rotate_to_orbit_frame(b->A, I, Omega, omega);
+  rotate_to_orbit_frame(b->spin, I, Omega, omega);
 }
 
 static double
@@ -198,16 +204,22 @@ void
 body_to_vector(const body *b, double *v) {
   v[BODY_M_INDEX] = b->m;
   v[BODY_a_INDEX] = b->a;
+  v[BODY_Qp_INDEX] = b->Qp;
+  v[BODY_I_INDEX] = b->I;
   memcpy(v+BODY_L_INDEX, b->L, 3*sizeof(double));
   memcpy(v+BODY_A_INDEX, b->A, 3*sizeof(double));
+  memcpy(v+BODY_SPIN_INDEX, b->spin, 3*sizeof(double));
 }
 
 void
 vector_to_body(const double *v, body *b) {
   b->m = v[BODY_M_INDEX];
   b->a = v[BODY_a_INDEX];
+  b->Qp = v[BODY_Qp_INDEX];
+  b->I = v[BODY_I_INDEX];
   memcpy(b->L, v+BODY_L_INDEX, 3*sizeof(double));
   memcpy(b->A, v+BODY_A_INDEX, 3*sizeof(double));
+  memcpy(b->spin, v+BODY_SPIN_INDEX, 3*sizeof(double));
 }
 
 void
@@ -265,4 +277,13 @@ body_coordinate_system(const body *b, double xhat[3], double yhat[3], double zha
   unitize(b->L, zhat);
   unitize(b->A, xhat);
   cross(zhat, xhat, yhat);
+}
+
+void
+body_set_synchronous_spin(body *b) {
+  double n = mean_motion(b);
+  double spinHat[3];
+
+  unitize(b->L, spinHat);
+  vscale(n, spinHat, b->spin);
 }

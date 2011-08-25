@@ -1,5 +1,6 @@
 #include"../src/rings.h"
 #include<gsl/gsl_rng.h>
+#include"checks.h"
 
 int main() {
   body b1, b2;
@@ -22,8 +23,8 @@ int main() {
   m1 = 1e-3*gsl_rng_uniform(rng);
   m2 = 1e-4*gsl_rng_uniform(rng);
 
-  init_random_body(rng, &b1, m1, a1);
-  init_random_body(rng, &b2, m2, a2);
+  init_random_body(rng, &b1, m1, a1, 0.0, 0.0);
+  init_random_body(rng, &b2, m2, a2, 0.0, 0.0);
 
   n1 = mean_motion(&b1);
   n2 = mean_motion(&b2);

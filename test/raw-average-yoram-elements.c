@@ -6,8 +6,8 @@
 #define EPS 1e-10
 
 int main() {
-  body b1 = {1e-6, 0.1, {0.0, 0.0, sqrt(1.0-0.04)}, {0.2, 0.0, 0.0}};
-  body b2 = {1e-6, 2.0, {0.0, 0.0, sqrt(1.0-0.09)}, {0.3, 0.0, 0.0}};
+  body b1 = {1e-6, 0.1, 0.0, 0.0, {0.0, 0.0, sqrt(1.0-0.04)}, {0.2, 0.0, 0.0}, {0.0, 0.0, 0.0}};
+  body b2 = {1e-6, 2.0, 0.0, 0.0, {0.0, 0.0, sqrt(1.0-0.09)}, {0.3, 0.0, 0.0}, {0.0, 0.0, 0.0}};
   const size_t ws_size = 10000;
   gsl_integration_workspace *ws1, *ws2;
   double rhs1[BODY_VECTOR_SIZE], rhs2[BODY_VECTOR_SIZE];

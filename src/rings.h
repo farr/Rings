@@ -63,15 +63,29 @@ softened_specific_acceleration(const double eps,
 typedef struct {
   double m; /* Mass, in units where G*Mcentral = 1 */
   double a; /* Semi-major axis. */
+  double Qp; /* Q' from Barker and Ogilvie.  Q' = 3 Q / (2 k), with Q
+                = 2 Pi E / Edot over an orbit and k the love number.
+                A homogeneous solid body, Q' = Q.  We assume
+                (following Barker and Ogilvie) that Q' does not change
+                as the orbit changes (though between integration steps
+                the user can change Q' to alter the tidal behavior of
+                the planet).  This is equivalent to a small time-lag
+                for all tidal components that scales with the orbital
+                period, so Q ~ 1/(tau*omega) remains constant. */
+  double I;  /* Body moment of inertia (units are m*a^2). */
   double L[3]; /* Of magnitude sqrt(1-e^2), in direction of Lhat */
   double A[3]; /* Of magnitude e, points to periapse. */
+  double spin[3]; /* Body's instantaneous spin vector. */  
 } body;
 
-#define BODY_VECTOR_SIZE 8
+#define BODY_VECTOR_SIZE 13
 #define BODY_M_INDEX 0
 #define BODY_a_INDEX 1
-#define BODY_L_INDEX 2
-#define BODY_A_INDEX 5
+#define BODY_Qp_INDEX 2
+#define BODY_I_INDEX 3
+#define BODY_L_INDEX 4
+#define BODY_A_INDEX 7
+#define BODY_SPIN_INDEX 10
 
 void
 body_to_vector(const body *b, double *v);
@@ -100,16 +114,25 @@ E_to_rv(const body *b, const double E, double r[3], double v[3]);
  * Omega: Longitude of ascending node in degrees.
  * omega: Argument of periapse in degrees.
 
+ * spin: The spin vector *in the body frame*.  For example, spin = {0,
+   0, omega} represents the body spinning in the plane of its orbit
+   (spin parallel to L).
+ * Qp is the adjusted quality factor for the tidal dissipation.
+ * inertia is the moment of inertia of the body (in units of m*a^2).
 */
 void
 init_body_from_elements(body *b,
                         const double m, const double a, const double e, const double I, 
-                        const double Omega, const double omega);
+                        const double Omega, const double omega, 
+                        const double spin[3], const double Qp, const double inertia);
 
 /* Sets the orbital elements given a body, b. */
 void
 elements_from_body(const body *b,
                    double *e, double *I, double *Omega, double *omega);
+
+void
+body_set_synchronous_spin(body *b);
 
 void
 body_instantaneous_rhs(const double eps,
