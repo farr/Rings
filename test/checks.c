@@ -60,7 +60,7 @@ random_vector(gsl_rng *rng, double v[3], const double scale) {
 }
 
 void
-init_random_body(gsl_rng *rng, body *b, const double m, const double a, const double Qp, const double inertia) {
+init_random_body(gsl_rng *rng, body *b, const double m, const double a, const double Qp, const double inertia, const double R) {
   double n = sqrt((1.0+m)/(a*a*a));
   double spin[3];
 
@@ -72,5 +72,5 @@ init_random_body(gsl_rng *rng, body *b, const double m, const double a, const do
                           random_between(rng, 0.0, 180.0),
                           random_between(rng, 0.0, 360.0),
                           random_between(rng, 0.0, 360.0),
-                          spin, Qp, inertia);                          
+                          spin, Qp, inertia, R);                          
 }

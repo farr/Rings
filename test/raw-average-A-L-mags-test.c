@@ -24,8 +24,8 @@ main() {
   assert(ws1 != 0);
   assert(ws2 != 0);
 
-  init_random_body(rng, &b1, random_between(rng, 1e-3, 2e-3), random_between(rng, 1.0, 1.5), 0.0, 0.0);
-  init_random_body(rng, &b2, random_between(rng, 1e-3, 2e-3), random_between(rng, 10.0, 15.0), 0.0, 0.0);
+  init_random_body(rng, &b1, random_between(rng, 1e-3, 2e-3), random_between(rng, 1.0, 1.5), 0.0, 0.0, 0.0);
+  init_random_body(rng, &b2, random_between(rng, 1e-3, 2e-3), random_between(rng, 10.0, 15.0), 0.0, 0.0, 0.0);
 
   raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs);
 

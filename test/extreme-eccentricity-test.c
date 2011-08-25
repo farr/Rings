@@ -26,8 +26,8 @@ int main() {
   assert(ws2 != NULL);  
 
   /* Low eccentricity */
-  init_body_from_elements(&b1, m1, a1, elow, I1, Omega1, omega1, spin, 0.0, 0.0);
-  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0);
+  init_body_from_elements(&b1, m1, a1, elow, I1, Omega1, omega1, spin, 0.0, 0.0, 0.0);
+  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
 
   /* RHS on b1. */
   average_rhs(eps, &b1, &b2, epsabs, analytic_rhs);
@@ -48,8 +48,8 @@ int main() {
   }
 
   /* High eccentricity */
-  init_body_from_elements(&b1, m1, a1, ehigh, I1, Omega1, omega1, spin, 0.0, 0.0);
-  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0);
+  init_body_from_elements(&b1, m1, a1, ehigh, I1, Omega1, omega1, spin, 0.0, 0.0, 0.0);
+  init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
 
   /* RHS on b1. */
   average_rhs(eps, &b1, &b2, epsabs, analytic_rhs);

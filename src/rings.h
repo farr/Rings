@@ -73,19 +73,21 @@ typedef struct {
                 for all tidal components that scales with the orbital
                 period, so Q ~ 1/(tau*omega) remains constant. */
   double I;  /* Body moment of inertia (units are m*a^2). */
+  double R; /* Body radius (in units of a). */
   double L[3]; /* Of magnitude sqrt(1-e^2), in direction of Lhat */
   double A[3]; /* Of magnitude e, points to periapse. */
   double spin[3]; /* Body's instantaneous spin vector. */  
 } body;
 
-#define BODY_VECTOR_SIZE 13
+#define BODY_VECTOR_SIZE 14
 #define BODY_M_INDEX 0
 #define BODY_a_INDEX 1
 #define BODY_Qp_INDEX 2
 #define BODY_I_INDEX 3
-#define BODY_L_INDEX 4
-#define BODY_A_INDEX 7
-#define BODY_SPIN_INDEX 10
+#define BODY_R_INDEX 4
+#define BODY_L_INDEX 5
+#define BODY_A_INDEX 8
+#define BODY_SPIN_INDEX 11
 
 void
 body_to_vector(const body *b, double *v);
@@ -124,7 +126,8 @@ void
 init_body_from_elements(body *b,
                         const double m, const double a, const double e, const double I, 
                         const double Omega, const double omega, 
-                        const double spin[3], const double Qp, const double inertia);
+                        const double spin[3], 
+                        const double Qp, const double inertia, const double R);
 
 /* Sets the orbital elements given a body, b. */
 void

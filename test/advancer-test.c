@@ -19,8 +19,8 @@ int main() {
   double rhs[BODY_VECTOR_SIZE];
   double spin[3] = {0.0, 0.0, 0.0};
 
-  init_body_from_elements(&(bs[0]), m1, a1, e1, I1, Omega1, omega1, spin, 0.0, 0.0);
-  init_body_from_elements(&(bs[1]), m2, a2, e2, I2, Omega2, omega2, spin, 0.0, 0.0);
+  init_body_from_elements(&(bs[0]), m1, a1, e1, I1, Omega1, omega1, spin, 0.0, 0.0, 0.0);
+  init_body_from_elements(&(bs[1]), m2, a2, e2, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
 
   do {
     status = evolve_system(e, con, step, &t, T, &h, bs, y, NBODIES, epsabs, 0.0);

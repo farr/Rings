@@ -24,6 +24,7 @@ void
 random_vector(gsl_rng *rng, double v[3], const double scale);
 
 void
-init_random_body(gsl_rng *rng, body *b, const double m, const double a, const double Qp, const double I);
+init_random_body(gsl_rng *rng, body *b, const double m, const double a, const double Qp, const double I, 
+                 const double R);
 
 #endif /* __CHECKS_H__ */

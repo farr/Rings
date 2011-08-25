@@ -225,6 +225,7 @@ average_integrand(const double Ep, void *vdata, double result[BODY_VECTOR_SIZE])
   result[BODY_M_INDEX] = 0.0;
   result[BODY_Qp_INDEX] = 0.0;
   result[BODY_I_INDEX] = 0.0;
+  result[BODY_R_INDEX] = 0.0;
 
   E_to_rv(data->bp, Ep, rp, vp);
 

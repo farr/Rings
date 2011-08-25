@@ -123,11 +123,12 @@ void
 init_body_from_elements(body *b, 
                         const double m, const double a, const double e, const double I,
                         const double Omega, const double omega, const double spin[3], 
-                        const double Qp, const double inertia) {
+                        const double Qp, const double inertia, const double R) {
   b->m = m;
   b->a = a;
   b->Qp = Qp;
   b->I = inertia;
+  b->R = R;
   
   b->L[0] = 0.0;
   b->L[1] = 0.0;
@@ -206,6 +207,7 @@ body_to_vector(const body *b, double *v) {
   v[BODY_a_INDEX] = b->a;
   v[BODY_Qp_INDEX] = b->Qp;
   v[BODY_I_INDEX] = b->I;
+  v[BODY_R_INDEX] = b->R;
   memcpy(v+BODY_L_INDEX, b->L, 3*sizeof(double));
   memcpy(v+BODY_A_INDEX, b->A, 3*sizeof(double));
   memcpy(v+BODY_SPIN_INDEX, b->spin, 3*sizeof(double));
@@ -217,6 +219,7 @@ vector_to_body(const double *v, body *b) {
   b->a = v[BODY_a_INDEX];
   b->Qp = v[BODY_Qp_INDEX];
   b->I = v[BODY_I_INDEX];
+  b->R = v[BODY_R_INDEX];
   memcpy(b->L, v+BODY_L_INDEX, 3*sizeof(double));
   memcpy(b->A, v+BODY_A_INDEX, 3*sizeof(double));
   memcpy(b->spin, v+BODY_SPIN_INDEX, 3*sizeof(double));

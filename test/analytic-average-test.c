@@ -45,8 +45,8 @@ main() {
   ws = gsl_integration_workspace_alloc(ws_size);
   assert(ws != 0);
 
-  init_random_body(rng, &b1, random_between(rng, 1e-3, 2e-3), random_between(rng, 1.0, 1.5), 0.0, 0.0);
-  init_random_body(rng, &b2, random_between(rng, 1e-4, 2e-4), random_between(rng, 10.0, 15.0), 0.0, 0.0);
+  init_random_body(rng, &b1, random_between(rng, 1e-3, 2e-3), random_between(rng, 1.0, 1.5), 0.0, 0.0, 0.0);
+  init_random_body(rng, &b2, random_between(rng, 1e-4, 2e-4), random_between(rng, 10.0, 15.0), 0.0, 0.0, 0.0);
 
   eps = random_between(rng, 1e-2, 2e-2);
 

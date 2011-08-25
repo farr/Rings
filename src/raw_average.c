@@ -21,6 +21,7 @@ typedef struct {
 static
 double inner_fn(double E2, inner_data *data) {
   if (data->comp == BODY_M_INDEX || data->comp == BODY_Qp_INDEX || data->comp == BODY_I_INDEX || 
+      data->comp == BODY_R_INDEX ||
       (data->comp >= BODY_SPIN_INDEX && data->comp < BODY_SPIN_INDEX + 3)) { 
     /* No change in these components. */
     return 0.0;
