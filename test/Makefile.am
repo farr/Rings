@@ -10,7 +10,8 @@ average-rhs-test \
 quad-test \
 extreme-eccentricity-test \
 analytic-average-A-L \
-advancer-test
+advancer-test \
+tides-angular-momentum-test
 
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la

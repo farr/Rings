@@ -286,4 +286,14 @@ int
 quad(const integrand f, void *fdata, const double a, const double b, const double eps, 
      double result[BODY_VECTOR_SIZE]);
 
+
+/* tides.c */
+
+/* Computes the rate of change of the body orbital elements and the
+   Sun's spin due to their tidal interaction. */
+void
+tidal_rhs(const body *b, const double QpSun, const double RSun, const double ISun,
+          const double OmegaSun[3], double brhs[BODY_VECTOR_SIZE], double srhs[3]);
+
+
 #endif /* __RINGS_H__ */
