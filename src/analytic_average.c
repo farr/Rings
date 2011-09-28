@@ -41,9 +41,6 @@ lambda_roots(const double A, const double Bcose, const double Bsine, const doubl
 
   double cosTheta = R / (sqrtQ*sqrtQ*sqrtQ);
 
-  if (cosTheta > 1.0) cosTheta = 1.0;
-  if (cosTheta < -1.0) cosTheta = -1.0;
-
   double theta = acos(cosTheta);
   
   *l0 = -2.0*sqrtQ*cos(theta/3.0 + 2.0*M_PI/3.0) - CmAO3;
@@ -190,16 +187,12 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 
   k2 = (l1-l2)/(l0-l2);
 
-  if (isnan(k2)) {
-    fprintf(stderr, "k2 = NaN!\n");
-    fprintf(stderr, "l0 = %g, l1 = %g, l2 = %g\n", l0, l1, l2);
-    fprintf(stderr, "In %s, line %d\n", __FILE__, __LINE__);
-    exit(1);
-  }
-
   k = sqrt(fabs(k2));
 
-  assert(!(isnan(k))); /* Workaround for infinite loop bug in GSL ellint. */
+  if (isnan(k)) {
+    fprintf(stderr, "k = NaN in %s, line %d\n", __FILE__, __LINE__);
+    exit(1);
+  }
 
   Ek = gsl_sf_ellint_Ecomp(k, GSL_PREC_DOUBLE);
   Kk = gsl_sf_ellint_Kcomp(k, GSL_PREC_DOUBLE);
