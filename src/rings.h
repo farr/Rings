@@ -236,8 +236,11 @@ gsl_odeiv_control *gsl_odeiv_control_secular_new(double epsabs);
 
 /* Exects body in Runge-Lenz/L coordinates as 
 
-   m a L0 L1 L2 A0 A1 A2
+   m a Qp I R L0 L1 L2 A0 A1 A2 Omega1 Omega2 Omega3
 
+   Qp, I, and R are the dissipation constant Qp, moment of inertia,
+   and radius (in units consistent with a and m).  Omega is the spin
+   vector of the body, also in units consistent with a and m.
    Whitespace is ignored.  Note that these coordinates should satisfy
    the constraints A*L = 0 and A^2 + L^2 = 1, but read_body does not
    check this!  */
@@ -246,10 +249,11 @@ read_body(FILE *stream, body *b);
 
 /* Expects elements in the following format: 
 
-   m a e I Omega omega
+   m a e I Omega omega Qp I R S1 S2 S3
 
-   whitespace is ignored. 
-*/
+   whitespace is ignored. Qp, I, R are the dissipation constant,
+   moment of inertia and radius, respectively.  S is the spin vector
+   for the object.  */
 int
 read_body_from_elements(FILE *stream, body *b);
 
@@ -259,13 +263,13 @@ read_body_bin(FILE *stream, body *b);
 
 /* Writes b to stream, in the format of read_body above:
 
-   m a L0 L1 L2 A0 A1 A2 */
+   m a Qp I R L0 L1 L2 A0 A1 A2 S0 S1 S2*/
 int
 write_body(FILE *stream, const body *b);
 
 /* Writes the state of b to stream as 
 
-   m a e I Omega omega\n
+   m a e I Omega omega Qp I R S0 S1 S2\n
 
    See read_body_from_elements.
 */
