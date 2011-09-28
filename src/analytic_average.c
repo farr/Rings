@@ -189,6 +189,14 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
   get_FU_FV(U, V, F0, F1, F2, FU, FV);
 
   k2 = (l1-l2)/(l0-l2);
+
+  if (isnan(k2)) {
+    fprintf(stderr, "k2 = NaN!\n");
+    fprintf(stderr, "l0 = %g, l1 = %g, l2 = %g\n", l0, l1, l2);
+    fprintf(stderr, "In %s, line %d\n", __FILE__, __LINE__);
+    exit(1);
+  }
+
   k = sqrt(fabs(k2));
 
   assert(!(isnan(k))); /* Workaround for infinite loop bug in GSL ellint. */

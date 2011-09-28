@@ -50,7 +50,9 @@ quad(const integrand f, void *fdata, const double a, const double b, const doubl
 
     nsubdiv *= 2;
     if (nsubdiv > quad_maxsubdiv) {
-      return cleanup(GSL_EMAXITER, result);
+      /* return cleanup(GSL_EMAXITER, result); */
+      fprintf(stderr, "WARNING: Large number of iterations in quad.\n");
+      return GSL_SUCCESS;
     }
 
     h = (b-a)/nsubdiv;
