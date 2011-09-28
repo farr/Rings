@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
     int status;
 
     for (i = 0; i < bsize; i++) {
-      fprintf(conf.out, "%g ", t);
+      fprintf(conf.out, "%.1f ", t);
       write_body_elements(conf.out, bs+i);
     }
 
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
   } while (t != conf.T);
 
   for (i = 0; i < bsize; i++) {
-    fprintf(conf.out, "%g ", t);
+    fprintf(conf.out, "%.1f ", t);
     write_body_elements(conf.out, bs+i);
   }
 
