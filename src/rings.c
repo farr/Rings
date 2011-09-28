@@ -164,7 +164,8 @@ int main(int argc, char **argv) {
     status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsabs, conf.eps);
 
     if (status != GSL_SUCCESS) {
-      fprintf(stderr, "Error in evolution: %d (%s)\n", status, gsl_strerror(status));
+      fprintf(stderr, "Error in evolution: %d (%s) at %s, line %d\n", status, gsl_strerror(status),
+              __FILE__, __LINE__);
       exit(1);
     }
 
