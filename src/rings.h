@@ -180,7 +180,8 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
    approximation) in rhs. */
 int
 average_rhs(const double eps, const body *b1, const body *b2, 
-            const double epsabs, double rhs[BODY_VECTOR_SIZE]);
+            const double epsabs, double rhs[BODY_VECTOR_SIZE],
+            gsl_integration_workspace *ws, size_t nws);
 
 /* advancer.c */
 
@@ -226,6 +227,7 @@ vector_to_bodies(const double y[], const size_t nbodies, body bs[]);
 int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], const size_t nbodies, 
+              gsl_integration_workspace *ws, const size_t nws,
               const double epsabs,
               const double eps);
 

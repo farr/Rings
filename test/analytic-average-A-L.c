@@ -10,16 +10,19 @@ int main() {
   const double epsabs = 1e-8;
   double ori1, ori2;
   double magdot1, magdot2;
+  const size_t nws = 100000;
+  gsl_integration_workspace *ws;
 
   rng = gsl_rng_alloc(gsl_rng_ranlxd2);
+  ws = gsl_integration_workspace_alloc(nws);
 
   eps = gsl_rng_uniform(rng);
 
   init_random_body(rng, &b1, 1e-1*gsl_rng_uniform(rng), 1.0+gsl_rng_uniform(rng), 0.0, 0.0, 0.0);
   init_random_body(rng, &b2, 2e-2*gsl_rng_uniform(rng), 2.0+gsl_rng_uniform(rng), 0.0, 0.0, 0.0);
 
-  average_rhs(eps, &b1, &b2, epsabs, rhs1);
-  average_rhs(eps, &b2, &b1, epsabs, rhs2);
+  average_rhs(eps, &b1, &b2, epsabs, rhs1, ws, nws);
+  average_rhs(eps, &b2, &b1, epsabs, rhs2, ws, nws);
 
   magdot1 = dot(b1.A, &(rhs1[BODY_A_INDEX])) + dot(b1.L, &(rhs1[BODY_L_INDEX]));
   magdot2 = dot(b2.A, &(rhs2[BODY_A_INDEX])) + dot(b2.L, &(rhs2[BODY_L_INDEX]));
@@ -48,6 +51,7 @@ int main() {
   }
     
   gsl_rng_free(rng);
+  gsl_integration_workspace_free(ws);
 
   return 0;
 }

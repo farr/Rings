@@ -10,7 +10,7 @@
 int
 main() {
   gsl_integration_workspace *ws1, *ws2;
-  const size_t ws_size = 10000;
+  const size_t ws_size = 100000;
   gsl_rng *rng;
   int status = 0;
   body b1, b2;
@@ -36,7 +36,7 @@ main() {
   init_random_body(rng, &b2, m2, a2, 0.0, 0.0, 0.0);
 
   raw_average_rhs(eps, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, numerical_rhs);
-  avg_status = average_rhs(eps, &b1, &b2, EPS, rhs);
+  avg_status = average_rhs(eps, &b1, &b2, EPS, rhs, ws1, ws_size);
 
   if (avg_status != GSL_SUCCESS) {
     fprintf(stderr, "average-rhs-test: quad reported error %d.\n", avg_status);

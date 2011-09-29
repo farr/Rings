@@ -31,6 +31,8 @@ typedef struct {
   size_t nbodies;
   double eps;
   double epsabs;
+  gsl_integration_workspace *ws;
+  size_t nws;
 } fparams;
 
 static int
@@ -59,7 +61,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
 
         vector_to_body(y+j*BODY_VECTOR_SIZE, &bj);
         
-        status = average_rhs(p->eps, &bi, &bj, p->epsabs, rhs);
+        status = average_rhs(p->eps, &bi, &bj, p->epsabs, rhs, p->ws, p->nws);
 
         if (status != GSL_SUCCESS) {
           for (k = 0; k < BODY_VECTOR_SIZE; k++) {
@@ -81,7 +83,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
 int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], 
-              size_t nbodies, 
+              size_t nbodies, gsl_integration_workspace *ws, const size_t nws, 
               const double epsabs,
               const double eps) {
   fparams p;
@@ -92,6 +94,8 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
   p.eps = eps;
   p.epsabs = epsabs;
   p.nbodies = nbodies;
+  p.ws = ws;
+  p.nws = nws;
 
   sys.function = (int (*)(double, const double [], double [], void *))f;
   sys.jacobian = 0;

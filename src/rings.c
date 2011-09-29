@@ -132,6 +132,8 @@ int main(int argc, char **argv) {
   gsl_odeiv_evolve *e;
   gsl_odeiv_control *con;
   gsl_odeiv_step *step;
+  gsl_integration_workspace *ws;
+  const size_t nws = 100000;
   double *ys;
   int odesize;
   int i;
@@ -152,6 +154,7 @@ int main(int argc, char **argv) {
   e = gsl_odeiv_evolve_alloc(odesize);
   step = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, odesize);
   con = gsl_odeiv_control_secular_new(conf.epsabs);
+  ws = gsl_integration_workspace_alloc(nws);
 
   do {
     int status;
@@ -161,7 +164,7 @@ int main(int argc, char **argv) {
       write_body_elements(conf.out, bs+i);
     }
 
-    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsabs, conf.eps);
+    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, ws, nws, conf.epsabs, conf.eps);
 
     if (status != GSL_SUCCESS) {
       fprintf(stderr, "Error in evolution: %d (%s) at %s, line %d\n", status, gsl_strerror(status),
@@ -183,6 +186,7 @@ int main(int argc, char **argv) {
   gsl_odeiv_step_free(step);
   gsl_odeiv_evolve_free(e);
   gsl_odeiv_control_free(con);
+  gsl_integration_workspace_free(ws);
 
   return 0;
 }

@@ -6,7 +6,7 @@
 
 int main() {
   body b1, b2;
-  const size_t ws_size = 10000;
+  const size_t ws_size = 100000;
   const double eps = 0.02;
   const double epsabs = 1e-8, epsrel = 1e-8;
   gsl_integration_workspace *ws1, *ws2;
@@ -30,7 +30,7 @@ int main() {
   init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
 
   /* RHS on b1. */
-  average_rhs(eps, &b1, &b2, epsabs, analytic_rhs);
+  average_rhs(eps, &b1, &b2, epsabs, analytic_rhs, ws1, ws_size);
   raw_average_rhs(eps, &b1, &b2, ws1, ws_size, ws2, ws_size, epsabs/10.0, epsrel/10.0, numerical_rhs);
 
   if (!check_vector_close(10*epsabs, 10*epsrel, BODY_VECTOR_SIZE, analytic_rhs, numerical_rhs)) {
@@ -39,7 +39,7 @@ int main() {
   }
 
   /* RHS on b2. */
-  average_rhs(eps, &b2, &b1, epsabs, analytic_rhs);
+  average_rhs(eps, &b2, &b1, epsabs, analytic_rhs, ws1, ws_size);
   raw_average_rhs(eps, &b2, &b1, ws1, ws_size, ws2, ws_size, epsabs/10.0, epsrel/10.0, numerical_rhs);
 
   if (!check_vector_close(10*epsabs, 10*epsrel, BODY_VECTOR_SIZE, analytic_rhs, numerical_rhs)) {
@@ -52,7 +52,7 @@ int main() {
   init_body_from_elements(&b2, m2, a2, emid, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
 
   /* RHS on b1. */
-  average_rhs(eps, &b1, &b2, epsabs, analytic_rhs);
+  average_rhs(eps, &b1, &b2, epsabs, analytic_rhs, ws1, ws_size);
   raw_average_rhs(eps, &b1, &b2, ws1, ws_size, ws2, ws_size, epsabs/10.0, epsrel/10.0, numerical_rhs);
 
   if (!check_vector_close(10*epsabs, 10*epsrel, BODY_VECTOR_SIZE, analytic_rhs, numerical_rhs)) {
@@ -61,7 +61,7 @@ int main() {
   }
 
   /* RHS on b2. */
-  average_rhs(eps, &b2, &b1, epsabs, analytic_rhs);
+  average_rhs(eps, &b2, &b1, epsabs, analytic_rhs, ws1, ws_size);
   raw_average_rhs(eps, &b2, &b1, ws1, ws_size, ws2, ws_size, epsabs/10.0, epsrel/10.0, numerical_rhs);
 
   if (!check_vector_close(10*epsabs, 10*epsrel, BODY_VECTOR_SIZE, analytic_rhs, numerical_rhs)) {

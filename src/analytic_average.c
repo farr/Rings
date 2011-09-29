@@ -2,6 +2,7 @@
 
 #include<gsl/gsl_sf.h>
 #include<gsl/gsl_poly.h>
+#include<gsl/gsl_integration.h>
 
 #include<math.h>
 #include<assert.h>
@@ -206,10 +207,11 @@ typedef struct {
   double eps;
   const body *bp;
   const body *b;
+  int i;
 } avg_data;
 
-static int
-average_integrand(const double Ep, void *vdata, double result[BODY_VECTOR_SIZE]) {
+static double
+average_integrand(double Ep, void *vdata) {
   avg_data *data = (avg_data *)vdata;
   double rp[3], vp[3];
   double f[3];
@@ -222,44 +224,61 @@ average_integrand(const double Ep, void *vdata, double result[BODY_VECTOR_SIZE])
   double ap = data->bp->a;
   double np = mean_motion(data->bp);
   int i;
+  int ind = data->i;
 
-  result[BODY_M_INDEX] = 0.0;
-  result[BODY_Qp_INDEX] = 0.0;
-  result[BODY_I_INDEX] = 0.0;
-  result[BODY_R_INDEX] = 0.0;
-
-  E_to_rv(data->bp, Ep, rp, vp);
-
-  force_averaged_unprimed(data->eps, rp, data->b, f);
-  
-  fdv = dot(f, vp);
-  rdf = dot(rp, f);
-  rdv = dot(rp, vp);
-  cross(rp, f, rxf);
-
-  result[BODY_a_INDEX] = 2.0*fac/(np*np*ap)*fdv;
-  
-  for (i = 0; i < 3; i++) {
-    result[BODY_A_INDEX+i] = fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
+  if (ind == BODY_M_INDEX || 
+      ind == BODY_Qp_INDEX ||
+      ind == BODY_I_INDEX ||
+      ind == BODY_R_INDEX ||
+      (ind >= BODY_SPIN_INDEX && ind < BODY_SPIN_INDEX + 3)) {
+    return 0.0;
+  } else {
+    E_to_rv(data->bp, Ep, rp, vp);
+    
+    force_averaged_unprimed(data->eps, rp, data->b, f);
+    
+    fdv = dot(f, vp);
+    rdf = dot(rp, f);
+    rdv = dot(rp, vp);
+    cross(rp, f, rxf);
+    
+    if (ind == BODY_a_INDEX) {
+      return 2.0*fac/(np*np*ap)*fdv;
+    } else if (ind >= BODY_A_INDEX && ind < BODY_A_INDEX + 3) {
+      int i = ind - BODY_A_INDEX;
+      return fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
+    } else if (ind >= BODY_L_INDEX && ind < BODY_L_INDEX + 3) {
+      int i = ind - BODY_L_INDEX;
+      return fac*rxf[i]/(np*ap*ap);
+    } else {
+      fprintf(stderr, "Index %d not recognized in average_integrand.c, %s, line %d\n",
+              ind, __FILE__, __LINE__);
+      exit(1);
+    }
   }
-
-  for (i = 0; i < 3; i++) {
-    result[BODY_L_INDEX+i] = fac*rxf[i]/(np*ap*ap);
-  }
-
-  memset(result+BODY_SPIN_INDEX, 0, 3*sizeof(double));
-
-  return GSL_SUCCESS;
 }
 
 int
 average_rhs(const double eps, const body *b1, const body *b2, 
-            const double epsabs, double rhs[BODY_VECTOR_SIZE]) {
+            const double epsabs, double rhs[BODY_VECTOR_SIZE], 
+            gsl_integration_workspace *ws, size_t nws) {
   avg_data data;
+  gsl_function func;
+  int i;
 
   data.b = b2;
   data.bp = b1;
   data.eps = eps;
 
-  return quad(average_integrand, &data, 0.0, 2.0*M_PI, epsabs, rhs);
+  func.function = &average_integrand;
+  func.params = &data;
+
+  for (i = 0; i < BODY_VECTOR_SIZE; i++) {
+    double err;
+    data.i = i;
+    gsl_integration_qag(&func, 0.0, 2.0*M_PI, epsabs, epsabs/10.0, nws, GSL_INTEG_GAUSS61, 
+                        ws, &(rhs[i]), &err);
+  }
+
+  return GSL_SUCCESS;
 }
