@@ -7,7 +7,6 @@ raw-average-yoram-elements \
 analytic-average-test \
 analytic-average-angular-momentum \
 average-rhs-test \
-quad-test \
 extreme-eccentricity-test \
 analytic-average-A-L \
 advancer-test \
