@@ -155,6 +155,9 @@ body_instantaneous_rhs(const double eps,
 void
 body_derivs_to_orbital_elements(const body *b, const double dbdt[BODY_VECTOR_SIZE], double deldt[NELEMENTS]);
 
+double
+body_system_amd(const body bs[], const size_t n);
+
 /* raw_average.c */
 
 void

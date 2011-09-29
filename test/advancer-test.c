@@ -18,17 +18,28 @@ int main() {
   double t = 0.0;
   double rhs[BODY_VECTOR_SIZE];
   double spin[3] = {0.0, 0.0, 0.0};
+  double amdInitial, amdFinal;
+  int i;
 
   init_body_from_elements(&(bs[0]), m1, a1, e1, I1, Omega1, omega1, spin, 0.0, 0.0, 0.0);
   init_body_from_elements(&(bs[1]), m2, a2, e2, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
+
+  amdInitial = body_system_amd(bs, 2);
 
   do {
     status = evolve_system(e, con, step, &t, T, &h, bs, y, NBODIES, epsabs, 0.0);
   } while (status == GSL_SUCCESS && t < T);
 
+  fprintf(stderr, "AMD finally %g\n", amdFinal);
+
   if (t != T) {
     fprintf(stderr, "Did not advance to stop time (t = %g, stop time = %g); GSL return code %d\n",
             t, T, status);
+    return 1;
+  }
+
+  if (fabs(amdInitial-amdFinal) > 1e-8) {
+    fprintf(stderr, "Did not conserve AMD: initially %g, finally %g\n", amdInitial, amdFinal);
     return 1;
   }
 

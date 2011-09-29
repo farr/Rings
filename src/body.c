@@ -290,3 +290,27 @@ body_set_synchronous_spin(body *b) {
   unitize(b->L, spinHat);
   vscale(n, spinHat, b->spin);
 }
+
+double
+body_system_amd(const body bs[], const size_t n) {
+  double Ltot[3];
+  double Lnrm;
+  double amd = 0.0;
+  size_t i;
+
+  memset(Ltot, 0, 3*sizeof(double));
+  for (i = 0; i < n; i++) {
+    double nrm = bs[i].m*sqrt(bs[i].a);
+    Ltot[0] += nrm*bs[i].L[0];
+    Ltot[1] += nrm*bs[i].L[1];
+    Ltot[2] += nrm*bs[i].L[2];
+  }
+  Lnrm = norm(Ltot);
+
+  amd = 0.0;
+  for (i = 0; i < n; i++) {
+    amd += bs[i].m*sqrt(bs[i].a)*(1 - dot(bs[i].L, Ltot)/Lnrm);
+  }
+
+  return amd;
+}
