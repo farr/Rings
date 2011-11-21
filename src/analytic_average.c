@@ -278,15 +278,15 @@ average_rhs(const double eps, const body *b1, const body *b2,
   for (i = BODY_A_INDEX; i < BODY_A_INDEX + 3; i++) {
     double err;
     data.i = i;
-    gsl_integration_qag(&func, 0.0, 2.0*M_PI, epsabs, epsabs, nws, GSL_INTEG_GAUSS61, 
-                        ws, &(rhs[i]), &err);
+    gsl_integration_qags(&func, 0.0, 2.0*M_PI, epsabs, epsabs, nws,
+                         ws, &(rhs[i]), &err);
   }
 
   for (i = BODY_L_INDEX; i < BODY_L_INDEX + 3; i++) {
     double err;
     data.i = i;
-    gsl_integration_qag(&func, 0.0, 2.0*M_PI, epsabs, epsabs, nws, GSL_INTEG_GAUSS61, 
-                        ws, &(rhs[i]), &err);
+    gsl_integration_qags(&func, 0.0, 2.0*M_PI, epsabs, epsabs, nws,
+                         ws, &(rhs[i]), &err);
   }
 
   return GSL_SUCCESS;
