@@ -65,53 +65,13 @@ sign(const double x) { if (x < 0.0) { return -1.0; } else { return 1.0; } }
 static void
 Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
         const double l0, const double l1_in, const double l2_in, 
+        const double e, 
         double Q[3][3]) {
-  int i,j,k;
   double l1 = fabs(l1_in);  /* l1 should always be nonnegative, but
                                roundoff.... */
   double l2 = -fabs(l2_in);  /* l2 should always be nonpositive, but
                                 roundoff.... */
-
-  double root_sum = l0+l1+fabs(l2);
-  double small = sqrt(DBL_EPSILON)*root_sum;
-
-  /* We have several issues to worry about here, hence the careful
-     finessing with fabs(...) and re-writing of some terms relative to
-     T&T. 
-
-     As e --> 0, C --> 0, and -C < l2 < 0 means that l2 becomes
-     "squeezed" between -C and 0.  In this case l2/(l2+C) --> 0/0.
-     So, we want to avoid this ratio.
-       
-     As e --> 1, 0 < l1 < a^2(1-e^2) gets squeezed toward zero.  In
-     this circumstance, the l1 in the denominator Q[1][1] is
-     problematic.  In fact, as e --> 1, Bsine --> 0 as well, so we
-     again have a 0/0 situation.
-
-     When rp*yhat --> 0, Bsine --> 0 (this happens at least once an
-     orbit); because l0*l1*l2 = -B^2 C Sin^2 epsilon, at least one of
-     l2 or l1 is driven to zero.  
-
-     We can fix these problems by using the relations
-
-     l0*l1*l2 = -Bsine^2 C
-     (l0+C)*(l1+C)*(l2+C) = Bcose^2 C
-
-     which imply that 
-
-     (l2+C)/l2 = cose^2/sine^2 l0*l1/((l0+C)*(l1+C))
-
-     to remove l2, l1, and (l2+C) terms from the denominator of the Q
-     components.  The result appears below.  We also added fabs(...)
-     to l1 and (l2+C) because they should be positive, but may be
-     negative due to roundoff.  (fabs(l2) already appears because l2
-     *should* be negative.)
-
-  */
-
-  /* Though l2 + C should always be positive, sometimes it gets small
-     enough that roundoff matters; in this case, we need the
-     fabs(l2+C) calls. */
+  
   Q[0][0] = sqrt(l0*(l0+C)/((l0-l1)*(l0-l2)));
   Q[0][1] = sqrt(l1*(l1+C)/((l0-l1)*(l1-l2)));
   Q[0][2] = sqrt(fabs(l2)*fabs(l2+C)/((l0-l2)*(l1-l2)));
@@ -121,6 +81,26 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
   Q[2][0] = Bcose*sqrt(l0/((l0+C)*(l0-l1)*(l0-l2)));
   Q[2][1] = Bcose*sqrt(l1/((l1+C)*(l0-l1)*(l1-l2)));
   Q[2][2] = Bcose*sqrt(fabs(l2)/(fabs(l2+C)*(l0-l2)*(l1-l2)));
+
+  if (e*e < 1e-8) {
+    /* Small e => small C => small l2, correct Q[1][2] and Q[2][2] */
+    Q[1][2] = - sign(Bsine)*fabs(Bcose)/sqrt(fabs((l0-l2)*(l1-l2)));
+    Q[2][2] = sign(Bcose)*fabs(Bsine)/sqrt(fabs((l0-l2)*(l1-l2)));
+  } else if (fabs(1.0 - e*e) < 1e-8) {
+    /* Large e => small B*sin(eps) => small l1, correct Q[1][1]. */
+    Q[1][1] = 1.0;
+  } else if (fabs(2.0*l2/(l1 + l0)) < 1e-8) {
+    /* l2 driven small => BSine similarly small, but, unlike e --> 0,
+       l2 not close to C. */
+    Q[1][2] = -1.0;
+  } else if (fabs(2.0*l1/(l0+l2)) < 1e-8) {
+    /* l1 driven small => BSine similarly small.*/
+    Q[1][1] = 1.0;
+  } else if (fabs(2.0*(l2+C)/(l1+C + l2+C)) < 1e-8) {
+    /* l2 driven toward -C => BCose similarly small. */
+    Q[2][2] = 1.0;
+  }
+
 }
 
 static void
@@ -145,7 +125,7 @@ get_F(const double rp[3], const body *b, double F0[3], double F1[3], double F2[3
 
   for (i = 0; i < 3; i++) {
     F0[i] = -rp[i] - a*e*xhat[i];
-    F1[i] = a*sqrt(1.0-e*e)*yhat[i];
+    F1[i] = a*sqrt(fabs(1.0-e*e))*yhat[i];
     F2[i] = a*xhat[i];
   }
 }
@@ -172,13 +152,14 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
   double F0[3], F1[3], F2[3];
   double FU[3], FV[3];
   double A, Bsine, Bcose, C;
+  double e = norm(b->A);
   double k, k2;
   double Ek, Kk;
   int i;
 
   get_ABC(eps, rp, b, &A, &Bcose, &Bsine, &C);
   lambda_roots(A, Bcose, Bsine, C, &l0, &l1, &l2);
-  Qmatrix(A, Bcose, Bsine, C, l0, l1, l2, Q);
+  Qmatrix(A, Bcose, Bsine, C, l0, l1, l2, e, Q);
 
   UV_from_Q(Q, norm(b->A), U, V);
   
@@ -199,7 +180,8 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
   Kk = gsl_sf_ellint_Kcomp(k, GSL_PREC_DOUBLE);
 
   for (i = 0; i < 3; i++) {
-    f[i] = 2.0*b->m/M_PI*sqrt(l0-l2)/((l0-l1)*(l1-l2))*((k2*FU[i] + FV[i])*Ek - (1.0 - k2)*FV[i]*Kk);
+    f[i] = 2.0*b->m/M_PI*sqrt(fabs(l0-l2))/((l0-l1)*(l1-l2))*((k2*FU[i] + FV[i])*Ek - (1.0 - k2)*FV[i]*Kk);
+    assert(!isnan(f[i]));
   }
 }
 
@@ -243,13 +225,16 @@ average_integrand(double Ep, void *vdata) {
     cross(rp, f, rxf);
     
     if (ind == BODY_a_INDEX) {
-      return 2.0*fac/(np*np*ap)*fdv;
+      double result = 2.0*fac/(np*np*ap)*fdv;
+      return result;
     } else if (ind >= BODY_A_INDEX && ind < BODY_A_INDEX + 3) {
       int i = ind - BODY_A_INDEX;
-      return fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
+      double result = fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
+      return result;
     } else if (ind >= BODY_L_INDEX && ind < BODY_L_INDEX + 3) {
       int i = ind - BODY_L_INDEX;
-      return fac*rxf[i]/(np*ap*ap);
+      double result = fac*rxf[i]/(np*ap*ap);
+      return result;
     } else {
       fprintf(stderr, "Index %d not recognized in average_integrand.c, %s, line %d\n",
               ind, __FILE__, __LINE__);

@@ -8,6 +8,7 @@ analytic-average-test \
 analytic-average-angular-momentum \
 average-rhs-test \
 extreme-eccentricity-test \
+nearly-touching-orbits-test \
 analytic-average-A-L \
 advancer-test \
 tides-angular-momentum-test

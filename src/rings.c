@@ -10,7 +10,8 @@ typedef enum {
   OPT_T,
   OPT_HINI,
   OPT_EPS,
-  OPT_ACC,
+  OPT_EPSQUAD,
+  OPT_EPSINT,
   OPT_INP,
   OPT_OUT
 } opt_flag;
@@ -19,7 +20,8 @@ typedef struct {
   double T;
   double hini;
   double eps;
-  double epsabs;
+  double epsquad;
+  double epsint;
   FILE *inp;
   FILE *out;
 } configuration;
@@ -28,8 +30,9 @@ static struct option opts[] = {
   {"help", no_argument, 0, OPT_HELP},
   {"time", required_argument, 0, OPT_T},
   {"h", required_argument, 0, OPT_HINI},
-  {"epsilon", required_argument, 0, OPT_EPS},
-  {"accuracy", required_argument, 0, OPT_ACC},
+  {"eps", required_argument, 0, OPT_EPS},
+  {"epsquad", required_argument, 0, OPT_EPSQUAD},
+  {"epsint", required_argument, 0, OPT_EPSINT},
   {"input", required_argument, 0, OPT_INP},
   {"output", required_argument, 0, OPT_OUT},
   {0}
@@ -42,7 +45,9 @@ static char usage[] = "rings OPTION ...\n"
 "--help          Display this help message\n"
 "--time T        Total evolution time\n"
 "--h H           Initial step size\n"
-"--epsilon EPS   Softening scale\n"
+"--eps EPS       Softening scale\n"
+"--epsquad EPS   Quadrature relative accuracy\n"
+"--epsint EPS    Integration relative accuracy\n"
 "--accuracy ACC  Absolute accuracy of evolution\n"
 "--input FILE    Input file\n"
 "--output FILE   Output file\n";
@@ -64,8 +69,11 @@ static int parse_args(int argc, char **argv, struct option *opts, configuration 
     case OPT_EPS:
       conf->eps = atof(optarg);
       break;
-    case OPT_ACC:
-      conf->epsabs = atof(optarg);
+    case OPT_EPSQUAD:
+      conf->epsquad = atof(optarg);
+      break;
+    case OPT_EPSINT:
+      conf->epsint = atof(optarg);
       break;
     case OPT_INP:
       conf->inp = fopen(optarg, "r");
@@ -125,7 +133,7 @@ static body *read_input(FILE *inp, body *bs, int *bsize) {
 
 int main(int argc, char **argv) {
   int status;
-  configuration conf = {1e9, 1.0, 0.0, 1e-8, stdin, stdout};
+  configuration conf = {1e9, 1.0, 0.0, 1e-11, 1e-8, stdin, stdout};
   body *bs = malloc(sizeof(body));
   int bsize = 1;
   double t = 0.0;
@@ -153,7 +161,7 @@ int main(int argc, char **argv) {
   ys = malloc(odesize*sizeof(double));
   e = gsl_odeiv_evolve_alloc(odesize);
   step = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, odesize);
-  con = gsl_odeiv_control_secular_new(conf.epsabs);
+  con = gsl_odeiv_control_secular_new(conf.epsint);
   ws = gsl_integration_workspace_alloc(nws);
 
   do {
@@ -164,7 +172,7 @@ int main(int argc, char **argv) {
       write_body_elements(conf.out, bs+i);
     }
 
-    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, ws, nws, conf.epsabs, conf.eps);
+    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, ws, nws, conf.epsquad, conf.eps);
 
     if (status != GSL_SUCCESS) {
       fprintf(stderr, "Error in evolution: %d (%s) at %s, line %d\n", status, gsl_strerror(status),

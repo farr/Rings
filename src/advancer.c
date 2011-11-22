@@ -30,7 +30,7 @@ vector_to_bodies(const double y[], const size_t nbodies, body bs[]) {
 typedef struct {
   size_t nbodies;
   double eps;
-  double epsabs;
+  double epsquad;
   gsl_integration_workspace *ws;
   size_t nws;
 } fparams;
@@ -61,7 +61,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
 
         vector_to_body(y+j*BODY_VECTOR_SIZE, &bj);
         
-        status = average_rhs(p->eps, &bi, &bj, p->epsabs, rhs, p->ws, p->nws);
+        status = average_rhs(p->eps, &bi, &bj, p->epsquad, rhs, p->ws, p->nws);
 
         if (status != GSL_SUCCESS) {
           for (k = 0; k < BODY_VECTOR_SIZE; k++) {
@@ -84,7 +84,7 @@ int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], 
               size_t nbodies, gsl_integration_workspace *ws, const size_t nws, 
-              const double epsabs,
+              const double epsquad, 
               const double eps) {
   fparams p;
   gsl_odeiv_system sys;
@@ -92,7 +92,7 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
   int i;
 
   p.eps = eps;
-  p.epsabs = epsabs;
+  p.epsquad = epsquad;
   p.nbodies = nbodies;
   p.ws = ws;
   p.nws = nws;

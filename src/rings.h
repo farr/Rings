@@ -228,7 +228,7 @@ int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], const size_t nbodies, 
               gsl_integration_workspace *ws, const size_t nws,
-              const double epsabs,
+              const double epsquad,
               const double eps);
 
 /* A new type of control object, does the usual checks of the standard
