@@ -169,6 +169,7 @@ int main(int argc, char **argv) {
     for (i = 0; i < bsize; i++) {
       fprintf(conf.out, "%.1f ", t);
       write_body_elements(conf.out, bs+i);
+      fflush(conf.out);
     }
 
     status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, ws, nws, conf.epsquad, conf.eps);
@@ -184,6 +185,7 @@ int main(int argc, char **argv) {
   for (i = 0; i < bsize; i++) {
     fprintf(conf.out, "%.1f ", t);
     write_body_elements(conf.out, bs+i);
+    fflush(conf.out);
   }
 
   if (conf.inp != stdin) fclose(conf.inp);
