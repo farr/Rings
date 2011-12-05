@@ -48,7 +48,6 @@ static char usage[] = "rings OPTION ...\n"
 "--eps EPS       Softening scale\n"
 "--epsquad EPS   Quadrature relative accuracy\n"
 "--epsint EPS    Integration relative accuracy\n"
-"--accuracy ACC  Absolute accuracy of evolution\n"
 "--input FILE    Input file\n"
 "--output FILE   Output file\n";
 
