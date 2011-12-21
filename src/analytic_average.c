@@ -225,7 +225,7 @@ average_force_components(const double eps, const body *b, const body *bp,
   double R, T, W;
   double err;
   int N, i;
-  const int NMax = 1048576;
+  const int NMax = 65536;
 
   memset(Rc, 0, 3*sizeof(double));
   memset(Rs, 0, 2*sizeof(double));
