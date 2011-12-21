@@ -178,10 +178,9 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 /* Returns the time derivative of b1's components (including the mass
    and semi-major axis, which are always constant in the secular
    approximation) in rhs. */
-int
+void
 average_rhs(const double eps, const body *b1, const body *b2, 
-            const double epsabs, double rhs[BODY_VECTOR_SIZE],
-            gsl_integration_workspace *ws, size_t nws);
+            const double epsabs, double rhs[BODY_VECTOR_SIZE]);
 
 /* advancer.c */
 
@@ -210,11 +209,10 @@ vector_to_bodies(const double y[], const size_t nbodies, body bs[]);
    will be overwritten as the routine progresses.  It should be of
    size nbodies.  y is a vector capable of storing the system state
    (see body_size_to_vector_size above).  y need not be initialized,
-   but on output it will contain the vectorized state of bs.  The ws
-   parameter is a workspace for the integration over rings; its size
-   should be given in ws_size. The parameters epsabs and epsrel are
-   integration tolerances for the averaging over rings.  They should
-   be set smaller than the desired accuracy in the control object con.
+   but on output it will contain the vectorized state of bs.  The
+   parameters epsabs and epsrel are integration tolerances for the
+   averaging over rings.  They should be set smaller than the desired
+   accuracy in the control object con.
 
    Typically, evolve_system is called in a loop that terminates when
    the output time is exactly t1.  In this use case, subsequent steps
@@ -227,9 +225,7 @@ vector_to_bodies(const double y[], const size_t nbodies, body bs[]);
 int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
               double *t, const double t1, double *h, body bs[], double y[], const size_t nbodies, 
-              gsl_integration_workspace *ws, const size_t nws,
-              const double epsquad,
-              const double eps);
+              const double epsquad, const double eps);
 
 /* A new type of control object, does the usual checks of the standard
    GSL control on the absolute error of y(t), but also checks the

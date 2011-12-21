@@ -14,11 +14,8 @@ int main() {
   double m1, m2;
   double a1, a2;
   int i;
-  gsl_integration_workspace *ws;
-  const size_t nws = 100000;
 
   rng = gsl_rng_alloc(gsl_rng_ranlxd2);
-  ws = gsl_integration_workspace_alloc(nws);
 
   eps = gsl_rng_uniform(rng);
 
@@ -33,8 +30,8 @@ int main() {
   n1 = mean_motion(&b1);
   n2 = mean_motion(&b2);
 
-  average_rhs(eps, &b1, &b2, epsabs, rhs1, ws, nws);
-  average_rhs(eps, &b2, &b1, epsabs, rhs2, ws, nws);
+  average_rhs(eps, &b1, &b2, epsabs, rhs1);
+  average_rhs(eps, &b2, &b1, epsabs, rhs2);
 
   for (i = 0; i < 3; i++) {
     Ldot[i] = m1*n1*a1*a1*rhs1[BODY_L_INDEX+i] + m2*n2*a2*a2*rhs2[BODY_L_INDEX+i];
@@ -46,6 +43,5 @@ int main() {
   }
 
   gsl_rng_free(rng);
-  gsl_integration_workspace_free(ws);
   return 0;
 }

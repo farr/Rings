@@ -132,7 +132,7 @@ static body *read_input(FILE *inp, body *bs, int *bsize) {
 
 int main(int argc, char **argv) {
   int status;
-  configuration conf = {1e9, 1.0, 0.0, 1e-11, 1e-8, stdin, stdout};
+  configuration conf = {1e9, 1.0, 0.0, 1e-8, 1e-5, stdin, stdout};
   body *bs = malloc(sizeof(body));
   int bsize = 1;
   double t = 0.0;
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
       fflush(conf.out);
     }
 
-    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, ws, nws, conf.epsquad, conf.eps);
+    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsquad, conf.eps);
 
     if (status != GSL_SUCCESS) {
       fprintf(stderr, "Error in evolution: %d (%s) at %s, line %d\n", status, gsl_strerror(status),

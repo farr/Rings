@@ -31,7 +31,7 @@ int main() {
   amdInitial = body_system_amd(bs, 2);
 
   do {
-    status = evolve_system(e, con, step, &t, T, &h, bs, y, NBODIES, ws, nws, epsabs, 0.0);
+    status = evolve_system(e, con, step, &t, T, &h, bs, y, NBODIES, epsabs, 0.0);
   } while (status == GSL_SUCCESS && t < T);
 
   amdFinal = body_system_amd(bs, 2);

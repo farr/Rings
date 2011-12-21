@@ -5,7 +5,7 @@
 #include<gsl/gsl_integration.h>
 #include<gsl/gsl_rng.h>
 
-#define EPS 1e-8
+#define EPS 1e-15
 
 int
 main() {
@@ -18,10 +18,9 @@ main() {
   const double m2 = 1.998e-3;
   const double a1 = 1.02;
   const double a2 = 10.3;
-  const double eps = 0.001;
+  const double eps = 1e-3;
   double rhs[BODY_VECTOR_SIZE];
   double numerical_rhs[BODY_VECTOR_SIZE];
-  int avg_status;
 
   rng = gsl_rng_alloc(gsl_rng_ranlxd2);
   assert(rng != 0);
@@ -36,21 +35,17 @@ main() {
   init_random_body(rng, &b2, m2, a2, 0.0, 0.0, 0.0);
 
   raw_average_rhs(eps, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, numerical_rhs);
-  avg_status = average_rhs(eps, &b1, &b2, EPS, rhs, ws1, ws_size);
-
-  if (avg_status != GSL_SUCCESS) {
-    fprintf(stderr, "average-rhs-test: quad reported error %d.\n", avg_status);
-    status = 2;
-  }
+  average_rhs(eps, &b1, &b2, EPS, rhs);
 
   if (!check_vector_close(10.0*EPS, 10.0*EPS, BODY_VECTOR_SIZE, rhs, numerical_rhs)) {
     fprintf(stderr, "average-rhs-test: numerical average doesn't agree with analytical average\n");
-    fprintf(stderr, "Analytic: %8g %8g %8g %8g %8g %8g %8g %8g\n",
+    fprintf(stderr, "Analytic:  %15g %15g %15g %15g %15g %15g %15g %15g %15g %15g %15g\n",
             rhs[0], rhs[1], rhs[2], rhs[3], rhs[4], rhs[5], rhs[6],
-            rhs[7]);
-    fprintf(stderr, "Numerical: %8g %8g %8g %8g %8g %8g %8g %8g\n",
-            numerical_rhs[0], numerical_rhs[1], numerical_rhs[2], numerical_rhs[3], numerical_rhs[4], numerical_rhs[5], numerical_rhs[6],
-            numerical_rhs[7]);
+            rhs[7], rhs[8], rhs[9], rhs[10]);
+    fprintf(stderr, "Numerical: %15g %15g %15g %15g %15g %15g %15g %15g %15g %15g %15g\n",
+            numerical_rhs[0], numerical_rhs[1], numerical_rhs[2], numerical_rhs[3], 
+            numerical_rhs[4], numerical_rhs[5], numerical_rhs[6],
+            numerical_rhs[7], numerical_rhs[8], numerical_rhs[9], numerical_rhs[10]);
 
     status = 1;
   }

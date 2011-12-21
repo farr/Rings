@@ -88,17 +88,17 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
     Q[2][2] = sign(Bcose)*fabs(Bsine)/sqrt(fabs((l0-l2)*(l1-l2)));
   } else if (fabs(1.0 - e*e) < 1e-8) {
     /* Large e => small B*sin(eps) => small l1, correct Q[1][1]. */
-    Q[1][1] = 1.0;
+    Q[1][1] = 1.0 - (C*l0 + C*l2 + l0*l2)*Bsine*Bsine/(2.0*l0*l0*l2*l2);
   } else if (fabs(2.0*l2/(l1 + l0)) < 1e-8) {
     /* l2 driven small => BSine similarly small, but, unlike e --> 0,
        l2 not close to C. */
-    Q[1][2] = -1.0;
+    Q[1][2] = -1.0 + Bsine*Bsine*(l0*l1 + C*(l0+l1))/(2.0*l0*l0*l1*l1);
   } else if (fabs(2.0*l1/(l0+l2)) < 1e-8) {
     /* l1 driven small => BSine similarly small.*/
-    Q[1][1] = 1.0;
-  } else if (fabs(2.0*(l2+C)/(l1+C + l2+C)) < 1e-8) {
+    Q[1][1] = 1.0 - (C*l0 + C*l2 + l0*l2)*Bsine*Bsine/(2.0*l0*l0*l2*l2);
+  } else if (fabs(2.0*(l2+C)/(l1+C + l0+C)) < 1e-8) {
     /* l2 driven toward -C => BCose similarly small. */
-    Q[2][2] = 1.0;
+    Q[2][2] = sqrt(fabs(l2*(l0+C)*(l1+C)/(C*(l0-l2)*(l1-l2))));
   }
 
 }
@@ -185,94 +185,155 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
   }
 }
 
-typedef struct {
-  double eps;
-  const body *bp;
-  const body *b;
-  int i;
-} avg_data;
+static void 
+force_to_components(const double r[3], const double v[3], const double f[3], 
+                    double *R, double *T, double *W) {
+  double l[3];
+  double rhat[3], that[3], lhat[3];
 
-static double
-average_integrand(double Ep, void *vdata) {
-  avg_data *data = (avg_data *)vdata;
+  cross(r, v, l);
+  unitize(l, lhat);
+
+  unitize(r, rhat);
+
+  cross(lhat, rhat, that);
+
+  *R = dot(rhat, f);
+  *T = dot(that, f);
+  *W = dot(lhat, f);
+}
+
+static void
+force_components_integrand(const double eps, const body *b, const body *bp, const double E,
+                           double *R, double *T, double *W) {
+  double r[3], v[3], f[3];
+
+  E_to_rv(bp, E, r, v);
+  force_averaged_unprimed(eps, r, b, f);
+  force_to_components(r, v, f, R, T, W);
+}
+
+static void 
+average_force_components(const double eps, const body *b, const body *bp, 
+                         const double epsacc,
+                         double Rc[3], double Rs[2],
+                         double Tc[3], double Ts[2], 
+                         double Wc[3], double Ws[2]) {
   double rp[3], vp[3];
-  double f[3];
-  double ep = norm(data->bp->A);
-  double fac = (1.0 - ep*cos(Ep))/(2.0*M_PI);
-  double fdv;
-  double rdf;
-  double rdv;
-  double rxf[3];
-  double ap = data->bp->a;
-  double np = mean_motion(data->bp);
-  int i;
-  int ind = data->i;
+  double ep = norm(bp->A);
+  double a = bp->a, n = mean_motion(bp);
+  double R, T, W;
+  double err;
+  int N, i;
+  const int NMax = 1048576;
 
-  if (ind == BODY_M_INDEX || 
-      ind == BODY_Qp_INDEX ||
-      ind == BODY_I_INDEX ||
-      ind == BODY_R_INDEX ||
-      (ind >= BODY_SPIN_INDEX && ind < BODY_SPIN_INDEX + 3)) {
-    return 0.0;
-  } else {
-    E_to_rv(data->bp, Ep, rp, vp);
-    
-    force_averaged_unprimed(data->eps, rp, data->b, f);
-    
-    fdv = dot(f, vp);
-    rdf = dot(rp, f);
-    rdv = dot(rp, vp);
-    cross(rp, f, rxf);
-    
-    if (ind == BODY_a_INDEX) {
-      double result = 2.0*fac/(np*np*ap)*fdv;
-      return result;
-    } else if (ind >= BODY_A_INDEX && ind < BODY_A_INDEX + 3) {
-      int i = ind - BODY_A_INDEX;
-      double result = fac/(1.0 + data->bp->m)*(2.0*fdv*rp[i] - rdf*vp[i] - rdv*f[i]);
-      return result;
-    } else if (ind >= BODY_L_INDEX && ind < BODY_L_INDEX + 3) {
-      int i = ind - BODY_L_INDEX;
-      double result = fac*rxf[i]/(np*ap*ap);
-      return result;
-    } else {
-      fprintf(stderr, "Index %d not recognized in average_integrand.c, %s, line %d\n",
-              ind, __FILE__, __LINE__);
-      exit(1);
+  memset(Rc, 0, 3*sizeof(double));
+  memset(Rs, 0, 2*sizeof(double));
+  memset(Tc, 0, 3*sizeof(double));
+  memset(Ts, 0, 2*sizeof(double));
+  memset(Wc, 0, 3*sizeof(double));
+  memset(Ws, 0, 2*sizeof(double));
+
+  /* Compute the E = 0 term. */
+  force_components_integrand(eps, b, bp, 0.0, &R, &T, &W);
+  for (i = 0; i < 3; i++) {
+    Rc[i] += R;
+    Tc[i] += T;
+    Wc[i] += W;
+  }
+
+  N = 1;
+  do {
+    double h;
+
+    N *= 2;
+    h = 1.0 / N;
+
+    for (i = 0; i < 3; i++) {
+      Rc[i] /= 2.0;
+      Tc[i] /= 2.0;
+      Wc[i] /= 2.0;
+    }
+
+    for (i = 0; i < 2; i++) {
+      Rs[i] /= 2.0;
+      Ts[i] /= 2.0;
+      Ws[i] /= 2.0;
+    }
+
+    for (i = 1; i < N; i += 2) {
+      double E = 2.0*M_PI*((double) i)/((double) N);
+      int j;
+
+      force_components_integrand(eps, b, bp, E, &R, &T, &W);
+
+      Rc[0] += h*R;
+      Tc[0] += h*T;
+      Wc[0] += h*W;
+      for (j = 0; j < 2; j++) {
+        double c = cos((j+1)*E);
+        double s = sin((j+1)*E);
+
+        Rc[j+1] += h*R*c;
+        Tc[j+1] += h*T*c;
+        Wc[j+1] += h*W*c;
+
+        Rs[j] += h*R*s;
+        Ts[j] += h*T*s;
+        Ws[j] += h*W*s;
+      }
+    }
+
+    err = fabs(ep*Rs[0] + sqrt(1.0 - ep*ep)*Tc[0])/(a*n*n);
+  } while ((N < 16 || err > epsacc) && (N < NMax));
+
+  if (N >= NMax) {
+    int i;
+    fprintf(stderr, "WARNING: max iters exceeded in numerical averaging (file %s, line %d, %s)\n",
+            __FILE__, __LINE__, __func__);
+    fprintf(stderr, "WARNING: err = %g\n", err);
+    fprintf(stderr, "WARNING: Rc[0] = %g, Tc[0] = %g, Wc[0] = %g\n",
+            Rc[0], Tc[0], Wc[0]);
+    for (i = 0; i < 2; i++) {
+      fprintf(stderr, "WARNING: Rc[%d] = %g, Tc[%d] = %g, Wc[%d] = %g\n",
+              i+1, Rc[i+1], i+1, Tc[i+1], i+1, Wc[i+1]);
+      fprintf(stderr, "WARNING: Rs[%d] = %g, Ts[%d] = %g, Ws[%d] = %g\n",
+              i+1, Rs[i], i+1, Ts[i], i+1, Ws[i]);
     }
   }
 }
 
-int
+void
 average_rhs(const double eps, const body *b1, const body *b2, 
-            const double epsabs, double rhs[BODY_VECTOR_SIZE], 
-            gsl_integration_workspace *ws, size_t nws) {
-  avg_data data;
-  gsl_function func;
+            const double epsabs, double rhs[BODY_VECTOR_SIZE]) {
   int i;
+  double Rc[3], Tc[3], Wc[3];
+  double Rs[2], Ts[2], Ws[2];
+  double a = b1->a, e = norm(b1->A);
+  double e2 = e*e;
+  double sqrt1me2 = norm(b1->L);
+  double N[3], A[3];
+  double xhat[3], yhat[3], zhat[3];
+  double n = mean_motion(b1);
+  double na2 = n*a*a;
+  double na = n*a;
 
-  data.b = b2;
-  data.bp = b1;
-  data.eps = eps;
+  average_force_components(eps, b2, b1, epsabs, Rc, Rs, Tc, Ts, Wc, Ws);
 
-  func.function = &average_integrand;
-  func.params = &data;
+  body_coordinate_system(b1, xhat, yhat, zhat);
+
+  N[0] = a*sqrt1me2*(Ws[0] - 0.5*e*Ws[1]);
+  N[1] = -a*((1.0+e2)*Wc[1] - 1.5*e*Wc[0] - 0.5*e*Wc[2]);
+  N[2] = a*((1.0+0.5*e2)*Tc[0] - 2.0*e*Tc[1] + 0.5*e2*Tc[2]);
+
+  A[0] = sqrt1me2/(2.0*na)*((4.0*Tc[1] - e*Tc[2] - 3.0*e*Tc[0]) + 2.0*sqrt1me2*Rs[0]);
+  A[1] = 1.0/(2.0*na)*(2.0*(2.0-e2)*Ts[0] - e*Ts[1] - 2.0*sqrt1me2*(Rc[1] - e*Rc[0]));
+  A[2] = -e/na*(Ws[0] - 0.5*e*Ws[1]);
 
   memset(rhs, 0, BODY_VECTOR_SIZE*sizeof(double));
 
-  for (i = BODY_A_INDEX; i < BODY_A_INDEX + 3; i++) {
-    double err;
-    data.i = i;
-    gsl_integration_qags(&func, 0.0, 2.0*M_PI, epsabs, epsabs, nws,
-                         ws, &(rhs[i]), &err);
+  for (i = 0; i < 3; i++) {
+    rhs[BODY_L_INDEX + i] = (N[0]*xhat[i] + N[1]*yhat[i] + N[2]*zhat[i])/na2;
+    rhs[BODY_A_INDEX + i] =  A[0]*xhat[i] + A[1]*yhat[i] + A[2]*zhat[i];
   }
-
-  for (i = BODY_L_INDEX; i < BODY_L_INDEX + 3; i++) {
-    double err;
-    data.i = i;
-    gsl_integration_qags(&func, 0.0, 2.0*M_PI, epsabs, epsabs, nws,
-                         ws, &(rhs[i]), &err);
-  }
-
-  return GSL_SUCCESS;
 }
