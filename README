@@ -13,7 +13,7 @@ m a e I Omega omega
 
 m is the mass, a the semi-major axis, e the eccentricity, I the
 inclination, Omega the longitude of the ascending node, and omega the
-argument of periapsis.  
+argument of periapsis.  All angles should be in *degrees*.
 
 The output of the code is in the format 
 
