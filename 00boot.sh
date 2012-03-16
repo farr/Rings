@@ -2,7 +2,4 @@
 
 set -e
 
-mkdir -p m4
-libtoolize
-automake --add-missing
-autoreconf
+autoreconf || (libtoolize; autoreconf; automake --add-missing; autoreconf)
