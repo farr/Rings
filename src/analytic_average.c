@@ -225,7 +225,7 @@ average_force_components(const double eps, const body *b, const body *bp,
   double R, T, W;
   double err;
   int N, i;
-  const int NMax = 65536;
+  const int NMax = 1048576;
 
   memset(Rc, 0, 3*sizeof(double));
   memset(Rs, 0, 2*sizeof(double));
@@ -289,17 +289,18 @@ average_force_components(const double eps, const body *b, const body *bp,
 
   if (N >= NMax) {
     int i;
-    fprintf(stderr, "WARNING: max iters exceeded in numerical averaging (file %s, line %d, %s)\n",
+    fprintf(stderr, "ERROR: max iters exceeded in numerical averaging (file %s, line %d, %s)\n",
             __FILE__, __LINE__, __func__);
-    fprintf(stderr, "WARNING: err = %g\n", err);
-    fprintf(stderr, "WARNING: Rc[0] = %g, Tc[0] = %g, Wc[0] = %g\n",
+    fprintf(stderr, "ERROR: err = %g\n", err);
+    fprintf(stderr, "ERROR: Rc[0] = %g, Tc[0] = %g, Wc[0] = %g\n",
             Rc[0], Tc[0], Wc[0]);
     for (i = 0; i < 2; i++) {
-      fprintf(stderr, "WARNING: Rc[%d] = %g, Tc[%d] = %g, Wc[%d] = %g\n",
+      fprintf(stderr, "ERROR: Rc[%d] = %g, Tc[%d] = %g, Wc[%d] = %g\n",
               i+1, Rc[i+1], i+1, Tc[i+1], i+1, Wc[i+1]);
-      fprintf(stderr, "WARNING: Rs[%d] = %g, Ts[%d] = %g, Ws[%d] = %g\n",
+      fprintf(stderr, "ERROR: Rs[%d] = %g, Ts[%d] = %g, Ws[%d] = %g\n",
               i+1, Rs[i], i+1, Ts[i], i+1, Ws[i]);
     }
+    exit(1);
   }
 }
 
