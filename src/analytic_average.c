@@ -47,6 +47,28 @@ lambda_roots(const double A, const double Bcose, const double Bsine, const doubl
   *l0 = -2.0*sqrtQ*cos(theta/3.0 + 2.0*M_PI/3.0) - CmAO3;
   *l1 = -2.0*sqrtQ*cos(theta/3.0 - 2.0*M_PI/3.0) - CmAO3;
   *l2 = -2.0*sqrtQ*cos(theta/3.0) - CmAO3;
+
+  if (C < 0.0) {
+    fprintf(stderr, "ERROR: bad C value in lambda_roots.\n");
+    exit(1);
+  } else if (*l2 < -C) {
+    /* Fix up assuming that the other roots are correct. */
+    *l2 = Bcose*Bcose*C/((*l0+C)*(*l1+C)) - C;
+  } else if (*l2 > 0.0) {
+    *l2 = -Bsine*Bsine*C / ((*l0)*(*l1));
+  } else if (*l1 < 0.0) {
+    fprintf(stderr, "ERROR: l1 < 0 in lambda_roots.\n");
+    exit(1);
+  } else if (*l1 > *l0) {
+    fprintf(stderr, "ERROR: l1 > l0 in lambda_roots.\n");
+    exit(1);
+  } else if (A < 0.0) {
+    fprintf(stderr, "ERROR: A < 0 in lambda_roots.\n");
+    exit(1);
+  } else if (*l0 > A) {
+    fprintf(stderr, "ERROR: l0 > A in lambda_roots.\n");
+    exit(1);
+  }
 }
 
 static double
@@ -114,6 +136,18 @@ UV_from_Q(double Q[3][3], const double e, double U[3], double V[3]) {
   V[2] = Q[0][1]*Q[2][1] - e*Q[2][1]*Q[2][1] - Q[0][2]*Q[2][2] + e*Q[2][2]*Q[2][2];
 }
 
+static void 
+UV_from_lambda(const double l0, const double l1, const double l2, const double A, 
+               const double Bsine, const double Bcose, const double C, const double e,
+               double U[3], double V[3]) {
+  U[0] = ((l0*(C-Bcose*e+l0))/(l0-l1) + (l2*(C-Bcose*e+l2))/(l2-l1))/(l0-l2);
+  U[1] = (Bsine*(l0*l1 - 2.0*l0*l2 + l1*l2 - C*(l0 - 2*l1 + l2) + Bcose*e*(l0 - 2*l1 + l2)))/((l0-l1)*(l0-l2)*(l1-l2));
+  U[2] = (Bcose*((l0*(C-Bcose*e+l0))/((l0+C)*(l0-l1)) + (fabs(l2)*(C-Bcose*e+l2))/((l1-l2)*(l2+C))))/(l0-l2);
+  V[0] = (l1*(C-Bcose*e+l1)*(l0-l2) + (l0-l1)*l2*(C-Bcose*e+l2))/((l0-l1)*(l0-l2)*(l1-l2));
+  V[1] = (Bsine*(l0*l1 + C*(2.0*l0-l1-l2)+l0*l2-2.0*l1*l2+Bcose*e*(l1+l2-2.0*l0)))/((l0-l1)*(l0-l2)*(l1-l2));
+  V[2] = Bcose*(l1*(C-Bcose*e+l1)/((l0-l1)*(C+l1)*(l1-l2)) + l2*(C-Bcose*e+l2)/((C+l2)*(l2-l0)*(l2-l1)));
+}
+
 static void
 get_F(const double rp[3], const body *b, double F0[3], double F1[3], double F2[3]) {
   double xhat[3], yhat[3], zhat[3];
@@ -159,9 +193,11 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 
   get_ABC(eps, rp, b, &A, &Bcose, &Bsine, &C);
   lambda_roots(A, Bcose, Bsine, C, &l0, &l1, &l2);
-  Qmatrix(A, Bcose, Bsine, C, l0, l1, l2, e, Q);
+  /* Qmatrix(A, Bcose, Bsine, C, l0, l1, l2, e, Q);
 
-  UV_from_Q(Q, norm(b->A), U, V);
+     UV_from_Q(Q, norm(b->A), U, V); */
+
+  UV_from_lambda(l0, l1, l2, A, Bsine, Bcose, C, e, U, V);
   
   get_F(rp, b, F0, F1, F2);
 
