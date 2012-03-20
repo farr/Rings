@@ -52,10 +52,9 @@ lambda_roots(const double A, const double Bcose, const double Bsine, const doubl
     fprintf(stderr, "ERROR: bad C value in lambda_roots.\n");
     exit(1);
   } else if (*l2 < -C) {
-    /* Fix up assuming that the other roots are correct. */
-    *l2 = Bcose*Bcose*C/((*l0+C)*(*l1+C)) - C;
+    *l2 = -C;
   } else if (*l2 > 0.0) {
-    *l2 = -Bsine*Bsine*C / ((*l0)*(*l1));
+    *l2 = 0.0;
   } else if (*l1 < 0.0) {
     fprintf(stderr, "ERROR: l1 < 0 in lambda_roots.\n");
     exit(1);
@@ -104,25 +103,12 @@ Qmatrix(const double A, const double Bcose, const double Bsine, const double C,
   Q[2][1] = Bcose*sqrt(l1/((l1+C)*(l0-l1)*(l1-l2)));
   Q[2][2] = Bcose*sqrt(fabs(l2)/(fabs(l2+C)*(l0-l2)*(l1-l2)));
 
-  if (e*e < 1e-8) {
-    /* Small e => small C => small l2, correct Q[1][2] and Q[2][2] */
-    Q[1][2] = - sign(Bsine)*fabs(Bcose)/sqrt(fabs((l0-l2)*(l1-l2)));
-    Q[2][2] = sign(Bcose)*fabs(Bsine)/sqrt(fabs((l0-l2)*(l1-l2)));
-  } else if (fabs(1.0 - e*e) < 1e-8) {
-    /* Large e => small B*sin(eps) => small l1, correct Q[1][1]. */
-    Q[1][1] = 1.0 - (C*l0 + C*l2 + l0*l2)*Bsine*Bsine/(2.0*l0*l0*l2*l2);
-  } else if (fabs(2.0*l2/(l1 + l0)) < 1e-8) {
-    /* l2 driven small => BSine similarly small, but, unlike e --> 0,
-       l2 not close to C. */
-    Q[1][2] = -1.0 + Bsine*Bsine*(l0*l1 + C*(l0+l1))/(2.0*l0*l0*l1*l1);
-  } else if (fabs(2.0*l1/(l0+l2)) < 1e-8) {
-    /* l1 driven small => BSine similarly small.*/
-    Q[1][1] = 1.0 - (C*l0 + C*l2 + l0*l2)*Bsine*Bsine/(2.0*l0*l0*l2*l2);
-  } else if (fabs(2.0*(l2+C)/(l1+C + l0+C)) < 1e-8) {
-    /* l2 driven toward -C => BCose similarly small. */
-    Q[2][2] = sqrt(fabs(l2*(l0+C)*(l1+C)/(C*(l0-l2)*(l1-l2))));
+  if (fabs((l2+C)/l2) < 1e-3) {
+    /* l2 --> C, re-write Q[2][2] to account for loss of accuracy. */
+    Q[2][2] = sign(Bcose)*sqrt(fabs(l2)*(l0+C)*(l1+C)/(C*(l0-l2)*(l1-l2)));
+  } else if (fabs(l2/C) < 1e-3) {
+    Q[1][2] = -sign(Bsine)*sqrt((l2+C)*l0*l1/(C*(l0-l1)*(l1-l2)));
   }
-
 }
 
 static void
@@ -193,11 +179,11 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 
   get_ABC(eps, rp, b, &A, &Bcose, &Bsine, &C);
   lambda_roots(A, Bcose, Bsine, C, &l0, &l1, &l2);
-  /* Qmatrix(A, Bcose, Bsine, C, l0, l1, l2, e, Q);
+  Qmatrix(A, Bcose, Bsine, C, l0, l1, l2, e, Q);
 
-     UV_from_Q(Q, norm(b->A), U, V); */
+  UV_from_Q(Q, norm(b->A), U, V);
 
-  UV_from_lambda(l0, l1, l2, A, Bsine, Bcose, C, e, U, V);
+  /* UV_from_lambda(l0, l1, l2, A, Bsine, Bcose, C, e, U, V); */
   
   get_F(rp, b, F0, F1, F2);
 

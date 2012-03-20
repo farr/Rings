@@ -132,7 +132,7 @@ static body *read_input(FILE *inp, body *bs, int *bsize) {
 
 int main(int argc, char **argv) {
   int status;
-  configuration conf = {1e9, 1.0, 0.0, 1e-8, 1e-5, stdin, stdout};
+  configuration conf = {1e9, 1.0, 0.0, 1e-6, 1e-4, stdin, stdout};
   body *bs = malloc(sizeof(body));
   int bsize = 1;
   double t = 0.0;
