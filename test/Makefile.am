@@ -15,6 +15,9 @@ tides-angular-momentum-test
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la
 
+dist_check_DATA = nature-ic.dat
+dist_check_DATA = nature-plot.py
+
 libcheck_la_SOURCES = checks.c
 
 TESTS = $(check_PROGRAMS)
