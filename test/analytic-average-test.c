@@ -78,8 +78,11 @@ main() {
       fnumerical[i] = result;
     }
 
-    if (!check_vector_close(EPS, EPS, 3, fanalytic, fnumerical)) {
+    if (!check_vector_close(10.0*EPS, 10.0*EPS, 3, fanalytic, fnumerical)) {
       fprintf(stderr, "analytic-average-test: analytic and numerical average forces disagree.\n");
+      fprintf(stderr, "analytic = [%g, %g, %g], numerical = [%g, %g, %g]\n", 
+              fanalytic[0], fanalytic[1], fanalytic[2], 
+              fnumerical[0], fnumerical[1], fnumerical[2]);
       status = 1;
     }
   }
@@ -123,8 +126,11 @@ main() {
       fnumerical[i] = result;
     }
 
-    if (!check_vector_close(EPS, EPS, 3, fanalytic, fnumerical)) {
+    if (!check_vector_close(10.0*EPS, 10.0*EPS, 3, fanalytic, fnumerical)) {
       fprintf(stderr, "analytic-average-test: analytic and numerical average forces disagree.\n");
+      fprintf(stderr, "analytic = [%g, %g, %g], numerical = [%g, %g, %g]\n", 
+              fanalytic[0], fanalytic[1], fanalytic[2], 
+              fnumerical[0], fnumerical[1], fnumerical[2]);
       status = 1;
     }
   }

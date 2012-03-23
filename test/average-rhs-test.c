@@ -5,7 +5,7 @@
 #include<gsl/gsl_integration.h>
 #include<gsl/gsl_rng.h>
 
-#define EPS 1e-15
+#define EPS 1e-10
 
 int
 main() {

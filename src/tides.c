@@ -87,7 +87,8 @@ tfs(const body *b, const double QpSun, const double RSun,
 void
 tidal_rhs(const body *b, const double QpSun, const double RSun, const double ISun,
           const double OmegaSun[3], double brhs[BODY_VECTOR_SIZE], double srhs[3]) {
-  double e = norm(b->A);
+  double e = get_e(b);
+  double sqrt1me2 = sqrt(1.0 - e*e);
   double e2 = e*e;
   double n = mean_motion(b);
   double a2 = b->a*b->a;
@@ -102,7 +103,7 @@ tidal_rhs(const body *b, const double QpSun, const double RSun, const double ISu
   double Omegasun_dot_e = dot(OmegaSun, b->A);
   double Omegasun_dot_h = n*a2*dot(OmegaSun, b->L);
 
-  double h = n*a2*norm(b->L);
+  double h = n*a2*sqrt1me2;
 
   double f1 = ff1(e2);
   double f2 = ff2(e2);

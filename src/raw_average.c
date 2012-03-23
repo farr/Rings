@@ -28,7 +28,7 @@ double inner_fn(double E2, inner_data *data) {
   } else {
     double r2[3], v2[3];
     double aspec[3], a[3];
-    double e2 = norm(data->b2->A);
+    double e2 = get_e(data->b2);
     double fac = (1.0 - e2*cos(E2))/(2.0*M_PI);
     double n1 = data->n1;
     double a1 = data->b1->a;
@@ -80,7 +80,7 @@ double outer_fn(double E1, outer_data *data) {
   inner_data idata;
   double result, error;
   gsl_function finner;
-  double e1 = norm(data->b1->A);
+  double e1 = get_e(data->b1);
   double fac = (1.0 - e1*cos(E1))/(2.0*M_PI);
 
   E_to_rv(data->b1, E1, idata.r1, idata.v1);

@@ -5,6 +5,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<float.h>
+#include<gsl/gsl_errno.h>
 
 double
 mean_motion(const body *b) {
@@ -19,15 +20,37 @@ period(const body *b) {
   return 2.0*M_PI / mean_motion(b);
 }
 
-void
+double
+get_e(const body *b) {
+  double eA = norm(b->A);
+
+  if (eA < 0.5) {
+    /* If e is small, use b->A because it implements reflecting
+       boundary condition at e = 0. */
+    return eA;
+  } else {
+    /* If e is large, use b->L because it implements reflecting
+       boundary condition around e = 1. */
+    double ln = norm(b->L);
+    double eL = sqrt(1.0 - ln*ln);
+
+    return eL;
+  }
+}
+
+int
 E_to_rv(const body *b, const double E, double x[3], double v[3]) {
   double xhat[3], yhat[3], zhat[3];
-  double etmp = norm(b->A);
-  double e = (etmp > 1.0 ? 1.0 : etmp);
+  double e = get_e(b);
+
+  if (e < 0.0 || e >= 1.0 || isnan(e)) {
+    return GSL_EINVAL;
+  }
+
   double n = mean_motion(b);
   double cosE = cos(E), sinE = sin(E);
   double eCosE = e*cosE;
-  double sqrt1me2 = norm(b->L);
+  double sqrt1me2 = sqrt(1.0-e*e);
   double denom = 1.0 - eCosE;
   double a = b->a;
   double xc = a*(cosE - e);
@@ -105,6 +128,8 @@ E_to_rv(const body *b, const double E, double x[3], double v[3]) {
     x[i] = xc*xhat[i] + yc*yhat[i];
     v[i] = xdot*xhat[i] + ydot*yhat[i];
   }
+
+  return GSL_SUCCESS;
 }
 
 static void
@@ -169,7 +194,7 @@ elements_from_body(const body *b,
   double asc_node_x_A[3];
 
   *I = acos(b->L[2]/Lmag)*180.0/M_PI;
-  *e = norm(b->A);
+  *e = get_e(b);
 
   if (b->L[1]*b->L[1] + b->L[0]*b->L[0] < 1e4*DBL_EPSILON*DBL_EPSILON) {
     /* If we are basically in the x-y plane, then Omega is undefined; use x-axis. */
@@ -190,7 +215,7 @@ elements_from_body(const body *b,
     /* Then e is so small we don't really have omega. */
     *omega = 0.0;
   } else {
-    *omega = acos(dot(asc_node, b->A)/norm(b->A));
+    *omega = acos(dot(asc_node, b->A)/get_e(b));
     
     cross(asc_node, b->A, asc_node_x_A);
     if (dot(b->L, asc_node_x_A) < 0.0) { /* This means large argument of periapse. */
@@ -277,9 +302,34 @@ body_derivs_to_orbital_elements(const body *b, const double dbdt[BODY_VECTOR_SIZ
 
 void
 body_coordinate_system(const body *b, double xhat[3], double yhat[3], double zhat[3]) {
-  unitize(b->L, zhat);
-  unitize(b->A, xhat);
-  cross(zhat, xhat, yhat);
+  double LNorm = norm(b->L);
+  double ANorm = norm(b->A);
+
+  if (LNorm > 0.0 && ANorm > 0.0) {
+    unitize(b->L, zhat);
+    unitize(b->A, xhat);
+    cross(zhat, xhat, yhat);
+  } else if (LNorm > 0.0) {
+    /* A norm is too small. */
+    double xhattmp[3], yhattmp[3];
+    unitize(b->L, zhat);
+    xhat[0] = 1.0; xhat[1] = 0.0; xhat[2] = 0.0;
+    cross(zhat, xhat, yhattmp);
+    cross(yhat, zhat, xhattmp);
+
+    unitize(xhattmp, xhat);
+    unitize(yhattmp, yhat);
+  } else {
+    /* L is too small. */
+    double xhattmp[3], yhattmp[3];
+    unitize(b->A, xhat);
+    zhat[0] = 0.0; zhat[1] = 0.0; zhat[2] = 1.0;
+    cross(zhat, xhat, yhattmp);
+    cross(yhat, zhat, xhattmp);
+
+    unitize(xhattmp, xhat);
+    unitize(yhattmp, yhat);
+  }
 }
 
 void

@@ -145,6 +145,7 @@ int main(int argc, char **argv) {
   int odesize;
   int i;
   double h;
+  const int NRETRIES_MAX = 5;
 
   status = parse_args(argc, argv, opts, &conf);
   if (status != 0) {
@@ -165,6 +166,7 @@ int main(int argc, char **argv) {
 
   do {
     int status;
+    int nretries = 0;
 
     for (i = 0; i < bsize; i++) {
       fprintf(conf.out, "%.1f ", t);
@@ -172,11 +174,19 @@ int main(int argc, char **argv) {
       fflush(conf.out);
     }
 
-    status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsquad, conf.eps);
+    do {
+      status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsquad, conf.eps);
+      
+      if (status != GSL_SUCCESS) {
+        nretries++;
+        h = h / 10.0;
+      }
+    } while (status != GSL_SUCCESS && nretries <= NRETRIES_MAX);
 
     if (status != GSL_SUCCESS) {
+      char message[1024];
       fprintf(stderr, "Error in evolution: %d (%s) at %s, line %d\n", status, gsl_strerror(status),
-              __FILE__, __LINE__);
+             __FILE__, __LINE__);
       exit(1);
     }
 

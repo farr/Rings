@@ -37,7 +37,7 @@ static int
 f(double t, const double y[], double dydt[], void *vparams) {
   fparams *p = (fparams *)vparams;
   size_t i;
-  int status;
+  int status = GSL_SUCCESS;
 
   memset(dydt, 0, p->nbodies*BODY_VECTOR_SIZE);
   
@@ -56,10 +56,15 @@ f(double t, const double y[], double dydt[], void *vparams) {
         body bj;
         double rhs[BODY_VECTOR_SIZE];
         size_t k;
+        int status;
 
         vector_to_body(y+j*BODY_VECTOR_SIZE, &bj);
         
-        average_rhs(p->eps, &bi, &bj, p->epsquad, rhs);
+        status = average_rhs(p->eps, &bi, &bj, p->epsquad, rhs);
+
+        if (status != GSL_SUCCESS) {
+          return GSL_EBADFUNC;
+        }
 
         for (k = 0; k < BODY_VECTOR_SIZE; k++) {
           dydt[i*BODY_VECTOR_SIZE+k] += rhs[k];
@@ -68,7 +73,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
     }
   }
 
-  return GSL_SUCCESS;
+  return status;
 }
 
 int
@@ -77,7 +82,7 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
               size_t nbodies, const double epsquad, const double eps) {
   fparams p;
   gsl_odeiv_system sys;
-  int status;
+  int status = 0;
   int i;
 
   p.eps = eps;

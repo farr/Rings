@@ -22,6 +22,7 @@ int main() {
   double spin[3] = {0.0, 0.0, 0.0};
   double amdInitial, amdFinal;
   int i;
+  int NRETRIES_MAX = 5;
 
   ws = gsl_integration_workspace_alloc(nws);
 
@@ -29,9 +30,23 @@ int main() {
   init_body_from_elements(&(bs[1]), m2, a2, e2, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
 
   amdInitial = body_system_amd(bs, 2);
+  
+  int nretries = 0;
 
   do {
-    status = evolve_system(e, con, step, &t, T, &h, bs, y, NBODIES, epsabs, 0.0);
+    do {
+      status = evolve_system(e, con, step, &t, T, &h, bs, y, NBODIES, epsabs, 0.0);
+
+      if (status != GSL_SUCCESS) {
+        fprintf(stderr, "Status = %d!\n", status);
+        nretries++;
+        h = h / 10.0;
+        gsl_odeiv_evolve_reset(e);
+        gsl_odeiv_step_reset(step);
+      } else {
+        nretries = 0;
+      }
+    } while (status != GSL_SUCCESS && nretries <= NRETRIES_MAX);
   } while (status == GSL_SUCCESS && t < T);
 
   amdFinal = body_system_amd(bs, 2);
