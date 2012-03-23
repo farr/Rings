@@ -180,6 +180,8 @@ int main(int argc, char **argv) {
       if (status != GSL_SUCCESS) {
         nretries++;
         h = h / 10.0;
+        gsl_odeiv_evolve_reset(e);
+        gsl_odeiv_step_reset(step);
       }
     } while (status != GSL_SUCCESS && nretries <= NRETRIES_MAX);
 
