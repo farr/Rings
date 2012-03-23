@@ -225,7 +225,9 @@ force_averaged_unprimed(const double eps, const double rp[3], const body *b, dou
 
   for (i = 0; i < 3; i++) {
     f[i] = 2.0*b->m/M_PI*sqrt(fabs(l0-l2))/((l0-l1)*(l1-l2))*((k2*FU[i] + FV[i])*Ek - (1.0 - k2)*FV[i]*Kk);
-    assert(!isnan(f[i]));
+    if (isnan(f[i])) {
+      return GSL_FAILURE;
+    }
   }
 
   return GSL_SUCCESS;
