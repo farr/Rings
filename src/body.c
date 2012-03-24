@@ -215,6 +215,11 @@ elements_from_body(const body *b,
     /* Then e is so small we don't really have omega. */
     *omega = 0.0;
   } else {
+    double cos_omega = dot(asc_node, b->A)/get_e(b);
+    
+    if (cos_omega > 1.0) cos_omega = 1.0;
+    if (cos_omega < -1.0) cos_omega = -1.0;
+
     *omega = acos(dot(asc_node, b->A)/get_e(b));
     
     cross(asc_node, b->A, asc_node_x_A);

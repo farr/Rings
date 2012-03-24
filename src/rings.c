@@ -168,6 +168,8 @@ int main(int argc, char **argv) {
     int status;
     int nretries = 0;
 
+    double dt, old_t;
+
     for (i = 0; i < bsize; i++) {
       fprintf(conf.out, "%.1f ", t);
       write_body_elements(conf.out, bs+i);
@@ -175,8 +177,9 @@ int main(int argc, char **argv) {
     }
 
     do {
+      old_t = t;
       status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsquad, conf.eps);
-      
+      dt = t - old_t;
       if (status != GSL_SUCCESS) {
         nretries++;
         h = h / 10.0;
@@ -186,12 +189,18 @@ int main(int argc, char **argv) {
     } while (status != GSL_SUCCESS && nretries <= NRETRIES_MAX);
 
     if (status != GSL_SUCCESS) {
-      char message[1024];
       fprintf(stderr, "Error in evolution: %d (%s) at %s, line %d\n", status, gsl_strerror(status),
              __FILE__, __LINE__);
       exit(1);
     }
 
+    for (i = 0; i < bsize; i++) {
+      if (dt < period(bs+i)) {
+        fprintf(stderr, "Error in evolution: dt < 1 orbit: dt = %g, T = %g at %s, line %d\n", 
+                dt, period(bs+i), __FILE__, __LINE__);
+        exit(1);
+      }
+    }
   } while (t != conf.T);
 
   for (i = 0; i < bsize; i++) {
