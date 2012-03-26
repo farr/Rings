@@ -24,11 +24,10 @@ double
 get_e(const body *b) {
   double eA = norm(b->A);
   double ln = norm(b->L);
-  double eL = sqrt(1.0-ln*ln);
+  
+  if (ln > 1.0) return eA; /* Small eccentricity regime, hopefully. */
 
-  if (isnan(eL)) {
-    return eL;
-  }
+  double eL = sqrt(1.0-ln*ln);
 
   double eAve = 0.5*(eA+eL);
 

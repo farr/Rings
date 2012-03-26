@@ -167,6 +167,7 @@ int main(int argc, char **argv) {
   do {
     int status;
     int nretries = 0;
+    double told = t;
 
     for (i = 0; i < bsize; i++) {
       fprintf(conf.out, "%.1f ", t);
@@ -182,12 +183,19 @@ int main(int argc, char **argv) {
         h = h / 10.0;
         gsl_odeiv_evolve_reset(e);
         gsl_odeiv_step_reset(step);
+        fprintf(stderr, "Retrying step at time %g, hnew = %g\n", t, h);
       }
     } while (status != GSL_SUCCESS && nretries <= NRETRIES_MAX);
 
     if (status != GSL_SUCCESS) {
       fprintf(stderr, "Error in evolution: %d (%s) at %s, line %d\n", status, gsl_strerror(status),
              __FILE__, __LINE__);
+      exit(1);
+    }
+
+    if (told == t) {
+      fprintf(stderr, "Error in evolution: driven to zero stepsize at time %g (retried %d steps), at %s, line %d\n", 
+              t, nretries, __FILE__, __LINE__);
       exit(1);
     }
   } while (t != conf.T);
