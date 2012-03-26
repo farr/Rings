@@ -12,6 +12,7 @@ typedef enum {
   OPT_EPS,
   OPT_EPSQUAD,
   OPT_EPSINT,
+  OPT_THIN,
   OPT_INP,
   OPT_OUT
 } opt_flag;
@@ -22,6 +23,7 @@ typedef struct {
   double eps;
   double epsquad;
   double epsint;
+  int thin_factor;
   FILE *inp;
   FILE *out;
 } configuration;
@@ -33,6 +35,7 @@ static struct option opts[] = {
   {"eps", required_argument, 0, OPT_EPS},
   {"epsquad", required_argument, 0, OPT_EPSQUAD},
   {"epsint", required_argument, 0, OPT_EPSINT},
+  {"thin", required_argument, 0, OPT_THIN},
   {"input", required_argument, 0, OPT_INP},
   {"output", required_argument, 0, OPT_OUT},
   {0}
@@ -48,6 +51,7 @@ static char usage[] = "rings OPTION ...\n"
 "--eps EPS       Softening scale\n"
 "--epsquad EPS   Quadrature relative accuracy\n"
 "--epsint EPS    Integration relative accuracy\n"
+"--thin NTHIN    Output only every NTHIN steps\n"
 "--input FILE    Input file\n"
 "--output FILE   Output file\n";
 
@@ -73,6 +77,9 @@ static int parse_args(int argc, char **argv, struct option *opts, configuration 
       break;
     case OPT_EPSINT:
       conf->epsint = atof(optarg);
+      break;
+    case OPT_THIN:
+      conf->thin_factor = atoi(optarg);
       break;
     case OPT_INP:
       conf->inp = fopen(optarg, "r");
@@ -132,7 +139,7 @@ static body *read_input(FILE *inp, body *bs, int *bsize) {
 
 int main(int argc, char **argv) {
   int status;
-  configuration conf = {1e9, 1.0, 0.0, 1e-6, 1e-4, stdin, stdout};
+  configuration conf = {1e9, 1.0, 0.0, 1e-6, 1e-4, 1, stdin, stdout};
   body *bs = malloc(sizeof(body));
   int bsize = 1;
   double t = 0.0;
@@ -146,6 +153,7 @@ int main(int argc, char **argv) {
   int i;
   double h;
   const int NRETRIES_MAX = 5;
+  int nstep = 0;
 
   status = parse_args(argc, argv, opts, &conf);
   if (status != 0) {
@@ -169,10 +177,12 @@ int main(int argc, char **argv) {
     int nretries = 0;
     double told = t;
 
-    for (i = 0; i < bsize; i++) {
-      fprintf(conf.out, "%.1f ", t);
-      write_body_elements(conf.out, bs+i);
-      fflush(conf.out);
+    if (nstep % conf.thin_factor == 0) {
+      for (i = 0; i < bsize; i++) {
+        fprintf(conf.out, "%.1f ", t);
+        write_body_elements(conf.out, bs+i);
+        fflush(conf.out);
+      }
     }
 
     do {
@@ -198,6 +208,8 @@ int main(int argc, char **argv) {
               t, nretries, __FILE__, __LINE__);
       exit(1);
     }
+
+    nstep++;
   } while (t != conf.T);
 
   for (i = 0; i < bsize; i++) {
