@@ -23,18 +23,25 @@ period(const body *b) {
 double
 get_e(const body *b) {
   double eA = norm(b->A);
+  double ln = norm(b->L);
+  double eL = sqrt(1.0-ln*ln);
 
-  if (eA < 0.5) {
-    /* If e is small, use b->A because it implements reflecting
-       boundary condition at e = 0. */
-    return eA;
-  } else {
-    /* If e is large, use b->L because it implements reflecting
-       boundary condition around e = 1. */
-    double ln = norm(b->L);
-    double eL = sqrt(1.0 - ln*ln);
-
+  if (isnan(eL)) {
     return eL;
+  }
+
+  double eAve = 0.5*(eA+eL);
+
+  if (eAve < 0.25) {
+    return eA;
+  } else if (eAve > 0.75) {
+    return eL;
+  } else {
+    double c = (3.0 - 4.0*eAve);
+    double c2 = c*c;
+    double f = c2*eAve;
+
+    return f*eA + (1.0-f)*eL;
   }
 }
 
