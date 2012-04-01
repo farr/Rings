@@ -1,3 +1,6 @@
+AM_CFLAGS=$(GSL_CFLAGS)
+AM_LDFLAGS=$(GSL_LIBS)
+
 check_PROGRAMS = vector-check body-test projection-test rotate-test \
 init-body-from-elements-test \
 raw-average-zero-adot-test raw-average-orthogonal-test raw-average-Ltot-test \
@@ -15,8 +18,7 @@ tides-angular-momentum-test
 check_HEADERS = checks.h
 check_LTLIBRARIES = libcheck.la
 
-dist_check_DATA = nature-ic.dat
-dist_check_DATA = nature-plot.py
+dist_check_DATA = nature-ic.dat nature-plot.py
 
 libcheck_la_SOURCES = checks.c
 

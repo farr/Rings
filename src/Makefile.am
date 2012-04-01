@@ -1,3 +1,6 @@
+AM_CFLAGS=$(GSL_CFLAGS)
+AM_LDFLAGS=$(GSL_LIBS)
+
 include_HEADERS = rings.h
 
 bin_PROGRAMS = rings
