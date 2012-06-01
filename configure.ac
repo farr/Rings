@@ -4,7 +4,11 @@ AM_INIT_AUTOMAKE
 AC_PROG_CC
 LT_INIT()
 
-AX_PATH_GSL(1.12)
+AX_PATH_GSL(1.12,[
+CFLAGS="$CFLAGS $GSL_CFLAGS"
+LDFLAGS="$LDFLAGS $GSL_LDFLAGS"
+],[
+AC_MSG_ERROR(could not find required version of GSL)])
 
 AC_CHECK_FUNC([getopt_long], [], [AC_MSG_ERROR([could not call getopt_long])])
 

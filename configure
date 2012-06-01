@@ -11438,7 +11438,10 @@ fi
   if test "x$no_gsl" = x ; then
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-     :
+
+CFLAGS="$CFLAGS $GSL_CFLAGS"
+LDFLAGS="$LDFLAGS $GSL_LDFLAGS"
+
   else
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -11491,7 +11494,8 @@ rm -f core conftest.err conftest.$ac_objext \
      fi
 #     GSL_CFLAGS=""
 #     GSL_LIBS=""
-     :
+
+as_fn_error $? "could not find required version of GSL" "$LINENO" 5
   fi
 
 
