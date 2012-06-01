@@ -2,7 +2,7 @@ AC_INIT([rings], [1.0], [w-farr@northwestern.edu])
 AM_INIT_AUTOMAKE
 
 AC_PROG_CC
-AC_PROG_LIBTOOL
+LT_INIT()
 
 AX_PATH_GSL(1.12)
 
