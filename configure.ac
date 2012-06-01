@@ -6,7 +6,7 @@ LT_INIT()
 
 AX_PATH_GSL(1.12,[
 CFLAGS="$CFLAGS $GSL_CFLAGS"
-LDFLAGS="$LDFLAGS $GSL_LDFLAGS"
+LIBS="$LIBS $GSL_LIBS"
 ],[
 AC_MSG_ERROR(could not find required version of GSL)])
 
