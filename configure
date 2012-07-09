@@ -11440,7 +11440,7 @@ fi
 $as_echo "yes" >&6; }
 
 CFLAGS="$CFLAGS $GSL_CFLAGS"
-LDFLAGS="$LDFLAGS $GSL_LDFLAGS"
+LIBS="$LIBS $GSL_LIBS"
 
   else
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
