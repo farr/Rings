@@ -14,8 +14,7 @@ typedef enum {
   OPT_EPSINT,
   OPT_THIN,
   OPT_INP,
-  OPT_OUT,
-  OPT_TIDES
+  OPT_OUT
 } opt_flag;
 
 typedef struct {
@@ -27,7 +26,6 @@ typedef struct {
   int thin_factor;
   FILE *inp;
   FILE *out;
-  int tides_p;
 } configuration;
 
 static struct option opts[] = {
@@ -40,7 +38,6 @@ static struct option opts[] = {
   {"thin", required_argument, 0, OPT_THIN},
   {"input", required_argument, 0, OPT_INP},
   {"output", required_argument, 0, OPT_OUT},
-  {"tides", no_argument, 0, OPT_TIDES},
   {0}
 };
 
@@ -56,8 +53,7 @@ static char usage[] = "rings OPTION ...\n"
 "--epsint EPS    Integration relative accuracy\n"
 "--thin NTHIN    Output only every NTHIN steps\n"
 "--input FILE    Input file\n"
-"--output FILE   Output file\n"
-"--tides         Apply tidal evolution\n";
+"--output FILE   Output file\n";
 
 static int parse_args(int argc, char **argv, struct option *opts, configuration *conf) {
   int flag, index;
@@ -98,9 +94,6 @@ static int parse_args(int argc, char **argv, struct option *opts, configuration 
         fprintf(stderr, "Could not open output file: %s\n", optarg);
         exit(1);
       }
-      break;
-    case OPT_TIDES:
-      conf->tides_p = 1;
       break;
     default:
       fprintf(stderr, "Unrecognized option!\n");
@@ -167,7 +160,7 @@ static int write_bodies(FILE *stream, const double t, const central_body *bc, co
 
 int main(int argc, char **argv) {
   int status;
-  configuration conf = {1e9, 1.0, 0.0, 1e-10, 1e-8, 1, stdin, stdout, 0};
+  configuration conf = {1e9, 1.0, 0.0, 1e-10, 1e-8, 1, stdin, stdout};
   body *bs = malloc(sizeof(body));
   central_body bc;
   int bsize = 1;

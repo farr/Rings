@@ -38,3 +38,7 @@ pp.ylabel(r'$L_1^z$')
 pp.subplot(4,1,4)
 pp.plot(ts, L2s)
 pp.ylabel(r'$L_2^z$')
+
+pp.savefig('/tmp/nature.pdf')
+
+pp.show()
