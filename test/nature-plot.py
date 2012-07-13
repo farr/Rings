@@ -8,11 +8,11 @@ data = np.loadtxt('/tmp/nature.dat')
 ei = 3
 ii = 4
 
-ts = data[0::2, 0]
-e1s = data[0::2, ei]
-e2s = data[1::2, ei]
-i1s = data[0::2, ii]
-i2s = data[1::2, ii]
+ts = data[0::3, 0]
+e1s = data[1::3, ei]
+e2s = data[2::3, ei]
+i1s = data[1::3, ii]
+i2s = data[2::3, ii]
 
 L1s = np.sqrt(1 - e1s**2.0)*np.cos(np.deg2rad(i1s))
 L2s = np.sqrt(1 - e2s**2.0)*np.cos(np.deg2rad(i2s))

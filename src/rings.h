@@ -105,13 +105,35 @@ typedef struct {
 #define BODY_A_INDEX 8
 #define BODY_SPIN_INDEX 11
 
+/** Central body information. */
+typedef struct {
+  double Qp;  /** Q' from Baker and Ogilvie (see above). */
+  double I;  /** Moment of inertia (units are m*a^2). */
+  double R;  /** Radius (units are a) */
+  double spin[3];  /** Instantaneous spin vector. */
+} central_body;
+
+#define CENTRAL_BODY_VECTOR_SIZE 6
+#define CENTRAL_BODY_Qp_INDEX 0
+#define CENTRAL_BODY_I_INDEX 1
+#define CENTRAL_BODY_R_INDEX 2
+#define CENTRAL_BODY_SPIN_INDEX 3
+
 /** Unpack a body into a vector of length #BODY_VECTOR_SIZE */
 void
 body_to_vector(const body *b, double *v);
 
+/** Unpack a central body into a vector of length #CENTRAL_BODY_VECTOR_SIZE */
+void
+central_body_to_vector(const central_body *bc, double *v);
+
 /** Pack a vector of length #BODY_VECTOR_SIZE into b. */
 void
 vector_to_body(const double *v, body *b);
+
+/** Pack a vector of length #CENTRAL_BODY_VECTOR_SIZE */
+void
+vector_to_central_body(const double *v, central_body *bc);
 
 /** Mean motion of b. */
 double
@@ -170,14 +192,22 @@ init_body_from_elements(body *b,
                         const double spin[3], 
                         const double Qp, const double inertia, const double R);
 
-/* Sets the orbital elements given a body, b. */
+/** Produce a central body from the given properties. */
+void
+init_central_body(central_body *b, const double Qp, const double I, 
+                  const double R, const double spin[3]);
+
+/** Sets the orbital elements given a body, b. */
 void
 elements_from_body(const body *b,
                    double *e, double *I, double *Omega, double *omega);
 
+/** Sets the spin to vector of the given body to synchronous rotation. */
 void
 body_set_synchronous_spin(body *b);
 
+/** Computes the instantaneous gravitational acceleration on b1 due to
+    b2, and the corresponding rate of change of b1's orbit. */
 void
 body_instantaneous_rhs(const double eps,
                        const body *b1, const double E1,
@@ -191,16 +221,19 @@ body_instantaneous_rhs(const double eps,
 #define OMEGA_INDEX 3
 #define oMEGA_INDEX 4
 
-/* Fills deldt with [adot, edot, Idot, OmegaDot, omegaDot] from the
+/** Fills deldt with [adot, edot, Idot, OmegaDot, omegaDot] from the
    given rates of change of the components of b in dbdt. */
 void
 body_derivs_to_orbital_elements(const body *b, const double dbdt[BODY_VECTOR_SIZE], double deldt[NELEMENTS]);
 
+/** Computes the AMD of the given system. */
 double
 body_system_amd(const body bs[], const size_t n);
 
 /* raw_average.c */
 
+/** Numerically averaged RHS of the evolution equations for body 1 due
+    to body 2. */
 void
 raw_average_rhs(const double eps, const body *b1, const body *b2,
                 gsl_integration_workspace *ws1, const size_t ws1_limit,
@@ -227,19 +260,21 @@ average_rhs(const double eps, const body *b1, const body *b2,
 /* advancer.c */
 
 /** Given the number of bodies in the sysetm, returns the number of
-    elements in the system vector.  This is useful when allocating GSL
-    odeiv objects, since these require a vector size. */
+    elements in the system vector (including the central body).  This
+    is useful when allocating GSL odeiv objects, since these require a
+    vector size. */
 size_t
 body_size_to_vector_size(const size_t nbodies);
 
-/* Convert between arrays of bodies and arrays of doubles. */
+/** Convert between arrays of bodies and arrays of doubles. */
 void
-bodies_to_vector(const body bs[], const size_t nbodies, double y[]);
+bodies_to_vector(const central_body *bc, const body bs[], const size_t nbodies, double y[]);
 
+/** Convert between arrays of doubles and arrays of bodies. */
 void
-vector_to_bodies(const double y[], const size_t nbodies, body bs[]);
+vector_to_bodies(const double y[], const size_t nbodies, central_body *bc, body bs[]);
 
-/* Advance routine.  Behaves similarly to gsl_odeiv_evolve_apply, but
+/** Advance routine.  Behaves similarly to gsl_odeiv_evolve_apply, but
    specialized to systems of bodies.  The e, con, and step arguments
    are as for gsl_odeiv_evolve_apply.  The evolve_system procedure
    uses the provided GSL objects to advance the system toward a time
@@ -266,18 +301,20 @@ vector_to_bodies(const double y[], const size_t nbodies, body bs[]);
   */
 int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
-              double *t, const double t1, double *h, body bs[], double y[], const size_t nbodies, 
-              const double epsquad, const double eps);
+              double *t, const double t1, double *h, central_body *bc, body bs[], 
+              double y[], const size_t nbodies, const double epsquad, 
+              const double eps);
 
-/* A new type of control object, does the usual checks of the standard
-   GSL control on the absolute error of y(t), but also checks the
-   orthogonality of A and L for each body, and the constraint A^2 +
-   L^2 = 1. */
-gsl_odeiv_control *gsl_odeiv_control_secular_new(double epsabs);
+/** A new type of control object, does the usual checks of the
+    standard GSL control on the absolute error of y(t), but also
+    checks the orthogonality of A and L for each body, and the
+    constraint A^2 + L^2 = 1. */
+gsl_odeiv_control *
+gsl_odeiv_control_secular_new(double epsabs);
 
 /* read_write.c */
 
-/* Exects body in Runge-Lenz/L coordinates as 
+/** Exects body in Runge-Lenz/L coordinates as 
 
    m a Qp I R L0 L1 L2 A0 A1 A2 Omega1 Omega2 Omega3
 
@@ -286,31 +323,52 @@ gsl_odeiv_control *gsl_odeiv_control_secular_new(double epsabs);
    vector of the body, also in units consistent with a and m.
    Whitespace is ignored.  Note that these coordinates should satisfy
    the constraints A*L = 0 and A^2 + L^2 = 1, but read_body does not
-   check this!  */
+   check this!  Returns number of bodies read. */
 int
 read_body(FILE *stream, body *b);
 
-/* Expects elements in the following format: 
+/** Read the central body properties from the stream in the format 
 
-   m a e I Omega omega Qp I R S1 S2 S3
+    Qp I R Omega1 Omega2 Omega3
 
-   whitespace is ignored. Qp, I, R are the dissipation constant,
-   moment of inertia and radius, respectively.  S is the spin vector
-   for the object.  */
+    with the corresponding meanings for a body.
+ */
+int
+read_central_body(FILE *stream, central_body *bc);
+
+/** Expects elements in the following format: 
+
+    m a e I Omega omega Qp I R S1 S2 S3
+
+    whitespace is ignored. Qp, I, R are the dissipation constant,
+    moment of inertia and radius, respectively.  S is the spin vector
+    for the object.  */
 int
 read_body_from_elements(FILE *stream, body *b);
 
-/* Binary version of read_body. */
+/** Binary version of read_body. */
 int
 read_body_bin(FILE *stream, body *b);
 
-/* Writes b to stream, in the format of read_body above:
+/** Binary version of read central body. */
+int
+read_central_body_bin(FILE *stream, central_body *bc);
+
+/** Writes b to stream, in the format of read_body above:
 
    m a Qp I R L0 L1 L2 A0 A1 A2 S0 S1 S2*/
 int
 write_body(FILE *stream, const body *b);
 
-/* Writes the state of b to stream as 
+/** Writes a central body to the stream in the format
+
+   1.0 0.0 Qp I R 0.0 0.0 0.0 0.0 0.0 0.0 S0 S1 S2
+
+ */
+int 
+write_central_body(FILE *stream, const central_body *b);
+
+/** Writes the state of b to stream as 
 
    m a e I Omega omega Qp I R S0 S1 S2\n
 
@@ -319,9 +377,20 @@ write_body(FILE *stream, const body *b);
 int
 write_body_elements(FILE *stream, const body *b);
 
-/* Writes b to stream in a binary format. */
+/** Writes the state of the central body to stream, in pseudo-element form:
+
+    1.0 0.0 0.0 0.0 0.0 0.0 Qp I R S0 S1 S2
+*/
+int
+write_central_body_elements(FILE *stream, const central_body *bc);
+
+/** Writes b to stream in a binary format. */
 int
 write_body_bin(FILE *stream, const body *b);
+
+/** Writes the central body in a binary format. */
+int
+write_central_body_bin(FILE *stream, const central_body *bc);
 
 /* tides.c */
 

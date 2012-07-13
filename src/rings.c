@@ -14,7 +14,8 @@ typedef enum {
   OPT_EPSINT,
   OPT_THIN,
   OPT_INP,
-  OPT_OUT
+  OPT_OUT,
+  OPT_TIDES
 } opt_flag;
 
 typedef struct {
@@ -26,6 +27,7 @@ typedef struct {
   int thin_factor;
   FILE *inp;
   FILE *out;
+  int tides_p;
 } configuration;
 
 static struct option opts[] = {
@@ -38,6 +40,7 @@ static struct option opts[] = {
   {"thin", required_argument, 0, OPT_THIN},
   {"input", required_argument, 0, OPT_INP},
   {"output", required_argument, 0, OPT_OUT},
+  {"tides", no_argument, 0, OPT_TIDES},
   {0}
 };
 
@@ -53,7 +56,8 @@ static char usage[] = "rings OPTION ...\n"
 "--epsint EPS    Integration relative accuracy\n"
 "--thin NTHIN    Output only every NTHIN steps\n"
 "--input FILE    Input file\n"
-"--output FILE   Output file\n";
+"--output FILE   Output file\n"
+"--tides         Apply tidal evolution\n";
 
 static int parse_args(int argc, char **argv, struct option *opts, configuration *conf) {
   int flag, index;
@@ -95,6 +99,9 @@ static int parse_args(int argc, char **argv, struct option *opts, configuration 
         exit(1);
       }
       break;
+    case OPT_TIDES:
+      conf->tides_p = 1;
+      break;
     default:
       fprintf(stderr, "Unrecognized option!\n");
       exit(1);
@@ -109,8 +116,13 @@ static int parse_args(int argc, char **argv, struct option *opts, configuration 
   return 0;
 }
 
-static body *read_input(FILE *inp, body *bs, int *bsize) {
+static body *read_input(FILE *inp, central_body *bc, body *bs, int *bsize) {
   int i = 0;
+
+  if (read_central_body(inp, bc) != 1) {
+    fprintf(stderr, "Error reading central body from input\n");
+    exit(1);
+  }
   
   while (!feof(inp)) {
     if (i == *bsize) {
@@ -118,7 +130,7 @@ static body *read_input(FILE *inp, body *bs, int *bsize) {
       *bsize = 2*i;
     }
 
-    if (read_body_from_elements(inp, bs+i)) {
+    if (read_body_from_elements(inp, bs+i) != 1) {
       fprintf(stderr, "Error reading body from input (%d bodies read)\n", i);
       exit(1);
     }
@@ -137,10 +149,27 @@ static body *read_input(FILE *inp, body *bs, int *bsize) {
   return bs;
 }
 
+static int write_bodies(FILE *stream, const double t, const central_body *bc, const body *bs, const size_t nbs) {
+  size_t i;
+
+  fprintf(stream, "%.1f ", t);
+  write_central_body_elements(stream, bc);
+
+  for (i = 0; i < nbs; i++) {
+    fprintf(stream, "%.1f ", t);
+    write_body_elements(stream, &(bs[i]));
+  }
+
+  fflush(stream);
+
+  return nbs + 1;
+}
+
 int main(int argc, char **argv) {
   int status;
-  configuration conf = {1e9, 1.0, 0.0, 1e-10, 1e-8, 1, stdin, stdout};
+  configuration conf = {1e9, 1.0, 0.0, 1e-10, 1e-8, 1, stdin, stdout, 0};
   body *bs = malloc(sizeof(body));
+  central_body bc;
   int bsize = 1;
   double t = 0.0;
   gsl_odeiv_evolve *e;
@@ -163,9 +192,9 @@ int main(int argc, char **argv) {
 
   h = conf.hini;
 
-  bs = read_input(conf.inp, bs, &bsize);
+  bs = read_input(conf.inp, &bc, bs, &bsize);
 
-  odesize = bsize*BODY_VECTOR_SIZE;
+  odesize = body_size_to_vector_size(bsize);
   ys = malloc(odesize*sizeof(double));
   e = gsl_odeiv_evolve_alloc(odesize);
   step = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, odesize);
@@ -178,15 +207,11 @@ int main(int argc, char **argv) {
     double told = t;
 
     if (nstep % conf.thin_factor == 0) {
-      for (i = 0; i < bsize; i++) {
-        fprintf(conf.out, "%.1f ", t);
-        write_body_elements(conf.out, bs+i);
-        fflush(conf.out);
-      }
+      write_bodies(conf.out, t, &bc, bs, bsize);
     }
 
     do {
-      status = evolve_system(e, con, step, &t, conf.T, &h, bs, ys, bsize, conf.epsquad, conf.eps);
+      status = evolve_system(e, con, step, &t, conf.T, &h, &bc, bs, ys, bsize, conf.epsquad, conf.eps);
 
       if (status != GSL_SUCCESS) {
         nretries++;
@@ -212,11 +237,7 @@ int main(int argc, char **argv) {
     nstep++;
   } while (t != conf.T);
 
-  for (i = 0; i < bsize; i++) {
-    fprintf(conf.out, "%.1f ", t);
-    write_body_elements(conf.out, bs+i);
-    fflush(conf.out);
-  }
+  write_bodies(conf.out, t, &bc, bs, bsize);
 
   if (conf.inp != stdin) fclose(conf.inp);
   if (conf.out != stdout) fclose(conf.out);

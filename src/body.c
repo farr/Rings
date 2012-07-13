@@ -176,6 +176,15 @@ init_body_from_elements(body *b,
   rotate_to_orbit_frame(b->spin, I, Omega, omega);
 }
 
+void
+init_central_body(central_body *b, const double Qp, const double I,
+                  const double R, const double spin[3]) {
+  b->Qp = Qp;
+  b->I = I;
+  b->R = R;
+  memcpy(b->spin, spin, 3*sizeof(double));
+}
+
 static double
 normalize_angle(const double ang, const double min, const double max) {
   assert(fabs(max - min - 2.0*M_PI) < 1e-8);
@@ -259,6 +268,22 @@ vector_to_body(const double *v, body *b) {
   memcpy(b->L, v+BODY_L_INDEX, 3*sizeof(double));
   memcpy(b->A, v+BODY_A_INDEX, 3*sizeof(double));
   memcpy(b->spin, v+BODY_SPIN_INDEX, 3*sizeof(double));
+}
+
+void
+central_body_to_vector(const central_body *bc, double *v) {
+  v[CENTRAL_BODY_Qp_INDEX] = bc->Qp;
+  v[CENTRAL_BODY_I_INDEX] = bc->I;
+  v[CENTRAL_BODY_R_INDEX] = bc->R;
+  memcpy(v+CENTRAL_BODY_SPIN_INDEX, bc->spin, 3*sizeof(double));
+}
+
+void
+vector_to_central_body(const double *v, central_body *bc) {
+  bc->Qp = v[CENTRAL_BODY_Qp_INDEX];
+  bc->I = v[CENTRAL_BODY_I_INDEX];
+  bc->R = v[CENTRAL_BODY_R_INDEX];
+  memcpy(bc->spin, v+CENTRAL_BODY_SPIN_INDEX, 3*sizeof(double));
 }
 
 void

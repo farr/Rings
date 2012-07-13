@@ -7,23 +7,27 @@
 #include<string.h>
 
 size_t
-body_size_to_vector_size(const size_t nbodies) { return nbodies*BODY_VECTOR_SIZE; }
+body_size_to_vector_size(const size_t nbodies) { return nbodies*BODY_VECTOR_SIZE + CENTRAL_BODY_VECTOR_SIZE; }
 
 void
-bodies_to_vector(const body bs[], const size_t nbodies, double y[]) {
+bodies_to_vector(const central_body *bc, const body bs[], const size_t nbodies, double y[]) {
   size_t i;
 
+  central_body_to_vector(bc, y);
+
   for(i = 0; i < nbodies; i++) {
-    body_to_vector(bs+i, y+i*BODY_VECTOR_SIZE);
+    body_to_vector(bs+i, y+i*BODY_VECTOR_SIZE+CENTRAL_BODY_VECTOR_SIZE);
   }
 }
 
 void
-vector_to_bodies(const double y[], const size_t nbodies, body bs[]) {
+vector_to_bodies(const double y[], const size_t nbodies, central_body *bc, body bs[]) {
   size_t i;
 
+  vector_to_central_body(y, bc);
+
   for (i = 0; i < nbodies; i++) {
-    vector_to_body(y+i*BODY_VECTOR_SIZE, bs+i);
+    vector_to_body(y+i*BODY_VECTOR_SIZE + CENTRAL_BODY_VECTOR_SIZE, bs+i);
   }
 }
 
@@ -39,16 +43,16 @@ f(double t, const double y[], double dydt[], void *vparams) {
   size_t i;
   int status = GSL_SUCCESS;
 
-  memset(dydt, 0, p->nbodies*BODY_VECTOR_SIZE);
+  memset(dydt, 0, body_size_to_vector_size(p->nbodies)*sizeof(double));
   
   for (i = 0; i < p->nbodies; i++) {
     size_t j;
     body bi;
 
-    vector_to_body(y+i*BODY_VECTOR_SIZE, &bi);
+    vector_to_body(y+i*BODY_VECTOR_SIZE+CENTRAL_BODY_VECTOR_SIZE, &bi);
 
     for (j = 0; j < BODY_VECTOR_SIZE; j++) {
-      dydt[i*BODY_VECTOR_SIZE+j] = 0.0;
+      dydt[CENTRAL_BODY_VECTOR_SIZE + i*BODY_VECTOR_SIZE + j] = 0.0;
     }
 
     for (j = 0; j < p->nbodies; j++) {
@@ -58,7 +62,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
         size_t k;
         int status;
 
-        vector_to_body(y+j*BODY_VECTOR_SIZE, &bj);
+        vector_to_body(y+j*BODY_VECTOR_SIZE + CENTRAL_BODY_VECTOR_SIZE, &bj);
         
         status = average_rhs(p->eps, &bi, &bj, p->epsquad, rhs);
 
@@ -67,7 +71,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
         }
 
         for (k = 0; k < BODY_VECTOR_SIZE; k++) {
-          dydt[i*BODY_VECTOR_SIZE+k] += rhs[k];
+          dydt[CENTRAL_BODY_VECTOR_SIZE + i*BODY_VECTOR_SIZE+k] += rhs[k];
         }
       }
     }
@@ -78,7 +82,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
 
 int
 evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step, 
-              double *t, const double t1, double *h, body bs[], double y[], 
+              double *t, const double t1, double *h, central_body *bc, body bs[], double y[], 
               size_t nbodies, const double epsquad, const double eps) {
   fparams p;
   gsl_odeiv_system sys;
@@ -94,11 +98,11 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
   sys.dimension = body_size_to_vector_size(nbodies);
   sys.params = &p;
 
-  bodies_to_vector(bs, nbodies, y);
+  bodies_to_vector(bc, bs, nbodies, y);
 
   status = gsl_odeiv_evolve_apply(e, con, step, &sys, t, t1, h, y);
 
-  vector_to_bodies(y, nbodies, bs);
+  vector_to_bodies(y, nbodies, bc, bs);
 
   return status;
 }
