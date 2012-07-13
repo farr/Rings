@@ -85,8 +85,20 @@ tfs(const body *b, const double QpSun, const double RSun,
 }
 
 void
-tidal_rhs(const body *b, const double QpSun, const double RSun, const double ISun,
-          const double OmegaSun[3], double brhs[BODY_VECTOR_SIZE], double srhs[3]) {
+tidal_rhs(const body *b, const central_body *bc, double brhs[BODY_VECTOR_SIZE], double srhs[3]) {
+  if (b->R <= 0.0 && bc->R <= 0.0) {
+    /* Fast path: if R == 0, no tides! */
+    memset(brhs, 0, BODY_VECTOR_SIZE*sizeof(double));
+    memset(srhs, 0, 3*sizeof(double));
+
+    return;
+  }
+
+  const double *OmegaSun = &(bc->spin[0]);
+  const double RSun = bc->R;
+  const double ISun = bc->I;
+  const double QpSun = bc->Qp;
+
   double e = get_e(b);
   double sqrt1me2 = sqrt(1.0 - e*e);
   double e2 = e*e;

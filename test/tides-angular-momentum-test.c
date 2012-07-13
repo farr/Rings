@@ -21,6 +21,7 @@ int main() {
   double zerov[3] = {0.0, 0.0, 0.0};
 
   body b;
+  central_body bc;
 
   double n;
   double a2;
@@ -49,10 +50,11 @@ int main() {
   
   QSun = QScale*gsl_rng_uniform(rng);
   ISun = IScale*gsl_rng_uniform(rng);
-  MSun = MScale*gsl_rng_uniform(rng);
   RSun = RScale*gsl_rng_uniform(rng);
 
-  tidal_rhs(&b, QSun, RSun, ISun, SpinSun, body_rhs, sun_rhs);
+  init_central_body(&bc, QSun, ISun, RSun, SpinSun);
+
+  tidal_rhs(&b, &bc, body_rhs, sun_rhs);
 
   n = mean_motion(&b);
   a2 = b.a*b.a;

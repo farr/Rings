@@ -48,8 +48,12 @@ f(double t, const double y[], double dydt[], void *vparams) {
   for (i = 0; i < p->nbodies; i++) {
     size_t j;
     body bi;
+    central_body bc;
+    double rhs[BODY_VECTOR_SIZE];
+    double dsunomega[3];
 
     vector_to_body(y+i*BODY_VECTOR_SIZE+CENTRAL_BODY_VECTOR_SIZE, &bi);
+    vector_to_central_body(y, &bc);
 
     for (j = 0; j < BODY_VECTOR_SIZE; j++) {
       dydt[CENTRAL_BODY_VECTOR_SIZE + i*BODY_VECTOR_SIZE + j] = 0.0;
@@ -74,6 +78,17 @@ f(double t, const double y[], double dydt[], void *vparams) {
           dydt[CENTRAL_BODY_VECTOR_SIZE + i*BODY_VECTOR_SIZE+k] += rhs[k];
         }
       }
+    }
+
+    /* Tidal Contributions */
+    memset(rhs, 0, BODY_VECTOR_SIZE*sizeof(double));
+    memset(dsunomega, 0, 3*sizeof(double));
+
+    tidal_rhs(&bi, &bc, rhs, dsunomega);
+
+    for (j = 0; j < 3; j++) {
+      dydt[CENTRAL_BODY_SPIN_INDEX + j] += dsunomega[j];
+      dydt[CENTRAL_BODY_VECTOR_SIZE + BODY_VECTOR_SIZE*i + BODY_SPIN_INDEX + j] += rhs[j];
     }
   }
 
