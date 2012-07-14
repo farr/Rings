@@ -133,7 +133,7 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
 
 /* A new GSL Control object */
 typedef struct {
-  double epsabs;
+  double eps;
 } sco_data;
 
 static const char *sco_name = "Secular Control Object";
@@ -149,7 +149,7 @@ static int
 sco_init(void *vstate, double eps_abs, double eps_rel, double a_y, double a_dydt) {
   sco_data *state = (sco_data *)vstate;
 
-  state->epsabs = eps_abs;
+  state->eps = eps_abs;
 
   return GSL_SUCCESS;
 }
@@ -157,21 +157,39 @@ sco_init(void *vstate, double eps_abs, double eps_rel, double a_y, double a_dydt
 static int
 sco_hadjust(void *vstate, size_t dim, unsigned int ord, const double y[], const double yerr[], const double yp[], double *h) {
   sco_data *state = (sco_data *)vstate;
-  double epsabs = state->epsabs;
+  double eps = state->eps;
   double max_error_factor = -1.0/0.0;
   double error_factor;
   size_t i;
   double hold = *h;
   double hnew;
   const double S = 0.9;
+  central_body bc;
+  double Ltot[3], Ltotmag;
 
-  /* Desired error is epsabs. */
-  for (i = 0; i < dim; i++) {
-    error_factor = yerr[i] / epsabs;
-
-    max_error_factor = (max_error_factor > error_factor ? max_error_factor : error_factor);
+  /* Find total angular momentum: */
+  memset(Ltot, 0, 3*sizeof(double));
+  vector_to_central_body(y, &bc);
+  for (i = 0; i < 3; i++) {
+    Ltot[i] += bc.I*bc.spin[i];
   }
 
+  for (i = CENTRAL_BODY_VECTOR_SIZE; i < dim; i += BODY_VECTOR_SIZE) {
+    body b;
+    double n;
+    int j;
+
+    vector_to_body(&(y[i]), &b);
+    n = mean_motion(&b);
+    for (j = 0; j < 3; j++) {
+      Ltot[j] += b.m*n*b.a*b.a*b.L[j];
+      Ltot[j] += b.I*b.spin[j];
+    }
+  }
+  
+  Ltotmag = norm(Ltot);
+
+  /* Match secular constraints. */
   for (i = CENTRAL_BODY_VECTOR_SIZE; i < dim; i += BODY_VECTOR_SIZE) {
     body b, berr;
 
@@ -179,12 +197,77 @@ sco_hadjust(void *vstate, size_t dim, unsigned int ord, const double y[], const 
     vector_to_body(&(yerr[i]), &berr);
 
     /* d(L^2 + A^2) = 2*(L*dL + A*dA) */
-    error_factor = 2.0 * (dot(b.L, berr.L) + dot(b.A, berr.A)) / epsabs;
+    error_factor = 2.0 * (dot(b.L, berr.L) + dot(b.A, berr.A)) / eps;
     max_error_factor = (max_error_factor > error_factor ? max_error_factor : error_factor);
     
     /* d(L*A) = L*dA + dL*A */
-    error_factor = (dot(b.L, berr.A) + dot(berr.L, b.A)) / epsabs;
+    error_factor = (dot(b.L, berr.A) + dot(berr.L, b.A)) / eps;
     max_error_factor = (max_error_factor > error_factor ? max_error_factor : error_factor);
+  }
+
+  /* Errors in central body. */
+  /* Relative in viscous timescale. Note comparsion works even if tV
+     == 0, and we get NaNs. */
+  error_factor = fabs(yerr[CENTRAL_BODY_TV_INDEX]/y[CENTRAL_BODY_TV_INDEX]) / eps;
+  max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+  /* Absolute in k. */
+  error_factor = fabs(yerr[CENTRAL_BODY_K_INDEX]) / eps;
+  max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+  /* Relative in I */
+  error_factor = fabs(yerr[CENTRAL_BODY_I_INDEX]/y[CENTRAL_BODY_I_INDEX]) / eps;
+  max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+  /* Relative in R. */
+  error_factor = fabs(yerr[CENTRAL_BODY_R_INDEX]/y[CENTRAL_BODY_R_INDEX]) / eps;
+  max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+  /* Error in spin relative to total angular momentum. */
+  error_factor = fabs(y[CENTRAL_BODY_I_INDEX]*norm(&(yerr[CENTRAL_BODY_SPIN_INDEX]))/Ltotmag) / eps;
+  max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+  for (i = CENTRAL_BODY_SPIN_INDEX; i < dim; i += BODY_VECTOR_SIZE) {
+    body b;
+    int j;
+
+    vector_to_body(&(y[i]), &b);
+
+    /* Relative in body m. */
+    error_factor = fabs(yerr[i+BODY_M_INDEX]/b.m) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Relative in body a. */
+    error_factor = fabs(yerr[i+BODY_a_INDEX]/b.a) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Relative in body tV. */
+    error_factor = fabs(yerr[i+BODY_TV_INDEX]/b.tV) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Absolute in k. */
+    error_factor = fabs(yerr[i+BODY_K_INDEX]) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Relative in I. */
+    error_factor = fabs(yerr[i+BODY_I_INDEX]/b.I) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Relative in R. */
+    error_factor = fabs(yerr[i+BODY_R_INDEX]/b.R) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Absolute in L = sqrt(1-e^2). */
+    error_factor = norm(&(yerr[i+BODY_L_INDEX])) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Absolute in A = e. */
+    error_factor = norm(&(yerr[i+BODY_A_INDEX])) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
+
+    /* Relative in spin to total L. */
+    error_factor = fabs(b.I*norm(&(yerr[i+BODY_SPIN_INDEX]))/Ltotmag) / eps;
+    max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
   }
 
   if (max_error_factor > 1.1) {
@@ -217,7 +300,7 @@ sco_free(void *vstate) {
 static gsl_odeiv_control_type sco_type;
 
 gsl_odeiv_control *
-gsl_odeiv_control_secular_new(double epsabs) {
+gsl_odeiv_control_secular_new(double eps) {
   gsl_odeiv_control *con;
 
   /* Make sure that sco_type is set up. */
@@ -230,7 +313,7 @@ gsl_odeiv_control_secular_new(double epsabs) {
   con = gsl_odeiv_control_alloc(&sco_type);
   if (con == NULL) return con;
 
-  gsl_odeiv_control_init(con, epsabs, 0.0, 0.0, 0.0); /* Remaining arguments are ignored. */
+  gsl_odeiv_control_init(con, eps, 0.0, 0.0, 0.0); /* Remaining arguments are ignored. */
 
   return con;
 }
