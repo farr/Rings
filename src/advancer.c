@@ -227,7 +227,7 @@ sco_hadjust(void *vstate, size_t dim, unsigned int ord, const double y[], const 
   error_factor = fabs(y[CENTRAL_BODY_I_INDEX]*norm(&(yerr[CENTRAL_BODY_SPIN_INDEX]))/Ltotmag) / eps;
   max_error_factor = (error_factor > max_error_factor ? error_factor : max_error_factor);
 
-  for (i = CENTRAL_BODY_SPIN_INDEX; i < dim; i += BODY_VECTOR_SIZE) {
+  for (i = CENTRAL_BODY_VECTOR_SIZE; i < dim; i += BODY_VECTOR_SIZE) {
     body b;
     int j;
 

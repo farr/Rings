@@ -12,7 +12,6 @@ typedef enum {
   OPT_EPS,
   OPT_EPSQUAD,
   OPT_EPSINT,
-  OPT_THIN,
   OPT_INP,
   OPT_OUT
 } opt_flag;
@@ -23,7 +22,6 @@ typedef struct {
   double eps;
   double epsquad;
   double epsint;
-  int thin_factor;
   FILE *inp;
   FILE *out;
 } configuration;
@@ -35,7 +33,6 @@ static struct option opts[] = {
   {"eps", required_argument, 0, OPT_EPS},
   {"epsquad", required_argument, 0, OPT_EPSQUAD},
   {"epsint", required_argument, 0, OPT_EPSINT},
-  {"thin", required_argument, 0, OPT_THIN},
   {"input", required_argument, 0, OPT_INP},
   {"output", required_argument, 0, OPT_OUT},
   {0}
@@ -51,7 +48,6 @@ static char usage[] = "rings OPTION ...\n"
 "--eps EPS       Softening scale\n"
 "--epsquad EPS   Quadrature relative accuracy\n"
 "--epsint EPS    Integration relative accuracy\n"
-"--thin NTHIN    Output only every NTHIN steps\n"
 "--input FILE    Input file\n"
 "--output FILE   Output file\n";
 
@@ -77,9 +73,6 @@ static int parse_args(int argc, char **argv, struct option *opts, configuration 
       break;
     case OPT_EPSINT:
       conf->epsint = atof(optarg);
-      break;
-    case OPT_THIN:
-      conf->thin_factor = atoi(optarg);
       break;
     case OPT_INP:
       conf->inp = fopen(optarg, "r");
@@ -160,11 +153,12 @@ static int write_bodies(FILE *stream, const double t, const central_body *bc, co
 
 int main(int argc, char **argv) {
   int status;
-  configuration conf = {1e9, 1.0, 0.0, 1e-10, 1e-8, 1, stdin, stdout};
+  configuration conf = {1e9, 1.0, 0.0, 1e-10, 1e-8, stdin, stdout};
   body *bs = malloc(sizeof(body));
   central_body bc;
   int bsize = 1;
   double t = 0.0;
+  double tnext = t;
   gsl_odeiv_evolve *e;
   gsl_odeiv_control *con;
   gsl_odeiv_step *step;
@@ -199,8 +193,11 @@ int main(int argc, char **argv) {
     int nretries = 0;
     double told = t;
 
-    if (nstep % conf.thin_factor == 0) {
+    if (t >= tnext) {
       write_bodies(conf.out, t, &bc, bs, bsize);
+      tnext = t + 1.0;
+    } else if (h < 1e-6) {
+      fprintf(stderr, "Small step? %g\n", h);
     }
 
     do {
