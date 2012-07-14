@@ -15,7 +15,7 @@ int main() {
   gsl_odeiv_step *step = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, body_size_to_vector_size(NBODIES));
   gsl_integration_workspace *ws;
   const size_t nws = 100000;
-  const double T = 1e8;
+  const double T = 1e5;
   double h = 0.1;
   double *y;
   int status;
@@ -31,8 +31,8 @@ int main() {
 
   ws = gsl_integration_workspace_alloc(nws);
 
-  init_body_from_elements(&(bs[0]), m1, a1, e1, I1, Omega1, omega1, spin, 0.0, 0.0, 0.0);
-  init_body_from_elements(&(bs[1]), m2, a2, e2, I2, Omega2, omega2, spin, 0.0, 0.0, 0.0);
+  init_body_from_elements(&(bs[0]), m1, a1, e1, I1, Omega1, omega1, spin, 1.0/0.0, 0.0, 0.0, 0.0);
+  init_body_from_elements(&(bs[1]), m2, a2, e2, I2, Omega2, omega2, spin, 1.0/0.0, 0.0, 0.0, 0.0);
 
   amdInitial = body_system_amd(bs, 2);
   
@@ -42,8 +42,7 @@ int main() {
     do {
       status = evolve_system(e, con, step, &t, T, &h, &bc, bs, y, NBODIES, epsabs, 0.0);
 
-      if (status != GSL_SUCCESS) {
-        fprintf(stderr, "Status = %d!\n", status);
+      if (status != GSL_SUCCESS) { 
         nretries++;
         h = h / 10.0;
         gsl_odeiv_evolve_reset(e);

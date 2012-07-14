@@ -9,14 +9,15 @@ int main() {
   const double AScale = 1.0;
   const double IScale = 1e-2;
   const double MScale = 1.0;
-  const double QScale = 1.0;
+  const double tVScale = 1.0;
+  const double kScale = 0.1;
 
   const double eps = 1e-12;
 
   gsl_rng *rng;
 
   double SpinSun[3];
-  double QSun, ISun, MSun, RSun;
+  double tVSun, kSun, ISun, MSun, RSun;
 
   double zerov[3] = {0.0, 0.0, 0.0};
 
@@ -43,16 +44,18 @@ int main() {
 
   init_body_from_elements(&b, MScale*gsl_rng_uniform(rng), AScale*gsl_rng_uniform(rng), gsl_rng_uniform(rng),
                           180.0*gsl_rng_uniform(rng), 360.0*gsl_rng_uniform(rng), 360.0*gsl_rng_uniform(rng), 
-                          zerov, QScale*gsl_rng_uniform(rng), IScale*gsl_rng_uniform(rng), RScale*gsl_rng_uniform(rng));
+                          zerov, tVScale*gsl_rng_uniform(rng), kScale*gsl_rng_uniform(rng), 
+                          IScale*gsl_rng_uniform(rng), RScale*gsl_rng_uniform(rng));
 
   random_vector(rng, b.spin, 1.0);
   random_vector(rng, SpinSun, 1.0);
   
-  QSun = QScale*gsl_rng_uniform(rng);
+  tVSun = tVScale*gsl_rng_uniform(rng);
+  kSun = kScale*gsl_rng_uniform(rng);
   ISun = IScale*gsl_rng_uniform(rng);
   RSun = RScale*gsl_rng_uniform(rng);
 
-  init_central_body(&bc, QSun, ISun, RSun, SpinSun);
+  init_central_body(&bc, tVSun, kSun, ISun, RSun, SpinSun);
 
   tidal_rhs(&b, &bc, body_rhs, sun_rhs);
 
@@ -65,7 +68,7 @@ int main() {
   mu = b.m/(1.0+b.m);
 
   for (i = 0; i < 3; i++) {
-    hdot[i] = mu*n*a2*body_rhs[BODY_L_INDEX+i] + 2.0*mu*n*b.a*adot*b.L[i] + mu*ndot*a2*b.L[i];
+    hdot[i] = mu*n*a2*(body_rhs[BODY_L_INDEX+i] + 0.5*(adot/b.a)*b.L[i]);
     bLdot[i] = b.I*body_rhs[BODY_SPIN_INDEX+i];
     sLdot[i] = ISun*sun_rhs[i];
     Ldot[i] = hdot[i] + bLdot[i] + sLdot[i];

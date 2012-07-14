@@ -28,8 +28,8 @@ main() {
   assert(ws1 != 0);
   assert(ws2 != 0);
 
-  init_random_body(rng, &b1, m1, a1, 0.0, 0.0, 0.0);
-  init_random_body(rng, &b2, m2, a2, 0.0, 0.0, 0.0);
+  init_random_body(rng, &b1, m1, a1, 1.0/0.0, 0.0, 0.0, 0.0);
+  init_random_body(rng, &b2, m2, a2, 1.0/0.0, 0.0, 0.0, 0.0);
 
   raw_average_rhs(0.0, &b1, &b2, ws1, ws_size, ws2, ws_size, EPS, EPS, rhs);
 

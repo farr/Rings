@@ -154,10 +154,11 @@ void
 init_body_from_elements(body *b, 
                         const double m, const double a, const double e, const double I,
                         const double Omega, const double omega, const double spin[3], 
-                        const double Qp, const double inertia, const double R) {
+                        const double tV, const double k, const double inertia, const double R) {
   b->m = m;
   b->a = a;
-  b->Qp = Qp;
+  b->tV = tV;
+  b->k = k;
   b->I = inertia;
   b->R = R;
   
@@ -169,17 +170,17 @@ init_body_from_elements(body *b,
   b->A[1] = 0.0;
   b->A[2] = 0.0;
 
-  memcpy(b->spin, spin, 3*sizeof(double));  
-
   rotate_to_orbit_frame(b->L, I, Omega, omega);
   rotate_to_orbit_frame(b->A, I, Omega, omega);
-  rotate_to_orbit_frame(b->spin, I, Omega, omega);
+
+  memcpy(b->spin, spin, 3*sizeof(double));  
 }
 
 void
-init_central_body(central_body *b, const double Qp, const double I,
+init_central_body(central_body *b, const double tV, const double k, const double I,
                   const double R, const double spin[3]) {
-  b->Qp = Qp;
+  b->tV = tV;
+  b->k = k;
   b->I = I;
   b->R = R;
   memcpy(b->spin, spin, 3*sizeof(double));
@@ -235,7 +236,7 @@ elements_from_body(const body *b,
     if (cos_omega > 1.0) cos_omega = 1.0;
     if (cos_omega < -1.0) cos_omega = -1.0;
 
-    *omega = acos(dot(asc_node, b->A)/get_e(b));
+    *omega = acos(cos_omega);
     
     cross(asc_node, b->A, asc_node_x_A);
     if (dot(b->L, asc_node_x_A) < 0.0) { /* This means large argument of periapse. */
@@ -250,7 +251,8 @@ void
 body_to_vector(const body *b, double *v) {
   v[BODY_M_INDEX] = b->m;
   v[BODY_a_INDEX] = b->a;
-  v[BODY_Qp_INDEX] = b->Qp;
+  v[BODY_TV_INDEX] = b->tV;
+  v[BODY_K_INDEX] = b->k;
   v[BODY_I_INDEX] = b->I;
   v[BODY_R_INDEX] = b->R;
   memcpy(v+BODY_L_INDEX, b->L, 3*sizeof(double));
@@ -262,7 +264,8 @@ void
 vector_to_body(const double *v, body *b) {
   b->m = v[BODY_M_INDEX];
   b->a = v[BODY_a_INDEX];
-  b->Qp = v[BODY_Qp_INDEX];
+  b->tV = v[BODY_TV_INDEX];
+  b->k = v[BODY_K_INDEX];
   b->I = v[BODY_I_INDEX];
   b->R = v[BODY_R_INDEX];
   memcpy(b->L, v+BODY_L_INDEX, 3*sizeof(double));
@@ -272,7 +275,8 @@ vector_to_body(const double *v, body *b) {
 
 void
 central_body_to_vector(const central_body *bc, double *v) {
-  v[CENTRAL_BODY_Qp_INDEX] = bc->Qp;
+  v[CENTRAL_BODY_TV_INDEX] = bc->tV;
+  v[CENTRAL_BODY_K_INDEX] = bc->k;
   v[CENTRAL_BODY_I_INDEX] = bc->I;
   v[CENTRAL_BODY_R_INDEX] = bc->R;
   memcpy(v+CENTRAL_BODY_SPIN_INDEX, bc->spin, 3*sizeof(double));
@@ -280,7 +284,8 @@ central_body_to_vector(const central_body *bc, double *v) {
 
 void
 vector_to_central_body(const double *v, central_body *bc) {
-  bc->Qp = v[CENTRAL_BODY_Qp_INDEX];
+  bc->tV = v[CENTRAL_BODY_TV_INDEX];
+  bc->k = v[CENTRAL_BODY_K_INDEX];
   bc->I = v[CENTRAL_BODY_I_INDEX];
   bc->R = v[CENTRAL_BODY_R_INDEX];
   memcpy(bc->spin, v+CENTRAL_BODY_SPIN_INDEX, 3*sizeof(double));

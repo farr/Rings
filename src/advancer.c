@@ -55,10 +55,6 @@ f(double t, const double y[], double dydt[], void *vparams) {
     vector_to_body(y+i*BODY_VECTOR_SIZE+CENTRAL_BODY_VECTOR_SIZE, &bi);
     vector_to_central_body(y, &bc);
 
-    for (j = 0; j < BODY_VECTOR_SIZE; j++) {
-      dydt[CENTRAL_BODY_VECTOR_SIZE + i*BODY_VECTOR_SIZE + j] = 0.0;
-    }
-
     for (j = 0; j < p->nbodies; j++) {
       if (j != i) {
         body bj;
@@ -86,9 +82,19 @@ f(double t, const double y[], double dydt[], void *vparams) {
 
     tidal_rhs(&bi, &bc, rhs, dsunomega);
 
+    for (j = 0; j < BODY_VECTOR_SIZE; j++) {
+      if (isnan(rhs[j])) return GSL_EBADFUNC;
+    }
+
+    for (j = 0; j < 3; j++) {
+      if (isnan(dsunomega[j])) return GSL_EBADFUNC;
+    }
+
     for (j = 0; j < 3; j++) {
       dydt[CENTRAL_BODY_SPIN_INDEX + j] += dsunomega[j];
-      dydt[CENTRAL_BODY_VECTOR_SIZE + BODY_VECTOR_SIZE*i + BODY_SPIN_INDEX + j] += rhs[j];
+    }
+    for (j = 0; j < BODY_VECTOR_SIZE; j++) {
+      dydt[CENTRAL_BODY_VECTOR_SIZE + i*BODY_VECTOR_SIZE + j] += rhs[j];
     }
   }
 
@@ -116,6 +122,9 @@ evolve_system(gsl_odeiv_evolve *e, gsl_odeiv_control *con, gsl_odeiv_step *step,
   bodies_to_vector(bc, bs, nbodies, y);
 
   status = gsl_odeiv_evolve_apply(e, con, step, &sys, t, t1, h, y);
+
+  /* Bail early without changing bodies. */
+  if (status != GSL_SUCCESS) return status;
 
   vector_to_bodies(y, nbodies, bc, bs);
 
@@ -163,7 +172,7 @@ sco_hadjust(void *vstate, size_t dim, unsigned int ord, const double y[], const 
     max_error_factor = (max_error_factor > error_factor ? max_error_factor : error_factor);
   }
 
-  for (i = 0; i < dim; i += BODY_VECTOR_SIZE) {
+  for (i = CENTRAL_BODY_VECTOR_SIZE; i < dim; i += BODY_VECTOR_SIZE) {
     body b, berr;
 
     vector_to_body(&(y[i]), &b);

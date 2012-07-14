@@ -29,63 +29,47 @@ static double pow_int(const double x, const int n) {
   }
 }
 
-static double ff1(const double e2) {
+static void 
+compute_XYZVW(const double m1, const double tV, const double k, const double Roa, const double n, const double a,  
+              const double e, const double m2, const double xhat[3], const double yhat[3], 
+              const double zhat[3], const double spin[3],
+              double *X, double *Y, double *Z, double *V, double *W) {
+  double e2 = e*e;
   double e4 = e2*e2;
   double e6 = e4*e2;
-  double sqrtDenom = sqrt(1.0 - e2);
-  double denom = pow_int(sqrtDenom, 13);
 
-  return (1.0 + 15.0/4.0*e2 + 15.0/8.0*e4 + 5.0/64.0*e6)/denom;
-}
-
-static double ff2(const double e2) {
-  double e4 = e2*e2;
-  double denom = pow_int(1.0 - e2, 5);
-
-  return (1.0 + 3.0/2.0*e2 + 1.0/8.0*e4)/denom;
-}
-
-static double ff3(const double e2) {
-  double e4 = e2*e2;
-  double denom = pow_int(1.0 - e2, 5);
-
-  return (1.0 + 9.0/2.0*e2 + 5.0/8.0*e4)/denom;
-}
-
-static double ff4(const double e2) {
-  double e4 = e2*e2;
-  double e6 = e2*e4;
-  double denom = pow_int(sqrt(1.0-e2), 13);
+  double Roa5 = pow_int(Roa, 5);
+  double aoR8 = pow_int(Roa, -8);
   
-  return (1.0 + 15.0/2.0*e2 + 45.0/8.0*e4 + 5.0/16.0*e6)/denom;
+  double mu = m1*m2/(m1+m2);
+  
+  double tF = tV/9.0*aoR8*m1*m1/(m1+m2)/m2*pow_int(1.0 + 2.0*k, -2);
+
+  double Ox = dot(spin, xhat);
+  double Oy = dot(spin, yhat);
+  double Oz = dot(spin, zhat);
+
+  *X = -m2*k*Roa5/(mu*n)*Oz*Ox/pow_int(1-e2, 2) - Oy/(2*n*tF)*(1.0 + (9.0/2.0)*e2 + (5.0/8.0)*e4)/pow_int(1-e2, 5);
+  *Y = -m2*k*Roa5/(mu*n)*Oz*Oy/pow_int(1-e2, 2) + Ox/(2*n*tF)*(1.0 + (3.0/2.0)*e2 + (1.0/8.0)*e4)/pow_int(1-e2, 5);
+  *Z =  m2*k*Roa5/(mu*n)*((2*Oz*Oz - Oy*Oy - Ox*Ox)/(2.0*pow_int(1-e2,2)) + 15.0*m2/pow_int(a,3)*(1.0 + (3.0/2.0)*e2 + (1.0/8.0)*e4)/pow_int(1-e2,5));
+
+  *V = 9.0/tF*((1.0 + (15.0/4.0)*e2 + (15.0/8.0)*e4 + (5.0/64.0)*e6)/sqrt(pow_int(1-e2,13)) - 11.0*Oz/(18.0*n)*(1.0 + (3.0/2.0)*e2 + (1.0/8.0)*e4)/pow_int(1-e2, 5));
+  *W = 1.0/tF*((1.0 + (15.0/2.0)*e2 + (45.0/8.0)*e4 + (5.0/16.0)*e6)/sqrt(pow_int(1-e2,13)) - Oz/n*(1.0 + 3.0*e2 + (3.0/8.0)*e4)/pow_int(1-e2, 5));
 }
 
-static double ff5(const double e2) {
-  double denom = pow_int(1.0 - e2, 5);
-
-  return (3.0 + 0.5*e2)/denom;
-}
-
-static double ff6(const double e2) {
-  double e4 = e2*e2;
-  double e6 = e4*e2;
-  double e8 = e6*e2;
-  double denom = pow_int(1.0-e2, 8);
-
-  return (1.0 + 31.0/2.0*e2 + 255.0/8.0*e4 + 185.0/16.0*e6 + 25.0/64.0*e8)/denom;
-}
-
-static void
-tfs(const body *b, const double QpSun, const double RSun,
-    double *tb, double *tSun) {
-  double n = mean_motion(b);
-
-  *tb = 1.0 / (9.0*n/(2.0*b->Qp) * (1.0 / b->m) * pow_int(b->R / b->a, 5));
-  *tSun = 1.0 / (9.0*n/(2.0*QpSun) * (b->m / 1.0) * pow_int(RSun / b->a, 5));
-}
-
+/* Equations from Fabrycky & Tremaine (2007). */
 void
 tidal_rhs(const body *b, const central_body *bc, double brhs[BODY_VECTOR_SIZE], double srhs[3]) {
+  double xhat[3], yhat[3], zhat[3];
+  double e, n;
+  
+  double X1, Y1, Z1, V1, W1;
+  double X2, Y2, Z2, V2, W2;
+  
+  double h, adot, mu, srtma, a2, a;
+
+  int i;
+
   if (b->R <= 0.0 && bc->R <= 0.0) {
     /* Fast path: if R == 0, no tides! */
     memset(brhs, 0, BODY_VECTOR_SIZE*sizeof(double));
@@ -94,100 +78,32 @@ tidal_rhs(const body *b, const central_body *bc, double brhs[BODY_VECTOR_SIZE], 
     return;
   }
 
-  const double *OmegaSun = &(bc->spin[0]);
-  const double RSun = bc->R;
-  const double ISun = bc->I;
-  const double QpSun = bc->Qp;
+  body_coordinate_system(b, xhat, yhat, zhat);
 
-  double e = get_e(b);
-  double sqrt1me2 = sqrt(1.0 - e*e);
-  double e2 = e*e;
-  double n = mean_motion(b);
-  double a2 = b->a*b->a;
-  double mu = b->m / (1.0 + b->m);
+  e = get_e(b);
+  n = mean_motion(b);
+  a = b->a;
+  a2 = a*a;
 
-  double Omegab2 = dot(b->spin, b->spin);
-  double OmegaSun2 = dot(OmegaSun, OmegaSun);
-  
-  double Omegab_dot_e = dot(b->spin, b->A);
-  double Omegab_dot_h = n*a2*dot(b->L, b->spin);
-  
-  double Omegasun_dot_e = dot(OmegaSun, b->A);
-  double Omegasun_dot_h = n*a2*dot(OmegaSun, b->L);
+  h = norm(b->L);
 
-  double h = n*a2*sqrt1me2;
+  mu = b->m/(1.0+b->m);
 
-  double f1 = ff1(e2);
-  double f2 = ff2(e2);
-  double f3 = ff3(e2);
-  double f4 = ff4(e2);
-  double f5 = ff5(e2);
-  double f6 = ff6(e2);
+  srtma = sqrt((1.0+b->m)*b->a);
 
-  double tBody, tSun;
-
-  double HBody, HSun;
-
-  double adot, ndot;
-
-  int i;
-
-  tfs(b, QpSun, RSun, &tBody, &tSun);
+  compute_XYZVW(1.0, bc->tV, bc->k, bc->R/b->a, n, b->a, e, b->m, xhat, yhat, zhat, bc->spin, &X1, &Y1, &Z1, &V1, &W1);
+  compute_XYZVW(b->m, b->tV, b->k, b->R/b->a, n, b->a, e, 1.0, xhat, yhat, zhat, b->spin, &X2, &Y2, &Z2, &V2, &W2);
 
   memset(brhs, 0, BODY_VECTOR_SIZE*sizeof(double));
   memset(srhs, 0, 3*sizeof(double));
 
-  for (i = 0; i < 3; i++) {
-    /* A15 from Barker and Ogilvie */
-    srhs[i] = mu / (ISun*tSun) * (Omegasun_dot_e/(2.0*n)*f5*h*b->A[i] -
-                                  f3*h/(2.0*n)*OmegaSun[i] + 
-                                  (f4 - Omegasun_dot_h/(2.0*n*h)*f2)*n*a2*b->L[i]);
-  }
-
-  for (i = 0; i < 3; i++) {
-    /* A14 from Barker and Ogilvie */
-    brhs[BODY_SPIN_INDEX + i] = 
-      mu / (b->I*tBody) * (Omegab_dot_e/(2.0*n)*f5*h*b->A[i] -
-                           f3*h/(2.0*n)*b->spin[i] +
-                           (f4 - Omegab_dot_h/(2.0*n*h)*f2)*n*a2*b->L[i]);
-  }
-  
-  /* A27 */
-  HBody = -mu*h/(n*tBody)*( 0.5*(Omegab2*f3 + Omegab_dot_h*Omegab_dot_h/(h*h)*f2 - Omegab_dot_e*Omegab_dot_e*f5) -
-                            2.0*n*Omegab_dot_h*f4/h + 
-                            n*n*f6 );
-
-  /* A28 */
-  HSun =  -mu*h/(n*tSun)*( 0.5*(OmegaSun2*f3 + Omegasun_dot_h*Omegasun_dot_h/(h*h)*f2 - 
-                                Omegasun_dot_e*Omegasun_dot_e*f5) -
-                           2.0*n*Omegasun_dot_h*f4/h +
-                           n*n*f6 );
-
-  /* From A25 and A26. */
-  adot = 2.0*a2/b->m*( HBody + HSun - ISun*dot(OmegaSun, srhs) - b->I*dot(b->spin, brhs+BODY_SPIN_INDEX) );
-
+  adot = -2*b->a*(W1 + W2 + e*e/(1-e*e)*(V1 + V2));
   brhs[BODY_a_INDEX] = adot;
 
-  ndot = -3.0/2.0*adot/b->a*n;
-
   for (i = 0; i < 3; i++) {
-    /* A7 and A8, plus compensating for h[i] = n a^2 L[i]. */
-    brhs[BODY_L_INDEX+i] = 
-      (-1.0/tBody * (Omegab_dot_e/(2.0*n)*f5*h*b->A[i] - 
-                     f3*h/(2.0*n)*b->spin[i] +
-                     (f4 - Omegab_dot_h/(2.0*n*h)*f2)*n*a2*b->L[i]) -
-       1.0/tSun  * (Omegasun_dot_e/(2.0*n)*f5*h*b->A[i] - 
-                    f3*h/(2.0*n)*OmegaSun[i] +
-                    (f4 - Omegasun_dot_h/(2.0*n*h)*f2)*n*a2*b->L[i]) -
-       ndot*a2*b->L[i] -
-       2.0*n*b->a*adot*b->L[i])/(n*a2);
-  }
-
-  for (i = 0; i < 3; i++) {
-    /* A10 and A11 */
-    brhs[BODY_A_INDEX+i] = 
-      -1.0/tBody * (Omegab_dot_e/(2.0*n)*f2*n*a2*b->L[i] + 9.0*(f1*h - 11.0/18.0*Omegab_dot_h/n*f2)*b->A[i]) -
-      1.0/tSun * (Omegasun_dot_e/(2.0*n)*f2*n*a2*b->L[i] + 9.0*(f1*h - 11.0/18.0*Omegasun_dot_h/n*f2)*b->A[i]);
-    brhs[BODY_A_INDEX+i] /= h;
+    brhs[BODY_A_INDEX + i] = e*((Z1 + Z2)*yhat[i] - (Y1 + Y2)*zhat[i] - (V1 + V2)*xhat[i]);
+    brhs[BODY_L_INDEX + i] = h*((Y1 + Y2)*xhat[i] - (X1 + X2)*yhat[i] - (W1 + W2)*zhat[i]) - 0.5*(adot/b->a)*b->L[i];
+    brhs[BODY_SPIN_INDEX + i] = mu*h*srtma/b->I*(-Y1*xhat[i] + X1*yhat[i] + W1*zhat[i]);
+    srhs[i] = mu*h*srtma/bc->I*(-Y2*xhat[i] + X2*yhat[i] + W2*zhat[i]);
   }
 }

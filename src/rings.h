@@ -78,16 +78,9 @@ softened_specific_acceleration(const double eps,
 typedef struct {
   double m; /** Mass, in units where G*Mcentral = 1 */
   double a; /** Semi-major axis. */
-  double Qp; /** Q' from Barker and Ogilvie.  Q' = 3 Q / (2 k), with Q
-                 = 2 Pi E / Edot over an orbit and k the love number.
-                 A homogeneous solid body, Q' = Q.  We assume
-                 (following Barker and Ogilvie) that Q' does not
-                 change as the orbit changes (though between
-                 integration steps the user can change Q' to alter the
-                 tidal behavior of the planet).  This is equivalent to
-                 a small time-lag for all tidal components that scales
-                 with the orbital period, so Q ~ 1/(tau*omega) remains
-                 constant. */
+  double tV; /** Viscous timescale.  See Fabrycky & Tremaine
+                  (2007). */
+  double k; /** Apsidal motion constant. */
   double I;  /** Body moment of inertia (units are m*a^2). */
   double R; /** Body radius (in units of a). */
   double L[3]; /** Of magnitude sqrt(1-e^2), in direction of Lhat */
@@ -95,29 +88,32 @@ typedef struct {
   double spin[3]; /** Body's instantaneous spin vector. */  
 } body;
 
-#define BODY_VECTOR_SIZE 14
+#define BODY_VECTOR_SIZE 15
 #define BODY_M_INDEX 0
 #define BODY_a_INDEX 1
-#define BODY_Qp_INDEX 2
-#define BODY_I_INDEX 3
-#define BODY_R_INDEX 4
-#define BODY_L_INDEX 5
-#define BODY_A_INDEX 8
-#define BODY_SPIN_INDEX 11
+#define BODY_TV_INDEX 2
+#define BODY_K_INDEX 3
+#define BODY_I_INDEX 4
+#define BODY_R_INDEX 5
+#define BODY_L_INDEX 6
+#define BODY_A_INDEX 9
+#define BODY_SPIN_INDEX 12
 
 /** Central body information. */
 typedef struct {
-  double Qp;  /** Q' from Baker and Ogilvie (see above). */
+  double tV;  /** Viscous timescale. */
+  double k; /** Apsidal motion constant. */
   double I;  /** Moment of inertia (units are m*a^2). */
   double R;  /** Radius (units are a) */
   double spin[3];  /** Instantaneous spin vector. */
 } central_body;
 
-#define CENTRAL_BODY_VECTOR_SIZE 6
-#define CENTRAL_BODY_Qp_INDEX 0
-#define CENTRAL_BODY_I_INDEX 1
-#define CENTRAL_BODY_R_INDEX 2
-#define CENTRAL_BODY_SPIN_INDEX 3
+#define CENTRAL_BODY_VECTOR_SIZE 7
+#define CENTRAL_BODY_TV_INDEX 0
+#define CENTRAL_BODY_K_INDEX 1
+#define CENTRAL_BODY_I_INDEX 2
+#define CENTRAL_BODY_R_INDEX 3
+#define CENTRAL_BODY_SPIN_INDEX 4
 
 /** Unpack a body into a vector of length #BODY_VECTOR_SIZE */
 void
@@ -179,7 +175,9 @@ E_to_rv(const body *b, const double E, double r[3], double v[3]);
  {0, 0, omega} represents the body spinning in the plane of its orbit
  (spin parallel to L).
 
- @param Qp is the adjusted quality factor for the tidal dissipation.
+ @param tV is the viscous timescale.
+
+ @param k is the apsidal motion constant.
 
  @param inertia is the moment of inertia of the body (in units of
    m*a^2).
@@ -190,12 +188,13 @@ init_body_from_elements(body *b,
                         const double m, const double a, const double e, const double I, 
                         const double Omega, const double omega, 
                         const double spin[3], 
-                        const double Qp, const double inertia, const double R);
+                        const double tV, const double k,
+                        const double inertia, const double R);
 
 /** Produce a central body from the given properties. */
 void
-init_central_body(central_body *b, const double Qp, const double I, 
-                  const double R, const double spin[3]);
+init_central_body(central_body *b, const double tV, const double k, 
+                  const double I, const double R, const double spin[3]);
 
 /** Sets the orbital elements given a body, b. */
 void
@@ -316,20 +315,21 @@ gsl_odeiv_control_secular_new(double epsabs);
 
 /** Exects body in Runge-Lenz/L coordinates as 
 
-   m a Qp I R L0 L1 L2 A0 A1 A2 Omega1 Omega2 Omega3
+   m a tV k I R L0 L1 L2 A0 A1 A2 Omega1 Omega2 Omega3
 
-   Qp, I, and R are the dissipation constant Qp, moment of inertia,
-   and radius (in units consistent with a and m).  Omega is the spin
-   vector of the body, also in units consistent with a and m.
-   Whitespace is ignored.  Note that these coordinates should satisfy
-   the constraints A*L = 0 and A^2 + L^2 = 1, but read_body does not
-   check this!  Returns number of bodies read. */
+   tV, k, I, and R are the modified viscous timescale, apsidal motion
+   constant, moment of inertia, and radius (in units consistent with a
+   and m).  Omega is the spin vector of the body, also in units
+   consistent with a and m.  Whitespace is ignored.  Note that these
+   coordinates should satisfy the constraints A*L = 0 and A^2 + L^2 =
+   1, but read_body does not check this!  Returns number of bodies
+   read. */
 int
 read_body(FILE *stream, body *b);
 
 /** Read the central body properties from the stream in the format 
 
-    Qp I R Omega1 Omega2 Omega3
+    tV k I R Omega1 Omega2 Omega3
 
     with the corresponding meanings for a body.
  */
@@ -338,11 +338,11 @@ read_central_body(FILE *stream, central_body *bc);
 
 /** Expects elements in the following format: 
 
-    m a e I Omega omega Qp I R S1 S2 S3
+    m a e I Omega omega tV k I R S1 S2 S3
 
-    whitespace is ignored. Qp, I, R are the dissipation constant,
-    moment of inertia and radius, respectively.  S is the spin vector
-    for the object.  */
+    whitespace is ignored. tV, k, I, R are the dissipation constant,
+    apsidal motion constant, moment of inertia and radius,
+    respectively.  S is the spin vector for the object.  */
 int
 read_body_from_elements(FILE *stream, body *b);
 
@@ -356,13 +356,13 @@ read_central_body_bin(FILE *stream, central_body *bc);
 
 /** Writes b to stream, in the format of read_body above:
 
-   m a Qp I R L0 L1 L2 A0 A1 A2 S0 S1 S2*/
+   m a tV k I R L0 L1 L2 A0 A1 A2 S0 S1 S2*/
 int
 write_body(FILE *stream, const body *b);
 
 /** Writes a central body to the stream in the format
 
-   1.0 0.0 Qp I R 0.0 0.0 0.0 0.0 0.0 0.0 S0 S1 S2
+   1.0 0.0 tV k I R 0.0 0.0 0.0 0.0 0.0 0.0 S0 S1 S2
 
  */
 int 
@@ -370,7 +370,7 @@ write_central_body(FILE *stream, const central_body *b);
 
 /** Writes the state of b to stream as 
 
-   m a e I Omega omega Qp I R S0 S1 S2\n
+   m a e I Omega omega tV k I R S0 S1 S2\n
 
    See read_body_from_elements.
 */
@@ -379,7 +379,7 @@ write_body_elements(FILE *stream, const body *b);
 
 /** Writes the state of the central body to stream, in pseudo-element form:
 
-    1.0 0.0 0.0 0.0 0.0 0.0 Qp I R S0 S1 S2
+    1.0 0.0 0.0 0.0 0.0 0.0 tV k I R S0 S1 S2
 */
 int
 write_central_body_elements(FILE *stream, const central_body *bc);

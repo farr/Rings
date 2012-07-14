@@ -9,7 +9,7 @@ main() {
   double a, e, I, Omega, omega, m;
   double myE, myI, myOmega, myomega;
   body b;
-  double Qp = 0.0, inertia = 0.0, spin[3] = {0.0, 0.0, 0.0}, R = 0.0;
+  double tV = 1.0/0.0, k = 0.0, inertia = 0.0, spin[3] = {0.0, 0.0, 0.0}, R = 0.0;
   gsl_rng *rng;
 
   rng = gsl_rng_alloc(gsl_rng_ranlxd2);
@@ -24,7 +24,7 @@ main() {
   Omega = random_between(rng, 0.0, 360.0);
   omega = random_between(rng, 0.0, 360.0);
 
-  init_body_from_elements(&b, m, a, e, I, Omega, omega, spin, Qp, inertia, R);
+  init_body_from_elements(&b, m, a, e, I, Omega, omega, spin, tV, k, inertia, R);
   elements_from_body(&b, &myE, &myI, &myOmega, &myomega);
 
   if (b.m != m) {
