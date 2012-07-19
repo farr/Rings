@@ -1,23 +1,52 @@
 A code to efficiently simulate the secular evolution of a system of
 bodies under the dominating gravitational influence of a massive
-central body.
+central body.  The evolution includes the effects of tides between
+each body and the central body.
 
 The main executable is "rings".  It takes various command line options
 controlling the integration; see "rings --help" for a summary.
 
-The input file for "rings" should be in the following format, with one
-line per body:
+The input file for "rings" should be in the following format:
 
-m a e I Omega omega
+tV k I R Spin0 Spin1 Spin2
+m a e I Omega omega tV k I R Spin0 Spin1 Spin2
 ...
 
-m is the mass, a the semi-major axis, e the eccentricity, I the
-inclination, Omega the longitude of the ascending node, and omega the
-argument of periapsis.  All angles should be in *degrees*.
+where the first line describes the tidal parameters of the central
+body, and subsequent lines describe the orbital and tidal parameters
+of the orbiting bodies.  The parameters are:
+
+* m is the mass (central mass = 1.0). 
+
+* a is the semi-major axis (arbitrary units; a = 1 corresponds to 2*Pi
+  period).
+
+* e is the eccentricity of the orbit.
+
+* I is the inclination (degrees)
+
+* Omega is the longitude of the ascending node (degrees).
+
+* omega is the argument of periapse (degrees).
+
+* tV is the viscous timescale (same units as orbital period).
+
+* k is the apsidal motion constant (equals 1/2 Love number).
+
+* I is the moment of inertia (units are consistent with m and a).
+
+* R is the radius of the body (units are same as a).
+
+* Spin0,1,2 are the instantaneous spin vector of the body.
+
+See Fabrycky & Tremaine (2007) for a description of the tidal
+evolution equations (derived from Eggleton & Kiseleva-Eggleton
+(2001)).
 
 The output of the code is in the format 
 
-t m a e I Omega omega
+t m a e I Omega omega tV k I R Spin0 Spin1 Spin2
 ...
 
-with one line for each body at each time, t.
+with one line for each body (including the central body!) at each
+time, t.
