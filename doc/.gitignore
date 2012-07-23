@@ -3,4 +3,3 @@ latex
 *~
 *.bak
 Makefile
-Makefile.in
