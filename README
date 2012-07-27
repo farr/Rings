@@ -37,7 +37,8 @@ of the orbiting bodies.  The parameters are:
 
 * R is the radius of the body (units are same as a).
 
-* Spin0,1,2 are the instantaneous spin vector of the body.
+* Spin0,1,2 are the instantaneous spin vector of the body in the
+  global coordinate frame.
 
 See Fabrycky & Tremaine (2007) for a description of the tidal
 evolution equations (derived from Eggleton & Kiseleva-Eggleton
