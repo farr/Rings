@@ -42,9 +42,11 @@ f(double t, const double y[], double dydt[], void *vparams) {
   fparams *p = (fparams *)vparams;
   size_t i;
   int status = GSL_SUCCESS;
+  int overall_status = GSL_SUCCESS;
 
   memset(dydt, 0, body_size_to_vector_size(p->nbodies)*sizeof(double));
   
+#pragma omp parallel for
   for (i = 0; i < p->nbodies; i++) {
     size_t j;
     body bi;
@@ -67,7 +69,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
         status = average_rhs(p->eps, &bi, &bj, p->epsquad, rhs);
 
         if (status != GSL_SUCCESS) {
-          return GSL_EBADFUNC;
+          overall_status = GSL_EBADFUNC;
         }
 
         for (k = 0; k < BODY_VECTOR_SIZE; k++) {
@@ -83,11 +85,11 @@ f(double t, const double y[], double dydt[], void *vparams) {
     tidal_rhs(&bi, &bc, rhs, dsunomega);
 
     for (j = 0; j < BODY_VECTOR_SIZE; j++) {
-      if (isnan(rhs[j])) return GSL_EBADFUNC;
+      if (isnan(rhs[j])) overall_status = GSL_EBADFUNC;
     }
 
     for (j = 0; j < 3; j++) {
-      if (isnan(dsunomega[j])) return GSL_EBADFUNC;
+      if (isnan(dsunomega[j])) overall_status = GSL_EBADFUNC;
     }
 
     for (j = 0; j < 3; j++) {
@@ -98,7 +100,7 @@ f(double t, const double y[], double dydt[], void *vparams) {
     }
   }
 
-  return status;
+  return overall_status;
 }
 
 int
