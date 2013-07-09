@@ -14,6 +14,9 @@ AC_CHECK_FUNC([getopt_long], [], [AC_MSG_ERROR([could not call getopt_long])])
 
 AC_CHECK_HEADER([getopt.h], [], [AC_MSG_ERROR([could not find getopt.h])])
 
+AC_OPENMP
+CFLAGS="$CFLAGS $OPENMP_CFLAGS"
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([
